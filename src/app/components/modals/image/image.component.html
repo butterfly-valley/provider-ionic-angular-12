@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar color="black" style="border: none">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!mobile || tablet" (click)="dismiss()" fill="clear" expand="full">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="mobile && !tablet" (click)="dismiss()" fill="clear" expand="full">
+        <ion-icon mode="md" name="close" size="large"(click)="dismiss()"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content color="black">
+  <ion-grid class="ion-no-padding">
+    <ion-row class="ion-justify-content-center ion-align-items-center" [ngClass]="{'min-height' : mobile, 'min-height-desktop' : !mobile}" style="flex-direction: column">
+      <ion-col class="ion-no-padding" style="display: contents">
+        <img [src]="image" alt="">
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

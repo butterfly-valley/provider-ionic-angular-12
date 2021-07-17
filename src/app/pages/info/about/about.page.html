@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button text=""></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<app-mainmenu [menuId]="'about'" [isAuthenticated]="(loggedUser$ | async)?.username !== null"></app-mainmenu>
+<ion-content>
+  <ion-grid>
+    <ion-row no-margin no-padding>
+      <ion-col size="12" sizeLg="8" offsetLg="2" no-margin no-padding>
+        <ion-card no-margin no-padding>
+          <ion-card-content >
+            <h1 translate text-uppercase style="margin-bottom: 32px">about-us-title</h1>
+            <div class="about" [innerHTML]="'about-us' | translate"></div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <app-terms *ngIf="showTermsContainer"></app-terms>
+</ion-content>

@@ -1,0 +1,181 @@
+.add-image-col{
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+
+.add-holder {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.add-holder-main {
+  width: 150px;
+  height: 127px;
+  position: relative;
+}
+
+.add-holder-main-pic {
+  height: 100px;
+  width: 100px;
+  display: flex;
+  align-items: center;
+}
+
+
+.camera{
+  height: 100px;
+  width: 100px;
+}
+
+
+.camera:hover{
+  cursor: pointer;
+}
+
+.add {
+  position: absolute;
+  bottom: 16px;
+  right: 10px;
+  height: 20px;
+  width: 20px;
+}
+
+.add-main {
+  right: 35px;
+}
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50% !important;
+  height: 100px;
+  min-width: 100px;
+}
+
+
+.image {
+  vertical-align: middle;
+  height: 100px;
+}
+
+.avatar:hover, .image:hover{
+  cursor: pointer;
+}
+
+.small-fab{
+  height: 25px;
+  width: 25px;
+}
+
+.small-fab ion-icon{
+  height: 20px;
+  width: 20px;
+}
+
+.edit-button{
+  right: -12px;
+}
+
+.delete-button{
+  left: -12px;
+}
+
+.image-buttons{
+  bottom: 0;
+  display: flex;
+}
+
+.image-holder{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.item-no-padding {
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.toggle-margin{
+  padding-right: 3px;
+}
+
+.time-picker{
+  text-align: center;
+  padding-bottom: 0;
+  padding-left: 0;
+  color: var(--ion-color-secondary);
+  padding-top: 0;
+}
+
+.weekday-holder:hover{
+  --background: var(--ion-color-white)!important;
+}
+
+::ng-deep .mat-datepicker-toggle *{
+  color: var(--ion-color-primary) !important;
+}
+
+@media (min-width: 768px) {
+  .time-picker{
+    font-size: 1.5em;
+  }
+}
+
+.avatar-holder {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.small-fab-avatar{
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  bottom: 0;
+  right: -110px;
+}
+
+.small-fab ion-icon{
+  height: 20px;
+  width: 20px;
+}
+
+
+.picker-icon{
+  width: 15px;
+  height: 15px;
+  margin-right: 16px;
+}
+
+mat-card, ion-list{
+  background: var(--ion-color-white);
+}
+
+.search-location{
+  margin: 16px 0;
+  min-width: 50%;
+  height: 40px;
+  z-index: 2;
+  background: var(--ion-color-white);
+  border: none;
+  border-bottom: 1px solid var(--ion-color-gray);
+}
+
+@media (max-width: 768px) {
+  ion-input, ion-textarea{
+    padding: 0 16px!important;
+  }
+
+  .search-location{
+    border: 1px solid var(--ion-color-medium);
+    padding: 0 16px;
+    background: var(--ion-color-background);
+    -webkit-border-radius: 50px!important;
+    -moz-border-radius: 50px!important;
+    border-radius: 50px!important;
+  }
+}

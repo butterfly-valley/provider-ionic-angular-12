@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "ZGBW6WY78M.com.bookanapp.provider",
+        "paths": ["*"]
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,149 @@
+<ion-fab style="position: fixed" slot="fixed" horizontal="end" vertical="center" [hidden]="fullcalendarService.selectedSlots.length<1" *ngIf="mobile">
+  <ion-fab-button color="danger" size="small" (click)="deleteSlots()">
+    <ion-icon name="trash"></ion-icon>
+  </ion-fab-button>
+  <ion-fab-button color="primary" size="small" (click)="editSlot()">
+    <ion-icon name="create"></ion-icon>
+  </ion-fab-button>
+  <ion-fab-button *ngIf="fullcalendarService.selectedSlots.length === 1" color="tertiary" size="small" (click)="slotInfo()">
+    <ion-icon name="information-circle-outline"></ion-icon>
+  </ion-fab-button>
+  <ion-fab-button *ngIf="fullcalendarService.selectedSlots.length === 1" color="warning" size="small" (click)="copySlot()">
+    <ion-icon name="copy-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+<ion-fab slot="fixed" style="position: fixed" horizontal="end" vertical="center" [hidden]="fullcalendarService.selectedTimeOffSlots.length<1" *ngIf="mobile">
+  <ion-fab-button color="primary" size="small" (click)="approveTimeOff()">
+    <ion-icon name="checkmark-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+<ion-grid class="pane-container ion-no-padding" style="margin-top: 16px" [style.margin-top]="rosterView ? '16px' : '0'" [@enterAnimation]>
+  <div [hidden]="fullcalendarService.selectedSlots.length<1" *ngIf="!mobile"
+       style="position: fixed; top: 50%; left: calc(50% - 112px); display: flex; z-index: 100">
+    <ion-fab-button color="danger" size="small" [title]="'delete' | translate" (click)="deleteSlots()">
+      <ion-icon name="trash"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button color="primary" size="small" [title]="'edit' | translate" (click)="editSlot()">
+      <ion-icon name="create"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button *ngIf="fullcalendarService.selectedSlots.length === 1" color="tertiary" size="small" (click)="slotInfo()">
+      <ion-icon name="information-circle-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button color="warning" size="small" (click)="copySlot()">
+      <ion-icon name="copy-outline"></ion-icon>
+    </ion-fab-button>
+  </div>
+  <div [hidden]="fullcalendarService.selectedTimeOffSlots.length<1" *ngIf="!mobile"
+       style="position: fixed; top: 50%; left: calc(50% - 112px); display: flex; z-index: 100">
+    <ion-fab-button color="primary" size="small" [title]="'aprove' | translate" (click)="approveTimeOff()">
+      <ion-icon name="checkmark-outline"></ion-icon>
+    </ion-fab-button>
+  </div>
+  <ion-row *ngIf="allEmployeesMap$ | async as employeesDivisionMap">
+    <ion-col offset-xs="1" offset-md="2" size="10" size-md="8" size-lg="5" offset-lg="1" style="display: flex" class="ion-align-items-center">
+      <ion-searchbar style="padding-left: 0; padding-right: 0" type="text" debounce="500" [placeholder]="'search' | translate" (ionInput)="searchRosters($event)" animated></ion-searchbar>
+    </ion-col>
+    <ion-col size="12" size-lg="5" class="ion-text-center">
+      <mat-form-field style="width: 90%;" class="no-padding" *ngIf="!searchingRoster">
+        <mat-select [placeholder]="'employees' | translate" (selectionChange)="pickEmployeeRoster($event)">
+          <div *ngFor="let division of employeesDivisionMap | keyvalue">
+            <mat-option [value]="'divisionId=' + getDivisionId(division.key)">
+              <b>{{division.key}}</b>
+            </mat-option>
+            <div class="margin-6" *ngFor="let subdivision of division.value | keyvalue">
+              <mat-option [value]="'subdivisionId=' + subdivision.value[0].subdivisionId">
+                <i>{{subdivision.key}}</i>
+              </mat-option>
+              <div class="margin-16" *ngFor="let employee of subdivision.value">
+                <mat-option [value]="'employeeId=' + employee.id">
+                  {{employee.name}}
+                </mat-option>
+              </div>
+            </div>
+          </div>
+        </mat-select>
+      </mat-form-field>
+    </ion-col>
+  </ion-row>
+  <ng-container *ngIf="employeeService.renderRosters">
+    <ng-container *ngIf="allDivisionsMap$ | async as employeesDivisionMap">
+      <ion-item lines="none" class="roster-item" style="width: 100%; margin-bottom: 16px;   --inner-padding-end: 0px;  --padding-start:0px">
+        <app-roster style="width: 100%" [index]="0" [preferredView]="preferredView"></app-roster>
+      </ion-item>
+      <div>
+        <ion-row *ngFor="let division of employeesDivisionMap | keyvalue">
+          <ion-col size="12">
+            <div class="subdivision-title-holder ion-text-uppercase align-content">
+              <ion-label *ngIf="division.key !== 'null'" class="subdivision-title" color="dark">{{division.key}}</ion-label>
+              <ion-icon [title]="('edit' | translate) + ' ' + ('roster' | translate | lowercase)"  *ngIf="division.value && !rosterView" color="primary" name="calendar" class="hover" (click)="editDivisionRoster(division)">
+              </ion-icon>
+              <ion-icon [title]="('share' | translate) + ' ' + ('roster' | translate | lowercase)"  *ngIf="division.value && !rosterView" color="primary" name="share-social-outline" class="hover" (click)="shareDivisionRoster(division)">
+              </ion-icon>
+            </div>
+          </ion-col>
+          <ion-col size="12">
+            <ion-reorder-group disabled="false" (ionItemReorder)="doReorder($event)" [@listAnimation]="rosterListLength">
+              <ng-container *ngFor="let subdivision of division.value | keyvalue; index as index">
+                <ion-item *ngIf="subdivision.value[0].subdivisionId" class="roster-item" [lines]="!mobile ? 'none' : true" style="margin-bottom: 10px">
+                  <div style="overflow: auto">
+                    <div>
+                      <app-roster [sharedView]="rosterView" [subdivision]="subdivision.value" [index]="1" [preferredView]="preferredView"></app-roster>
+                    </div>
+                    <div *ngFor="let emp of subdivision.value; index as i">
+                      <app-roster [sharedView]="rosterView" [employee]="emp" [index]="i+2" [preferredView]="preferredView"></app-roster>
+                    </div>
+                  </div>
+                  <ion-reorder slot="end"></ion-reorder>
+                </ion-item>
+              </ng-container>
+              <ng-container *ngFor="let subdivision of division.value | keyvalue; index as index">
+                <ng-container *ngIf="!subdivision.value[0].subdivisionId">
+                  <ion-item [lines]="!mobile ? 'none' : true" *ngFor="let employee of subdivision.value" class="roster-item" lines="none" style="margin-bottom: 10px">
+                    <div style="overflow: auto">
+                      <div>
+                        <app-roster [sharedView]="rosterView" [employee]="employee" [index]="index+1" [preferredView]="preferredView"></app-roster>
+                      </div>
+                    </div>
+                    <ion-reorder slot="end"></ion-reorder>
+                  </ion-item>
+                </ng-container>
+              </ng-container>
+            </ion-reorder-group>
+          </ion-col>
+          <ion-col>
+          </ion-col>
+        </ion-row>
+        <div class="align-content" style="justify-content: flex-start">
+          <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="warning" name="alert-circle-outline"></ion-icon>
+          <ion-label color="dark"> <span> - </span><span translate>roster-unpublished</span></ion-label>
+        </div>
+        <div class="align-content" style="justify-content: flex-start">
+          <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="warning" name="alert-outline"></ion-icon>
+          <ion-label color="dark"> <span> - </span><span translate>time-off-to-approve</span></ion-label>
+        </div>
+        <div class="align-content" style="justify-content: flex-start">
+          <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="success" name="checkmark-outline"></ion-icon>
+          <ion-label color="dark"> <span> - </span><span translate>time-off-approved</span></ion-label>
+        </div>
+        <div class="align-content" style="justify-content: flex-start">
+          <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="danger" name="close-outline"></ion-icon>
+          <ion-label color="dark"> <span> - </span><span translate>time-off-denied</span></ion-label>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+  <ion-grid>
+    <ion-row class="app-icon-container" style="flex-direction: column; height: 70vh" *ngIf="!employeeService.renderRosters && !noRosterSearchResults">
+      <ion-col size="12" style="display: flex; flex-direction: column" class="ion-justify-content-center ion-align-items-center">
+        <ion-icon name="calendar-outline" style="opacity: 0.5; height: 200px; width: 200px" color="primary"></ion-icon>
+        <ion-label style="font-size: 30px" translate>pick-roster</ion-label>
+      </ion-col>
+    </ion-row>
+    <ion-row class="app-icon-container" style="flex-direction: column; height: 70vh" *ngIf="noRosterSearchResults">
+      <ion-col size="12" style="display: flex; flex-direction: column" class="ion-justify-content-center ion-align-items-center">
+        <ion-icon name="search-outline" color="dark" style="height: 200px; width: 200px"></ion-icon>
+        <ion-label style="font-size: 30px" translate>customer-noresults</ion-label>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-grid>

@@ -1,0 +1,263 @@
+<ion-header>
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon md="arrow-back" ios="chevron-back"></ion-icon>
+        <ion-label translate>account</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark" >{{setTitle()}}</ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="formChanged" translate fill="clear" color="warning" (click)="submitForm()">submit</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+    <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+  </div>
+  <ng-container *ngIf="provider$ | async as user; else loadingOrError">
+    <ion-grid class="container app-content ion-no-padding">
+      <ion-row class="ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+        <ion-col class="ion-no-padding">
+          <form [formGroup]="editProfileForm" (ngSubmit)="onEditSubmit()" style="padding: 16px">
+              <ion-item *ngIf="userService.editName" lines="none">
+                <div style="min-width: 100%">
+                  <ion-input type="text" style="padding: 0 16px !important"
+                             [placeholder]="user.name"
+                             formControlName="name"></ion-input>
+                  <p *ngIf="editProfileForm.controls['name'].hasError('minlength') || editProfileForm.controls['name'].hasError('maxlength')" translate class="danger">reg-name-error</p>
+                </div>
+              </ion-item>
+              <ion-item *ngIf="userService.editCompanyName" lines="none">
+                <div style="min-width: 100%">
+                  <ion-input type="text" style="padding: 0 16px !important;"
+                             [placeholder]="user.companyName"
+                             formControlName="companyName"></ion-input>
+                  <p *ngIf="editProfileForm.controls['companyName'].hasError('minlength') || editProfileForm.controls['companyName'].hasError('maxlength')" translate class="danger">reg-name-error</p>
+                </div>
+              </ion-item>
+              <ion-item *ngIf="userService.editUsername" lines="none">
+                <div style="min-width: 100%">
+                  <ion-input type="password" style="padding: 0 16px!important;"
+                             formControlName="oldPassword"
+                             [placeholder]="'prof-current-psswd' | translate"
+                  ></ion-input>
+                  <ion-label class="margin-left" *ngIf="editProfileForm.controls['oldPassword'].hasError('pattern')" color="danger" translate>login-psswd-error</ion-label>
+                  <ion-input type="email" style="padding: 0 16px !important; margin-top: 16px"
+                             [placeholder]="user.username"
+                             formControlName="username"></ion-input>
+                  <ion-label *ngIf="editProfileForm.controls['username'].hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+                </div>
+              </ion-item>
+              <ion-item *ngIf="userService.editVAT" lines="none">
+                <div style="min-width: 100%">
+                  <ion-input type="text" style="padding: 0 16px !important;"
+                             [placeholder]="user.vatNumber" maxlength="15" minlength="8"
+                             formControlName="vat"></ion-input>
+                  <ion-label *ngIf="editProfileForm.controls['vat'].hasError('minlength') || editProfileForm.controls['vat'].hasError('maxlength')" color="danger" translate>reg-vat-error</ion-label>
+                </div>
+              </ion-item>
+              <ion-item *ngIf="userService.editServices" lines="none">
+                <select formControlName="serviceType" id="service" style="min-width: 100%; padding: 0;">
+                  <option *ngFor="let category of userService.getCategories()" [value]="category.category">{{category.translation}}</option>
+                </select>
+              </ion-item>
+              <ng-container *ngIf="userService.editPhone">
+                <div formGroupName="phones" style="display: flex; align-items: center">
+                  <div style="width: 100%">
+                    <ng-container *ngFor="let phone of phoneControls; index as i">
+                      <div [formGroupName]="i">
+                        <div class="ion-align-items-center phone-holder">
+                          <div style="display: flex">
+                            <ion-button size="small" fill="clear" color="danger" (click)="removePhone(i)">
+                              <ion-icon name="trash" slot="icon-only"></ion-icon>
+                            </ion-button>
+                            <div class="select-holder">
+                              <select formControlName="type" style="margin-bottom: 6px">
+                                <option value="CELL">
+                                  {{'prof-cell' | translate}}
+                                </option>
+                                <option value="LANDLINE">
+                                  {{'prof-landline' | translate}}
+                                </option>
+                                <option value="MISC">
+                                  {{'phone-misc' | translate}}
+                                </option>
+                              </select>
+                              <ion-icon class="select-dropdown-icon" name="chevron-down-outline" style="margin-bottom: 6px;"></ion-icon>
+                            </div>
+                          </div>
+                          <ngx-intl-tel-input
+                                  [cssClass]="'intl-code-input'"
+                                  [enableAutoCountrySelect]="true"
+                                  [enablePlaceholder]="true"
+                                  [searchCountryFlag]="true"
+                                  [selectFirstCountry]="false"
+                                  [preferredCountries]="userService.preferredCountries"
+                                  [maxLength]="15"
+                                  [separateDialCode]="true"
+                                  [phoneValidation]="true"
+                                  [searchCountryPlaceholder]="translate.getFromKey('search')"
+                                  formControlName="phone"></ngx-intl-tel-input>
+                        </div>
+                        <div *ngIf="phone.controls.type.hasError('required')">
+                          <ion-label color="danger" translate>phone-type-error</ion-label>
+                        </div>
+                        <div *ngIf="!phone.controls.phone.valid">
+                          <ion-label color="danger" translate>phone-error</ion-label>
+                        </div>
+                      </div>
+                    </ng-container>
+                    <div style="width: 100%" class="ion-text-center">
+                      <ion-button mode="ios" size="large" (click)="userService.addPhoneField(editProfileForm, formChanged)" color="warning" fill="clear">
+                        <ion-icon name="add"></ion-icon></ion-button>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+              <ion-item *ngIf="userService.editPassword" lines="none">
+                <div>
+                  <div class="margin-top">
+                    <ion-input type="password" style="padding: 0 16px!important;"
+                               formControlName="oldPassword"
+                               [placeholder]="'prof-current-psswd' | translate"
+                    ></ion-input>
+                  </div>
+                  <ion-label class="margin-left" *ngIf="editProfileForm.controls['oldPassword'].hasError('pattern')" color="danger" translate>login-psswd-error</ion-label>
+                  <div class="margin-top">
+                    <ion-input type="password" style="padding: 0 16px!important; margin-top: 16px"
+                               formControlName="newPassword"
+                               [placeholder]="'prof-new-psswd' | translate"
+                    ></ion-input>
+                  </div>
+                  <div style="margin-top: 5px" class="margin-left">
+                    <div *ngIf="editProfileForm.controls['newPassword'].hasError('hasCapitalCase') || (editProfileForm.value.newPassword==null || editProfileForm.value.newPassword.length<1)">
+                      <ion-label color="danger">
+                        <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-cap1</span>
+                      </ion-label>
+                    </div>
+                    <div  *ngIf="!editProfileForm.controls['newPassword'].hasError('hasCapitalCase') && editProfileForm.value.newPassword!=null && editProfileForm.value.newPassword.length>0">
+                      <ion-label color="success">
+                        <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-cap1</span>
+                      </ion-label>
+                    </div>
+                    <div *ngIf="editProfileForm.controls['newPassword'].hasError('hasSmallCase') || (editProfileForm.value.newPassword==null || editProfileForm.value.newPassword.length<1)">
+                      <ion-label color="danger">
+                        <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-reg1</span>
+                      </ion-label>
+                    </div>
+                    <div *ngIf="!editProfileForm.controls['newPassword'].hasError('hasSmallCase') && editProfileForm.value.newPassword!=null && editProfileForm.value.newPassword.length>0">
+                      <ion-label color="success">
+                        <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-reg1</span>
+                      </ion-label>
+                    </div>
+                    <div *ngIf="editProfileForm.controls['newPassword'].hasError('hasNumber') || (editProfileForm.value.newPassword==null || editProfileForm.value.newPassword.length<1)">
+                      <ion-label color="danger">
+                        <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-fig1</span>
+                      </ion-label>
+                    </div>
+                    <div *ngIf="!editProfileForm.controls['newPassword'].hasError('hasNumber') && editProfileForm.value.newPassword!=null && editProfileForm.value.newPassword.length>0">
+                      <ion-label color="success">
+                        <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-fig1</span>
+                      </ion-label>
+                    </div>
+                    <div *ngIf="editProfileForm.controls['newPassword'].hasError('minlength') || (editProfileForm.value.newPassword==null || editProfileForm.value.newPassword.length<1)">
+                      <ion-label color="danger">
+                        <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-char8</span>
+                      </ion-label>
+                    </div>
+                    <div *ngIf="!editProfileForm.controls['newPassword'].hasError('minlength') && editProfileForm.value.newPassword!=null && editProfileForm.value.newPassword.length>0">
+                      <ion-label color="success">
+                        <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-char8</span>
+                      </ion-label>
+                    </div>
+                  </div>
+                  <div class="margin-top">
+                    <ion-input type="password" style="padding: 0 16px!important; margin-top: 16px"
+                               formControlName="confirmPassword"
+                               [placeholder]="'reg-cfm-psswd' | translate"
+                    ></ion-input>
+                  </div>
+                  <div class="margin-left" *ngIf="editProfileForm.controls['confirmPassword'].hasError('matchOther')">
+                    <ion-label color="danger" translate>reg-psswd-match-error</ion-label>
+                  </div>
+                </div>
+              </ion-item>
+              <ion-item [hidden]="!userService.editAddress" lines="none" formGroupName="address" >
+                <div style="width: 100%">
+                  <ion-input style="padding: 0 16px!important; margin-top: 16px; max-width: 100%"
+                             formControlName="street1"
+                             [placeholder]="'address-line-1' | translate"
+                  ></ion-input>
+                  <ion-input style="padding: 0 16px!important; margin-top: 16px; max-width: 100%"
+                             formControlName="street2"
+                             [placeholder]="'address-line-2' | translate"
+                  ></ion-input>
+                  <ion-input style="padding: 0 16px!important; margin-top: 16px"
+                             formControlName="postalCode"
+                             [placeholder]="('reg-zip' | translate) + '*'"
+                  ></ion-input>
+
+                  <ion-input style="padding: 0 16px!important; margin-top: 16px"
+                             formControlName="city"
+                             [placeholder]="('reg-place' | translate) + '*'"
+                  ></ion-input>
+
+                  <ion-input style="padding: 0 16px!important; margin-top: 16px"
+                             formControlName="province"
+                             [placeholder]="'reg-province' | translate"
+                  ></ion-input>
+                  <select [value]="'Portugal'" formControlName="country" style="margin: 16px 0; padding: 6px; height: 38px; width: 100%">
+                    <option *ngFor="let country of countryCodesService.getCodes()" [value]="country.name">{{country.name}}</option>
+                  </select>
+                </div>
+              </ion-item>
+              <ion-item *ngIf="userService.editNotifications">
+                <ion-label>
+                  <h2 translate>notif-bookings</h2>
+                </ion-label>
+                <ion-toggle formControlName="emailBookingNotification"></ion-toggle>
+              </ion-item>
+              <ion-item *ngIf="userService.editNotifications">
+                <ion-label>
+                  <h2 translate>notif-messages</h2>
+                </ion-label>
+                <ion-toggle formControlName="emailMessageNotification"></ion-toggle>
+              </ion-item>
+              <ion-item lines="none" *ngIf="userService.editLocale">
+                <ion-radio-group formControlName="locale" style="width: 100%">
+                  <ion-item>
+                    <ion-label>English(USA)</ion-label>
+                    <ion-radio slot="start" value="en-US"></ion-radio>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>Português(Portugal)</ion-label>
+                    <ion-radio slot="start" value="pt-PT"></ion-radio>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>Русский</ion-label>
+                    <ion-radio slot="start" value="ru-RU"></ion-radio>
+                  </ion-item>
+                </ion-radio-group>
+              </ion-item>
+            <button style="display: none" #submitBtn></button>
+          </form>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-container>
+  <ng-template #loadingOrError>
+    <ion-grid class="ion-no-padding ion-no-margin">
+      <ion-row class="iconContainer ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+        <ion-col size="12" class="ion-text-center">
+          <ng-container *ngIf="loadingError">
+            <ion-icon name="alert" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+          </ng-container>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-template>
+</ion-content>

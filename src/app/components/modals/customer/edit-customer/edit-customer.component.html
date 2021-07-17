@@ -1,0 +1,294 @@
+<ion-header mode="ios">
+  <ion-toolbar color="toolbar" mode="ios" *ngIf="mobile">
+    <ion-buttons slot="start">
+      <ion-button size="small" *ngIf="!tablet && mobile" (click)="dismiss()" fill="clear">
+        <ion-icon name="close"></ion-icon>
+        <ion-label translate>customers</ion-label>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+      <ion-button fill="clear" *ngIf="!mobile" (click)="dismiss()">
+        <ion-icon name="arrow-back"></ion-icon>
+        <span class="ion-text-capitalize" translate>back</span>
+      </ion-button>
+    </ion-buttons>
+    <ng-container>
+      <ion-title *ngIf="customerService.customer$ | async as customer" class="ion-text-center">
+        <ion-label color="dark" >{{customer.name}}</ion-label>
+      </ion-title>
+    </ng-container>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="bookanapp" fill="clear" color="danger" translate (click)="ban()">app-ban-btn</ion-button>
+      <ion-button color="warning" style="font-weight: 600" [hidden]="!customerService.formChanged || bookanapp" translate (click)="submitEditForm()" fill="clear">save</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+    <ion-toolbar color="toolbar" *ngIf="!mobile">
+      <ion-buttons slot="start">
+        <ion-button fill="clear" *ngIf="!mobile" (click)="dismiss()">
+          <ion-icon name="arrow-back"></ion-icon>
+          <span class="ion-text-capitalize" translate>back</span>
+        </ion-button>
+      </ion-buttons>
+  <ng-container *ngIf="customerService.customer$ | async as customer; else loadingOrError">
+      <ion-title *ngIf="!customerService.editName" class="ion-text-center">
+        <ion-label color="dark">{{customer.name}}</ion-label>
+        <ion-icon *ngIf="!bookanapp" class="edit-icon" color="secondary" name="create" (click)="customerService.editField('name')"></ion-icon>
+      </ion-title>
+  </ng-container>
+    </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <div class="loading-cover-desktop-modal" *ngIf="customerService.isLoading && !mobile">
+    <div style="position: absolute; top: 50%; left: calc(50% - 37px);z-index: 10000;"><ion-spinner color="secondary" style="height: 75px; width: 75px"></ion-spinner></div>
+  </div>
+  <ion-toolbar style="min-height: 200px" mode="ios" color="toolbar" *ngIf="customerService.customer$ | async as customer; else loadingOrError">
+    <ion-grid class="ion-no-padding" style="width: 100%; padding-bottom: 0">
+      <ion-row>
+        <ion-col size="12" class="ion-no-padding">
+          <div style="display: flex; flex-direction: column" class="ion-justify-content-center ion-align-items-center ion-margin">
+            <div class="avatar-holder">
+              <ion-avatar>
+                <input type="file" accept="image/x-png,image/jpeg" style="display: none" #imagePicker (change)="onImagePicked($event)">
+                <img (click)="openAvatar(customer.avatar)" [src]="customerService.imageSrc || customer.avatar || '/assets/img/avatar.svg'" class="avatar hover">
+              </ion-avatar>
+              <ion-fab class="delete-button" *ngIf="!bookanapp">
+                <ion-fab-button (click)="editPickedPic(customer.avatar)" class="ion-no-margin small-fab" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+              </ion-fab>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row class="modal-container" *ngIf="!bookanapp">
+        <ion-col class="ion-text-center" style="padding-bottom: 0">
+          <ion-chip outline color="warning" (click)="smsCampaign()">
+            <ion-icon name="add-outline"></ion-icon>
+            <ion-label translate>customer-sms-campaign</ion-label>
+          </ion-chip>
+          <ion-chip *ngIf="!customer.userId" outline color="warning" (click)="customerService.registerBookanAppUser(this.id)">
+            <ion-label translate>register-user</ion-label>
+          </ion-chip>
+        </ion-col>
+        <ion-col size="12" class="ion-no-padding" style="margin: 10px 0">
+          <ion-button color="danger" expand="full" translate (click)="performDelete()">delete</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row class="modal-container" *ngIf="bookanapp">
+        <ion-col size="12" class="ion-text-center" style="padding-bottom: 0">
+          <ion-chip outline color="warning" (click)="promoCampaign()">
+            <ion-icon name="add-outline"></ion-icon>
+            <ion-label translate>customer-promo</ion-label>
+          </ion-chip>
+        </ion-col>
+        <ion-col size="12" size-lg="6" offset-lg="3"  class="ion-no-padding" style="margin: 10px 0">
+          <ion-button color="danger" expand="full" translate (click)="ban()">app-ban-btn</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+  <ion-grid class="ion-no-padding ion-no-margin full-height" *ngIf="customerService.isLoading && mobile">
+    <ion-row class="full-height">
+      <ion-col size="12" class="ion-text-center full-height ion-align-items-center">
+        <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <div [ngClass]="{'modal-container' : !mobile}" *ngIf="customerService.customer$ | async as customer; else loadingOrError">
+    <form *ngIf="!bookanapp" [formGroup]="customerService.editForm" (ngSubmit)="onSubmitForm()" [hidden]="customerService.isLoading && mobile">
+      <button style="display: none" #editSubmitBtn></button>
+      <ion-list *ngIf="customerService.editName && !mobile">
+        <ion-item>
+          <ion-icon color="secondary" slot="start" name="person"></ion-icon>
+          <ion-input type="text" style="margin: 10px 0; " formControlName="name" [placeholder]="'reg-name' | translate"></ion-input>
+        </ion-item>
+        <ion-label class="alert-margin" *ngIf="customerService.editForm.get('name').hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+        <ion-label class="alert-margin" *ngIf="customerService.editForm.get('name').hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+        <ion-label class="alert-margin" *ngIf="customerService.editForm.get('name').hasError('required')"  color="danger" translate>sched-name-error</ion-label>
+      </ion-list>
+      <ion-list *ngIf="mobile" style="margin-bottom: 6px">
+        <ion-item>
+          <ion-icon color="secondary" slot="start" name="person"></ion-icon>
+          <ion-label *ngIf="!customerService.editName" class="normal-white-space">
+            <span>{{customer.name}}</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="customerService.editField('name')"></ion-icon>
+          </ion-label>
+          <ion-input *ngIf="customerService.editName" type="text" style="margin: 10px 0; " formControlName="name" [placeholder]="'reg-name' | translate"></ion-input>
+        </ion-item>
+        <ion-label class="alert-margin" *ngIf="customerService.editForm.get('name').hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+        <ion-label class="alert-margin" *ngIf="customerService.editForm.get('name').hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+        <ion-label class="alert-margin" *ngIf="customerService.editForm.get('name').hasError('required')"  color="danger" translate>sched-name-error</ion-label>
+      </ion-list>
+      <ion-grid style="padding-left: 16px" *ngIf="customerService.editPhone" class="edit-phone-div ion-align-items-center">
+        <ion-row style="width: 100%">
+          <ion-col style="display: flex; padding-bottom: 16px;" size="1" class="ion-align-items-center ion-no-padding">
+            <ion-icon name="phone-portrait" class="edit-phone-icon" color="primary"></ion-icon>
+          </ion-col>
+          <ion-col style="border-bottom: 1px solid #ddd; padding-bottom: 16px;" size="11" class="ion-no-padding border-bottom">
+            <ngx-intl-tel-input style="max-width: 90%"
+                                [cssClass]="'intl-code-input'"
+                                [enableAutoCountrySelect]="true"
+                                [enablePlaceholder]="true"
+                                [searchCountryFlag]="true"
+                                [selectFirstCountry]="true"
+                                [preferredCountries]="preferredCountries"
+                                [maxLength]="15"
+                                [separateDialCode]="true"
+                                [phoneValidation]="true"
+                                [searchCountryPlaceholder]="translate.getFromKey('search')"
+                                formControlName="internationalPhone"></ngx-intl-tel-input>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <div class="alert-margin" *ngIf="customerService.editPhone && !customerService.editForm.controls['internationalPhone'].valid">
+        <ion-label translate *ngIf="!customerService.editForm.controls['internationalPhone'].valid" color="danger">phone-error</ion-label>
+      </div>
+      <ion-list *ngIf="!bookanapp" class="ion-no-padding">
+        <ion-item *ngIf="!customerService.editPhone">
+          <ion-icon slot="start" name="phone-portrait" color="primary"></ion-icon>
+          <ion-label style="margin-bottom: 0px">
+            <ion-label class="bold-600" translate>phone</ion-label>
+            <a *ngIf="customer.phone" style="color: var(--ion-color-secondary); text-decoration: none" [href]="'tel:' + '+' + '+' + customer.phone"><span>{{'+'+customer.phone}}</span></a>
+            <ion-icon style="margin-left: 16px" *ngIf="customer.phone" class="edit-icon" color="secondary" name="create" (click)="customerService.editField('phone')"></ion-icon>
+            <ion-icon style="margin-left: 16px" *ngIf="customer.phone" class="edit-icon" color="danger" name="trash" (click)="customerService.deletePhone()"></ion-icon>
+            <ion-icon *ngIf="!customer.phone" class="align-icon edit-icon" color="warning" name="add" (click)="customerService.editField('phone')"></ion-icon>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="!customerService.editEmail">
+          <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+          <ion-label *ngIf="!customerService.editEmail" style="margin-bottom: 0px">
+            <ion-label class="bold-600" translate>login-email</ion-label>
+            <ion-icon class="align-icon edit-icon" *ngIf="!customer.email" color="warning" name="add" (click)="customerService.editField('email')"></ion-icon>
+            <span *ngIf="customer.email" slot="end"><span class="description">{{ customer.email }}</span><ion-icon color="secondary" name="create" class="edit-icon" (click)="customerService.editField('email')"></ion-icon></span>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="customerService.editEmail">
+          <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+          <ion-input type="email" style=" margin: 10px"
+                     formControlName="email"
+                     email
+                     placeholder="example@example.com"
+          ></ion-input>
+        </ion-item>
+        <ion-label class="alert-margin" *ngIf="customerService.editForm.get('email').hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+        <ion-item>
+          <fa-icon [ngClass]="{'fa-margin' : !mobile, 'fa-margin-mobile' : mobile}" slot="start" [icon]="customerService.birthdayIcon"></fa-icon>
+          <ion-label style="margin-bottom: 0">
+            <ion-label class="bold-600" translate>customer-dob</ion-label>
+            <ion-label *ngIf="customer.dob && !customerService.editDob">
+              <span class="description">{{timeUtil.showDob(customer.dob, translate.getLocale())}}</span>
+              <ion-icon color="secondary" name="create" class="edit-icon" (click)="customerService.editField('dob')"></ion-icon>
+            </ion-label>
+            <ion-icon class="align-icon edit-icon" *ngIf="!customer.dob && !customerService.editDob" color="warning" name="add" (click)="customerService.editField('dob')"></ion-icon>
+            <mat-form-field [hidden]="!customerService.editDob">
+              <input class="calendar-input" formControlName="dob" matInput [matDatepicker]="endDate" [placeholder]="'customer-dob' | translate">
+              <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+              <mat-datepicker #endDate startView="multi-year"></mat-datepicker>
+            </mat-form-field>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon color="secondary" slot="start" name="cash-outline"></ion-icon>
+          <ion-label style="margin-bottom: 0">
+            <ion-label class="bold-600" translate>subscription</ion-label>
+            <ion-label *ngIf="!customerService.editSub">
+              <p *ngIf="customer.subEnd"><span>{{timeUtil.showDob(customer.subEnd, translate.getLocale())}}</span>
+                <ion-icon color="secondary" name="create" class="edit-icon" (click)="customerService.editField('sub')"></ion-icon>
+              </p>
+              <p *ngIf="!customer.subEnd">
+                <ion-icon color="warning" class="align-icon edit-icon" name="add" (click)="customerService.editField('sub')"></ion-icon>
+              </p>
+            </ion-label>
+            <ion-icon class="align-icon edit-icon" *ngIf="!customer.dob && !customerService.editSub" color="warning" name="add" (click)="customerService.editField('sub')"></ion-icon>
+            <mat-form-field [hidden]="!customerService.editSub">
+              <input class="calendar-input" formControlName="subEnd" matInput [matDatepicker]="endSub">
+              <mat-datepicker-toggle matSuffix [for]="endSub"></mat-datepicker-toggle>
+              <mat-datepicker #endSub startView="multi-year"></mat-datepicker>
+            </mat-form-field>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="document" color="secondary" slot="start"></ion-icon>
+          <ion-label style="margin-bottom: 0px">
+            <ion-label class="bold-600" translate>customer-gdpr</ion-label>
+            <input type="file" accept="image/x-png,image/jpeg" style="display: none" #GDPRPicker (change)="onGDPRPicked($event)">
+            <ion-icon class="align-icon edit-icon" *ngIf="!customer.docPhoto" color="warning" name="add" (click)="uploadGDPR()"></ion-icon>
+            <a *ngIf="customer.docPhoto" style="color: var(--ion-color-secondary); text-decoration: none" [href]="customer.docPhoto"><span translate>download</span></a>
+            <ion-icon style="margin-left: 16px" *ngIf="customer.docPhoto" class="edit-icon" color="primary" name="create" (click)="uploadGDPR()"></ion-icon>
+            <ion-icon style="margin-left: 16px" *ngIf="customer.docPhoto" class="edit-icon" color="danger" name="trash" (click)="deleteGDPR()"></ion-icon>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="information-circle-outline" color="secondary" slot="start"></ion-icon>
+          <ion-grid class="ion-no-padding">
+            <ion-row>
+              <ion-col class="ion-no-padding">
+                <ion-label class="bold-600" translate>notes</ion-label>
+              </ion-col>
+            </ion-row>
+            <ion-row *ngIf="!customerService.editNote">
+              <ion-col *ngFor="let timeline of customer.timeline" class="ion-no-padding" size="12">
+                <ion-grid class="ion-no-padding">
+                  <ion-row>
+                    <ion-col size="2" size-md="1" class="delete-holder">
+                      <ion-button class="delete-hours-button" fill="clear" (click)="deleteNote(timeline.timestamp)" color="danger">
+                        <ion-icon slot="icon-only" name="trash"></ion-icon>
+                      </ion-button>
+                    </ion-col>
+                    <ion-col size="10" size-md="11">
+                      <ion-label class="icon-holder"><ion-icon name="time-outline" color="primary"></ion-icon> <span style="color: var(--ion-color-gray)">{{timeUtil.showUTCDate(translate.getLocale(), timeline.timestamp)}}</span></ion-label>
+                      <p>{{timeline.description}}</p>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+            <ion-row *ngIf="customerService.editNote">
+              <ion-col class="ion-no-padding">
+                <ion-textarea auto-grow="true" rows="1" style="margin: 10px 0" formControlName="remark" [placeholder]="translate.getFromKey('sched-remark')"></ion-textarea>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col class="ion-no-padding ion-text-center icon-holder" [style.justify-content]="customer.timeline.length>0 ? 'center' : 'flex-start'">
+                <ion-icon class="align-icon edit-icon" *ngIf="!customerService.editNote" color="warning" name="add" (click)="customerService.editField('note')"></ion-icon>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-item>
+        <ion-item *ngIf="customer.missedApps>0">
+          <fa-icon [ngClass]="{'fa-margin' : !mobile, 'fa-margin-mobile' : mobile}" slot="start" style="margin-left: 0" [icon]="missedAppIcon"></fa-icon>
+          <ion-label><span translate>customer-missedApps</span>: {{customer.missedApps}}</ion-label>
+        </ion-item>
+        <ion-item>
+          <fa-icon [ngClass]="{'fa-margin' : !mobile, 'fa-margin-mobile' : mobile}" slot="start" [icon]="customerService.smsIcon"></fa-icon>
+          <ion-label translate>pricing-sms</ion-label>
+          <ion-toggle style="padding-right: 3px;" color="warning" slot="end" formControlName="sendSms"></ion-toggle>
+        </ion-item>
+      </ion-list>
+      <div class="modal-submit-button-holder" *ngIf="customerService.formChanged && !mobile">
+        <ion-button  (click)="submitEditForm()" color="primary" translate>save</ion-button>
+      </div>
+    </form>
+    <div *ngIf="bookanapp" [hidden]="customerService.isLoading" style="margin-bottom: 16px">
+      <ion-item *ngIf="customer.missedApps>0">
+        <fa-icon [ngClass]="{'fa-margin' : !mobile, 'fa-margin-mobile' : mobile}" slot="start" [icon]="missedAppIcon"></fa-icon>
+        <ion-label><span translate>customer-missedApps</span>: {{customer.missedApps}}</ion-label>
+      </ion-item>
+      <ion-item *ngIf="mobile && !tablet">
+        <ion-icon slot="start" name="hand" color="primary"></ion-icon>
+        <ion-button size="small" fill="clear" (click)="promoCampaign()">
+          <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+        </ion-button>
+      </ion-item>
+    </div>
+    </div>
+  <ng-template #loadingOrError>
+    <ion-grid class="ion-no-padding ion-no-margin" *ngIf="!customerService.isLoading">
+      <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: 500px; flex-direction: column">
+        <ion-col size="12" class="ion-text-center">
+          <ion-icon name="alert" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-template>
+</ion-content>
+

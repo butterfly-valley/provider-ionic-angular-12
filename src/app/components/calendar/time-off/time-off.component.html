@@ -1,0 +1,27 @@
+<ion-fab slot="fixed" horizontal="end" vertical="center" [hidden]="employeeProfileService.selectedSlots.length<1" *ngIf="mobile">
+  <ion-fab-button color="danger" size="small" (click)="deleteTimeOffRequests()">
+    <ion-icon name="trash"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+<div [hidden]="employeeProfileService.selectedSlots.length<1" *ngIf="!mobile"
+     style="position: fixed; top: 50%; left: calc(50% - 112px); display: flex; z-index: 100">
+  <ion-fab-button color="danger" size="small" [title]="'delete' | translate" (click)="deleteTimeOffRequests()">
+    <ion-icon name="trash"></ion-icon>
+  </ion-fab-button>
+</div>
+<!--<mat-card style="margin-bottom: 16px; max-height: 50vh; overflow: auto" class="roster-item" [@enterAnimation]>-->
+<!--  <ion-row>-->
+<!--    <ion-col size="12">-->
+<!--    </ion-col>-->
+<!--  </ion-row>-->
+<!--</mat-card>-->
+      <ion-grid style="padding: 16px">
+        <div class="loading-cover-desktop-modal" style="height: 100%; position: absolute; top: 1px" *ngIf="isLoading && index !== 0">
+          <div style="position: absolute; top: calc(50% - 25px); left: calc(50% - 37px);z-index: 10000;"><ion-spinner color="secondary" style="height: 50px; width: 50px"></ion-spinner></div>
+        </div>
+        <ion-row>
+          <ion-col style="padding: 6px">
+              <full-calendar #fullCalendar id="fullcalendar" [options]="fullCalendarOptions"></full-calendar>
+          </ion-col>
+        </ion-row>
+      </ion-grid>

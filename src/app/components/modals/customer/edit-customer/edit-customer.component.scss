@@ -1,0 +1,112 @@
+fa-icon {
+  color: var(--ion-color-secondary);
+}
+ion-avatar:hover{
+  cursor: pointer;
+}
+
+.fa-margin {
+  margin: 0 32px 0 4px;
+}
+
+.fa-margin-mobile {
+  margin: 0 22px 0 4px;
+}
+
+
+.edit-icon:hover{
+  cursor: pointer;
+}
+
+.edit-phone-div {
+  display: flex;
+}
+
+.edit-phone-icon {
+  //margin-right: 32px;
+  width: 25px;
+  height: 25px;
+}
+
+.align-icon{
+  height: 30px;
+  width: 30px
+}
+
+::ng-deep .mat-form-field-appearance-legacy .mat-form-field-wrapper {
+  padding-bottom: 0!important;
+}
+
+.calendar-input{
+  border-bottom: 1px solid #ddd;
+}
+
+.alert-margin {
+  margin-left: 64px;
+}
+
+.avatar-holder {
+  width: 150px;
+  height: 150px;
+  position: relative;
+}
+
+.small-fab{
+  height: 40px;
+  width: 40px;
+  position: absolute;
+  bottom: 0;
+  right: -150px;
+}
+
+.small-fab ion-icon{
+  height: 30px;
+  width: 30px;
+}
+
+ion-avatar{
+  width: 150px;
+  height: 150px;
+}
+@media (max-width: 768px) {
+  ion-input, ion-textarea{
+    padding: 0 16px!important;
+  }
+}
+
+::ng-deep .mat-datepicker-toggle *{
+  color: var(--ion-color-primary) !important;
+}
+
+.icon-holder{
+  display: flex;
+  align-items: center;
+}
+
+.delete-holder{
+  display: flex;
+  justify-content: flex-end;
+}
+
+.description{
+  color: var(--ion-color-gray);
+}
+
+@media (min-width: 801px) {
+  mat-card {
+    border: 1px solid var(--ion-color-medium);
+  }
+
+}
+
+mat-paginator{
+  background: var(--ion-color-white);
+}
+
+:host ::ng-deep .mat-form-field-flex {
+  border-bottom: 1px solid var(--ion-color-gray)!important;
+}
+
+:host ::ng-deep .mat-form-field-infix {
+  border: 0!important;
+}

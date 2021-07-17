@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()" color="primary" fill="clear" expand="full">
+        <ion-label *ngIf="tablet" translate>close</ion-label>
+        <ion-icon mode="md" name="close" size="large" *ngIf="!tablet"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <ion-button (click)="rotateRight()" fill="clear">
+        <ion-icon name="arrow-redo"></ion-icon>
+        <ion-label translate>rotate</ion-label>
+      </ion-button>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="pagePic" [disabled]="isLoading" (click)="submitImage()" color="warning" fill="clear" translate>upload</ion-button>
+      <ion-button *ngIf="employeeId" [disabled]="isLoading" (click)="editEmployeeAvatar()" color="warning" fill="clear" translate>upload</ion-button>
+      <ion-button *ngIf="newEmployee" [disabled]="isLoading" (click)="newEmployeeAvatar()" color="warning" fill="clear" translate>upload</ion-button>
+      <ion-button *ngIf="customerId" [disabled]="isLoading" (click)="editCustomerAvatar()" color="warning" fill="clear" translate>upload</ion-button>
+      <ion-button *ngIf="newCustomer" [disabled]="isLoading" (click)="newCustomerAvatar()" color="warning" fill="clear" translate>upload</ion-button>
+      <ion-button *ngIf="scheduleId" [disabled]="isLoading" (click)="editScheduleAvatar()" color="warning" fill="clear" translate>upload</ion-button>
+      <ion-button *ngIf="newSchedule" [disabled]="isLoading" (click)="newScheduleAvatar()" color="warning" fill="clear" translate>upload</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content style="--background: black!important;">
+  <ion-grid class="ion-no-padding" *ngIf="isLoading">
+    <ion-row style="display: flex; align-content: center; min-height: calc(100vh - 44px)">
+      <ion-col class="ion-padding ion-text-center">
+        <ion-spinner color="primary" style="height: 75px; width: 75px"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid>
+    <ion-row>
+      <ion-col class="ion-padding">
+        <image-cropper #cropper style="padding: 0; background: black"
+                       [imageBase64]="image"
+                       [maintainAspectRatio]="false"
+                       [canvasRotation]="rotate"
+                       format="jpeg"
+                       (imageCropped)="imageCropped($event)"
+                       (imageLoaded)="imageLoaded()"
+                       (cropperReady)="cropperReady()"
+                       (loadImageFailed)="loadImageFailed()"
+        ></image-cropper>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+

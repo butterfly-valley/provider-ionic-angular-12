@@ -1,0 +1,48 @@
+<ion-header *ngIf="mobile">
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()" fill="clear" *ngIf="!tablet">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{subdivisionName + ' (' + divisionName + ')'}}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="warning" *ngIf="!isLoading" style="font-weight: 600" translate (click)="submitForm()" fill="clear">submit</ion-button>
+      <ion-spinner color="warning" *ngIf="isLoading"  class="ion-align-self-center"></ion-spinner>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <h3 *ngIf="!mobile" class="ion-text-center" style="width: 100%">{{subdivisionName + ' (' + divisionName + ')'}}</h3>
+  <form [formGroup]="editDivisionForm" (ngSubmit)="onSubmit()" class="ion-padding">
+    <button style="display: none" #submitBtn></button>
+    <ion-item lines="none" style="--background: var(--ion-color-white)">
+      <ion-label position="floating" translate>division</ion-label>
+      <ion-input formControlName="divisionName"
+                 [placeholder]="'division' | translate"
+      ></ion-input>
+    </ion-item>
+    <ion-label *ngIf="formSubmitted && editDivisionForm.controls.divisionName.hasError('required')" color="danger" translate>login-email-error</ion-label>
+    <ion-label *ngIf="editDivisionForm.controls.divisionName.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+    <ion-label *ngIf="editDivisionForm.controls.divisionName.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+    <ion-item lines="none" style="--background: var(--ion-color-white)">
+      <ion-label position="floating" translate>subdivision</ion-label>
+      <ion-input formControlName="subdivisionName"
+                 [placeholder]="'subdivision' | translate"
+      ></ion-input>
+    </ion-item>
+    <ion-label *ngIf="formSubmitted && editDivisionForm.controls.subdivisionName.hasError('required')" color="danger" translate>login-email-error</ion-label>
+    <ion-label *ngIf="editDivisionForm.controls.subdivisionName.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+    <ion-label *ngIf="editDivisionForm.controls.subdivisionName.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+  </form>
+</ion-content>
+<ion-footer class="ion-padding" *ngIf="!mobile" style="display: flex; justify-content: flex-end">
+  <ion-button (click)="dismiss()" fill="clear" color="dark" translate>close</ion-button>
+  <ion-button mode="md" *ngIf="!isLoading" (click)="submitForm()" translate>submit</ion-button>
+  <ion-spinner color="primary" *ngIf="isLoading"  class="ion-align-self-center"></ion-spinner>
+</ion-footer>

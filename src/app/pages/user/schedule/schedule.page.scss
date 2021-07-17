@@ -1,0 +1,149 @@
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+@media (min-width: 1201px) {
+  .scheduleContainer {
+    //width: calc(100vw - 150px);
+    max-width: 1200px;
+  }
+}
+
+.font-20 {
+  font-size: 19px;
+}
+
+.multipleCalendar {
+  width: 25%;
+  margin: 5px;
+}
+
+::ng-deep .mat-calendar-spacer {
+  flex: none!important;
+}
+
+
+::ng-deep .mat-calendar-controls {
+  margin-top: 0!important;
+}
+
+::ng-deep .mat-calendar-table-header-divider{
+  padding: 0!important;
+}
+
+.small-icon{
+  height: 23px;
+  width: 23px;
+}
+
+/*mat-calendar {
+  background: #D6E7F1;
+  border: 1px solid var(--ion-color-secondary);
+  margin: 5px;
+}*/
+
+.openSideNav,{
+  margin-left: -16px;
+}
+
+.openSideNav,.closeSideNav {
+  height: 30px;
+  width: 30px;
+}
+
+.openSideNav:hover, .closeSideNav:hover {
+  cursor: pointer;
+}
+
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+mat-sidenav-container {
+  background: var(--ion-color-background);
+}
+
+#fullcalendar {
+  overflow: auto!important;
+}
+
+.fc-view > table {
+  overflow:auto!important;
+}
+
+.schedule-avatar {
+  height: 70px;
+  width: 70px;
+}
+
+.info-circle:hover{
+  cursor: pointer;
+}
+
+.bookanapp-image {
+  height: 20px;
+  width: 20px;
+  object-fit: cover;
+}
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50%!important;
+}
+
+@media (max-width: 450px) {
+  .schedule-avatar {
+    height: 50px;
+    width: 50px;
+  }
+
+}
+.schedule-view{
+  text-decoration: none;
+  color: var(--ion-color-secondary);
+}
+
+.schedule-view:hover{
+  cursor: pointer;
+}
+
+.dropdown-icon{
+  margin-top: 5px;
+}
+
+.schedule-category-view{
+  margin-top: 16px;
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.margin-bottom{
+  margin-bottom: 32px;
+}
+.image-margin{
+  margin-left: 6px;
+}
+
+//highlight weekends
+::ng-deep .mat-calendar-table-header > tr > th:nth-child(6),
+::ng-deep .mat-calendar-table-header > tr > th:nth-child(7) {background: var(--ion-color-light-yellow); height: 45px!important; padding: 0 !important; font-weight: bold !important; border-radius: 25px;}
+
+::ng-deep .weekend > .mat-calendar-body-cell-content{
+  background: var(--ion-color-light-yellow);
+  border-radius: 25px;
+}
+
+:host ::ng-deep .long-text {
+  word-break: break-all;
+  white-space: normal;
+}

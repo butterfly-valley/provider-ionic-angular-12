@@ -1,0 +1,68 @@
+ion-icon{
+  vertical-align: middle;
+}
+
+::ng-deep .mat-form-field-underline {
+  display: none;
+}
+
+.margin-left {
+  margin-left: 15px;
+}
+
+:host ::ng-deep .mat-form-field-wrapper{
+  padding-bottom: 0;
+}
+
+.ios.interactive{
+  margin: 16px;
+}
+
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.input-margin {
+  margin: 13px 0 0 5px;
+}
+
+.input-margin-mobile {
+  margin-left: 6px;;
+}
+
+
+.list-avatar-image {
+  vertical-align: middle;
+  border-radius: 50% !important;
+  height: 250px;
+}
+
+.login-form {
+  width: calc(100% - 316px);
+  margin-left: 16px;
+}
+
+.login-background {
+  background-image: linear-gradient(#ff9d2f, #ff5406);
+}
+
+.login-background-desktop{
+  height: calc(100vh - 50px);
+  justify-content: flex-end!important;
+  height: 100%;
+}
+
+.login-row-mobile{
+  align-items: normal!important;
+}
+
+.login-image {
+  height: 220px!important;
+}
+
+@media (max-width: 768px) {
+  ion-input{
+    padding: 0 16px!important;
+  }
+}

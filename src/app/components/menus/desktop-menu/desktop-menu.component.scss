@@ -1,0 +1,29 @@
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px;
+  --detail-icon-color: var(--ion-color-primary);
+  --detail-icon-opacity: 1;
+}
+
+ion-item:hover{
+  cursor: pointer;
+  --background: var(--ion-color-background);
+}
+
+ion-button:hover{
+  --background: var(--ion-color-background)!important;
+}
+
+fa-icon {
+  font-size: 12px;
+  margin-top: 1px;
+}
+
+.badge {
+  padding: 5px 8px!important;
+  border-radius: 50%;
+}
+
+.badge-holder ion-badge {
+  margin: 1px;
+}

@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon md="arrow-back" ios="chevron-back"></ion-icon>
+        <ion-label translate>navbar-page</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label style="white-space: inherit!important;" color="dark" >{{setTitle()}}</ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="pageService.formChanged" translate fill="clear" color="warning" (click)="submitForm()">submit</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+    <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+  </div>
+  <ng-container *ngIf="pageService.provider$ | async as user; else loadingOrError">
+    <ion-grid class="container app-content ion-no-padding">
+      <ion-row class="ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+        <ion-col class="ion-no-padding">
+          <form [formGroup]="pageService.pageForm" (ngSubmit)="onSubmitForm()">
+              <ion-item *ngIf="pageService.editDescription" lines="none">
+                <ion-textarea auto-grow="true" style="padding: 16px!important; margin: 16px 0" formControlName="description" [placeholder]="'description' | translate"></ion-textarea>
+              </ion-item>
+              <div *ngIf="pageService.editDescription">
+                <ion-label style="margin-left: 16px" color="danger" *ngIf="pageService.pageForm.get('description').hasError('minlength') || pageService.pageForm.get('description').hasError('maxlength')" translate>man-desc-error</ion-label>
+              </div>
+              <ion-item lines="none" [hidden]="!pageService.editAddress" style="margin-top: 16px">
+                <ion-icon *ngIf="pageService.addressPicked !== ''" name="trash" size="large" color="danger" (click)="resetFacilityAddress()"></ion-icon>
+                <div *ngIf="pageService.addressPicked !== ''" style="display: flex; width: 100%; position: absolute; margin-left: 26px; padding-right: 16px">
+                  <ion-label *ngIf="pageService.addressPicked !== ''" style="margin-left: 10px">{{pageService.addressPicked}}</ion-label>
+                </div>
+                <div style="width: 100%;">
+                  <input [hidden]="pageService.addressPicked !== ''" class="search-location" type="text" #googlePlacesAutocomplete placeholder="{{ 'reg-start-typing' | translate }}"/>
+                </div>
+                <div formGroupName="address">
+                  <input type="hidden" data-minlength="3" id="route" formControlName="route" />
+                  <input type="hidden" formControlName="street_number" id="street_number" />
+                  <input type="hidden"  id="postal_code"  formControlName="postal_code"/>
+                  <input type="hidden" id="locality" formControlName="locality" />
+                  <input type="hidden" id="administrative_area_level_1" tabindex="7" formControlName="administrative_area_level_1"/>
+                  <input type="hidden" id="country" formControlName="country" />
+                </div>
+              </ion-item>
+              <ion-item *ngIf="pageService.editAddressVisible">
+                <ion-label translate>prof-addressVisible</ion-label>
+                <ion-toggle class="toggle-margin" slot="end" formControlName="addressVisible"></ion-toggle>
+              </ion-item>
+              <ion-item *ngIf="pageService.editRestricted">
+                <ion-label translate>prof-restrict-access-title</ion-label>
+                <ion-toggle class="toggle-margin" slot="end" formControlName="restricted"></ion-toggle>
+              </ion-item>
+              <ion-item *ngIf="pageService.editAnonymousApps">
+                <ion-label translate style="white-space: normal">anonymous-apps</ion-label>
+                <ion-toggle class="toggle-margin" slot="end" formControlName="anonymousApps"></ion-toggle>
+              </ion-item>
+              <div formGroupName="schedule" *ngIf="pageService.editOpsHours">
+                <ng-container *ngIf="pageService.editOpsHours">
+                  <app-weekday-picker [scheduleForm]="pageService.pageForm" [days]="true" [formSubmitted]="formSubmitted" [opsHours]="opsHours"></app-weekday-picker>
+                </ng-container>
+              </div>
+            <button style="display: none" #submitBtn></button>
+          </form>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-container>
+  <ng-template #loadingOrError>
+    <ion-grid class="ion-no-padding ion-no-margin">
+      <ion-row class="iconContainer ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+        <ion-col size="12" class="ion-text-center">
+          <ng-container *ngIf="loadingError">
+            <ion-icon name="alert" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+          </ng-container>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-template>
+</ion-content>

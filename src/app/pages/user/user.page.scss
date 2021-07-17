@@ -1,0 +1,71 @@
+ion-icon{
+  vertical-align: middle;
+}
+
+fa-icon{
+  font-size: 20px;
+}
+
+.language-picker:hover {
+  cursor: pointer;
+}
+
+::ng-deep .mat-form-field-underline {
+  display: none;
+}
+
+.app-content{
+  margin: 50px 0 50px 0;
+}
+
+
+
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+@media (max-width: 575px ) {
+  .noMobile {
+    display: none;
+  }
+}
+
+.badge {
+  padding: 2px 6px !important;
+  font-size: 11px !important;
+  border-radius: 50%!important;
+  background: #ff5406;
+  color: white;
+  position: absolute;
+  top: 0;
+  right: 33%;
+}
+
+@media (max-width: 400px) {
+  .badge {
+    right: 30%;
+  }
+}
+
+@media (min-width: 401px) {
+  .badge {
+    right: 35%;
+  }
+}
+
+@media (min-width: 768px) {
+  .badge {
+    right: 40%;
+  }
+}
+
+@media (min-width: 1025px) {
+  .badge {
+    right: 38%;
+  }
+}
+
+.desktop-label{
+  font-size: 1.3em;
+}

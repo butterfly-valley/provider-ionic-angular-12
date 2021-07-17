@@ -1,0 +1,39 @@
+<ion-menu side="start" [menuId]="menuId" content-id="content">
+  <ion-header>
+    <ion-toolbar color="toolbar">
+      <ion-buttons slot="start">
+        <a routerLink="/user/appointments" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content style="border-right: 1px solid #ddd;" class="white">
+    <ion-list class="ion-no-padding ion-no-margin">
+      <ion-item *ngIf="menuId !== 'login' && !isAuthenticated" detail><ion-button mode="md" (click)="navigate('/login')" expand="full" fill="clear" color="dark"><ion-icon name="log-in"></ion-icon><a class="menuLink" translate>login-header</a></ion-button></ion-item>
+      <ion-item *ngIf="menuId === 'home'" detail><ion-button mode="md" (click)="navigate('/register')"  expand="full" fill="clear" color="dark"><ion-icon name="body"></ion-icon><a class="menuLink" translate>pricing-join</a></ion-button></ion-item>
+      <ion-item *ngIf="menuId !== 'home' &&!isAuthenticated" detail><ion-button mode="md" routerLink="/"  expand="full" fill="clear" color="dark"><ion-icon name="home"></ion-icon><a class="menuLink" translate>home</a></ion-button></ion-item>
+      <ion-item *ngIf="menuId === 'home' &&!isAuthenticated" detail><ion-button mode="md" (click)="navigate('/info/pricing')"  expand="full" fill="clear" color="dark"><ion-icon name="cash"></ion-icon><a class="menuLink" translate>footer-pricing</a></ion-button></ion-item>
+      <ion-item *ngIf="menuId === 'home' &&!isAuthenticated"><ion-button mode="md" (click)="show('about')"  expand="full" fill="clear" color="dark"><ion-icon name="information-circle-outline"></ion-icon><a class="menuLink" translate>about-us-title</a></ion-button></ion-item>
+      <ion-item *ngIf="isAuthenticated && !management" detail><ion-button mode="md" color="dark" (click)="redirectToAppointments()" expand="full" fill="clear" ><ion-icon name="calendar" mode="ios"></ion-icon><a class="menuLink" translate>management</a></ion-button></ion-item>
+      <ion-item class="profile" *ngIf="isAuthenticated && !profile" detail><ion-button mode="md" color="dark" (click)="navigate('/user/profile/' + profileUrl)" expand="full" fill="clear"><ion-icon name="person-circle-outline"></ion-icon><a class="menuLink" translate>navbar-profile</a></ion-button></ion-item>
+      <ion-item *ngIf="help && isAuthenticated && menuId !== 'help'" detail><ion-button mode="md" color="dark" routerLink="/user/help" expand="full" fill="clear"><ion-icon name="help-circle"></ion-icon><a class="menuLink" translate>footer-help</a></ion-button></ion-item>
+      <ion-item *ngIf="menuId !== 'terms'"><ion-button mode="md" expand="full" fill="clear" color="dark" (click)="navigate('/info/terms')"><ion-icon name="clipboard"></ion-icon><a class="menuLink" translate>footer-terms</a></ion-button></ion-item>
+      <ion-item *ngIf="menuId === 'home'"><ion-button mode="md" expand="full" fill="clear" color="dark"><ion-icon name="person"></ion-icon><a style="color: var(--ion-color-dark)" class="menuLink" target="_blank" href="https://www.bookanapp.com" translate >welcome-user-site</a></ion-button></ion-item>
+      <ion-item><ion-button mode="md" (click)="contact()" expand="full" color="dark" fill="clear"><ion-icon name="mail"></ion-icon><a class="menuLink" translate>feedback</a></ion-button></ion-item>
+      <ion-item><ion-button mode="md" expand="full" color="dark" fill="clear"><app-languagepicker style="width: 100%"></app-languagepicker></ion-button></ion-item>
+      <ion-item *ngIf="isAuthenticated"><ion-button mode="md" (click)="featureTour()" expand="full" color="dark" fill="clear"><ion-icon name="hammer"></ion-icon><a class="menuLink" translate>tour-10</a></ion-button></ion-item>
+      <ion-item>
+       <ion-toggle [checked]="darkMode" style="margin-left: 10px" (ionChange)="toggleDarkMode($event)"></ion-toggle>
+       <ion-label translate color="dark" class="ion-text-uppercase" style="font-weight: 200; font-size: 12.5px">dark-mode</ion-label>
+     </ion-item>
+      <ion-item> <span style="padding-left: 10px; color: var(--ion-color-dark)" translate>footer-follow</span>
+        <a class="follow" href="https://www.facebook.com/bookanapp"><ion-icon slot="start" color="secondary" name="logo-facebook"></ion-icon></a>
+        <a class="follow" href="https://twitter.com/AppBookan"><ion-icon slot="start" name="logo-twitter" color="secondary"></ion-icon></a>
+        <a class="follow" href="https://www.instagram.com/bookanapp/"><ion-icon slot="start" name="logo-instagram" color="secondary"></ion-icon></a></ion-item>
+      <ion-item><ion-label style="padding-left: 10px"><small><span [innerHTML]="showYear()"></span> <fa-icon style="font-size: 12px; margin-left: 6px" [icon]="copyRightIcon"></fa-icon> Butterfly Valley, Lda</small></ion-label></ion-item>
+      <ion-item *ngIf="isAuthenticated" (click)="signOut()"> <ion-button expand="full" color="danger" fill="clear" mode="md">
+        <ion-icon name="log-out"></ion-icon>
+        <a translate class="menuLink" style="color: #F40000">leave</a>
+      </ion-button></ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>

@@ -1,0 +1,298 @@
+<ng-container *ngIf="appointment$ | async as appointment">
+    <ion-header mode="ios" class="desktop-modal-header">
+        <ion-toolbar color="toolbar" mode="ios">
+            <ion-buttons slot="start">
+                <ion-button  (click)="dismiss()" fill="clear" *ngIf="!tablet && mobile">
+                    <ion-icon *ngIf="swipe" name="close" slot="icon-only" mode="md"></ion-icon>
+                    <ion-icon *ngIf="!swipe" md="arrow-back" ios="chevron-back"></ion-icon>
+                </ion-button>
+                <ion-label color="dark" *ngIf="!tablet && mobile">
+                    {{showModalTitle(appointment)}}
+                </ion-label>
+                <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+                    <ion-label translate>close</ion-label>
+                </ion-button>
+                <ion-button *ngIf="!mobile" fill="clear" (click)="dismiss()">
+                    <ion-icon name="arrow-back"></ion-icon>
+                    <span class="ion-text-capitalize" translate>back</span>
+                </ion-button>
+            </ion-buttons>
+            <ion-title class="ion-text-center" *ngIf="tablet || !mobile">
+                <ion-label color="dark" class="ion-text-capitalize">
+                    {{showModalTitle(appointment)}}
+                </ion-label>
+            </ion-title>
+            <ion-buttons slot="end" *ngIf="auth.userAuthorities$| async as authorities;" >
+                <ng-container *ngIf="mobile">
+                    <ion-button color="warning" style="font-weight: 600" *ngIf="formChanged && !isLoading" fill="clear" translate (click)="submitEditForm()">save</ion-button>
+                    <ion-buttons slot="end" *ngIf="!appointment.pastAppointment && appointment.bookAnApp  && !appointment.anonymous">
+                        <ion-button (click)="sendMessage(appointment.id, appointment.appointmentDate)" color="secondary" fill="clear">  <fa-icon [icon]="messageIcon" slot="icon-only"></fa-icon></ion-button>
+                    </ion-buttons>
+                    <ion-buttons slot="end" *ngIf="!appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')">
+                        <ion-button (click)="cancel(appointment.id, appointment.appointmentDate)" color="danger" fill="clear"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+                    </ion-buttons>
+                    <ion-buttons slot="end" *ngIf="appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')">
+                        <ion-button (click)="archive(appointment.id)" color="danger" fill="clear"><ion-icon slot="icon-only" name="archive"></ion-icon></ion-button>
+                    </ion-buttons>
+                </ng-container>
+            </ion-buttons>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content class="white">
+        <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+            <div style="position: absolute; top: 50%; left: calc(50% - 37px);z-index: 10000;"><ion-spinner color="secondary" style="height: 75px; width: 75px"></ion-spinner></div>
+        </div>
+        <div class="modal-container">
+            <ion-grid class="ion-no-padding ion-no-margin" *ngIf="auth.userAuthorities$| async as authorities;">
+                <ion-row class="ion-no-padding ion-justify-content-center" style="flex-direction: column; display: flex">
+                    <ion-col class="ion-no-padding">
+                        <ion-list class="list-desktop ion-no-padding" style="padding-right: 3px; background: var(--ion-color-white)">
+                            <ion-item>
+                                <ion-icon color="secondary" slot="start" name="time"></ion-icon>
+                                <ion-label>
+                                    <h4 *ngIf="!editTime"  translate>mess-timedate</h4>
+                                    <p *ngIf="!editTime"><span class="ion-text-capitalize">{{showModalTitle(appointment)}}</span></p>
+                                    <ion-button *ngIf="!editTime && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" size="small" (click)="editField('time')" translate>sched-rebook-btn</ion-button>
+
+                                    <div *ngIf="!appointment.pastAppointment && editTime  && !appointment.pastAppointment  && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" style="width: 100%; text-align: center; padding: 6px">
+                                        <ion-grid>
+                                            <form [formGroup]="editDateTimeForm" (ngSubmit)="editTimeFormSubmit()">
+                                                <button style="display: none" #editSlotBtn></button>
+                                                <ion-row>
+                                                    <ion-col class="ion-no-padding" size="12" size-md="6" style="display: flex; align-items: center">
+                                                        <mat-form-field class="ion-margin">
+                                                            <input class="calendar-input" matInput [placeholder]="'date' | translate" formControlName="date" [matDatepicker]="startDate">
+                                                            <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+                                                            <mat-datepicker #startDate
+                                                                            startView="year">
+                                                            </mat-datepicker>
+                                                        </mat-form-field>
+                                                    </ion-col>
+                                                    <ion-col class="ion-no-padding" size="12" size-md="6" style="display: flex">
+                                                        <ngb-timepicker [formControlName]="'hour'" [meridian]="translate.getLocale().includes('en')"></ngb-timepicker>
+                                                    </ion-col>
+                                                    <ion-col size="12" class="ion-no-padding">
+                                                        <ion-label *ngIf="!appointment.pastAppointment && formSubmitted && editDateTimeForm.get('date').hasError('required')"  color="danger" translate>sched-choose-date-error</ion-label>
+                                                        <ion-label *ngIf="!appointment.pastAppointment && formSubmitted && editDateTimeForm.get('hour').hasError('required')"  color="danger" translate>sched-choose-time-error</ion-label>
+                                                    </ion-col>
+                                                </ion-row>
+                                                <ion-row *ngIf="!appointment.pastAppointment">
+                                                    <ion-col class="ion-text-center">
+                                                        <ion-button [disabled]="editDateTimeForm.get('date').hasError('required') && editDateTimeForm.get('hour').hasError('required')" (click)="submitEditSlotForm()" translate>sched-rebook-btn</ion-button>
+                                                    </ion-col>
+                                                </ion-row>
+                                            </form>
+                                        </ion-grid>
+                                    </div>
+                                </ion-label>
+                            </ion-item>
+                            <form *ngIf="editAppointmentForm" [formGroup]="editAppointmentForm" (ngSubmit)="editFormSubmit()">
+                                <ion-item *ngIf="!editName">
+                                    <ion-icon *ngIf="!appointment.bookAnApp" color="secondary" slot="start" name="person"></ion-icon>
+                                    <img *ngIf="appointment.bookAnApp" slot="start" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                    <ion-label class="normal-white-space">
+                                        <h4 translate class="bold-font"><span translate>reg-name</span><ion-icon *ngIf="!appointment.pastAppointment && !appointment.bookAnApp && !appointment.pastAppointment && !appointment.providerCustomer && !appointment.anonymous && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" color="secondary" name="create" class="edit-icon" (click)="editField('name')"></ion-icon></h4>
+                                        <p *ngIf="!appointment.providerCustomer" slot="end"><span>{{appointment.name}}</span>
+                                            <span *ngIf="appointment.anonymous" > (<span translate>anonymous-user</span>)</span>
+                                        </p>
+                                        <ion-button class="ion-no-padding" (click)="openCustomer(appointment.providerCustomer)" fill="clear" mode="ios" *ngIf="appointment.providerCustomer"><span>{{appointment.name + ' ('}}</span><span translate>customer-mycustomer</span>) <ion-icon name="open"></ion-icon></ion-button>
+                                    </ion-label>
+                                    <ion-input type="text" style="margin: 10px 0; " *ngIf="!appointment.pastAppointment && editName" formControlName="customer_name" [placeholder]="'reg-name' | translate"></ion-input>
+                                </ion-item>
+                                <ion-item *ngIf="!appointment.pastAppointment && editName">
+                                    <ion-icon *ngIf="!appointment.bookAnApp" color="secondary" slot="start" name="person"></ion-icon>
+                                    <img *ngIf="appointment.bookAnApp" slot="start" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                    <ion-input type="text" style="margin: 10px 0; " *ngIf="!appointment.pastAppointment && editName" formControlName="customer_name" [placeholder]="'reg-name' | translate"></ion-input>
+                                </ion-item>
+                                <ion-label class="alert-margin" *ngIf="!appointment.pastAppointment && editName && editAppointmentForm.get('customer_name').hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+                                <ion-label class="alert-margin" *ngIf="!appointment.pastAppointment && editName && editAppointmentForm.get('customer_name').hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+                                <ion-item>
+                                    <ion-icon color="secondary" slot="start" name="calendar"></ion-icon>
+                                    <ion-label>
+                                        <h4 translate class="bold-font">specialist</h4>
+                                        <p *ngIf="appointment.category" slot="end">{{ appointment.schedule }} ({{appointment.category}})</p>
+                                        <p *ngIf="!appointment.category" slot="end">{{ appointment.schedule }}</p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item *ngIf="appointment.bookedServices && appointment.bookedServices.length>0">
+                                    <fa-icon slot="start" [icon]="iconService.getIcon(appointment.providerCategory)"></fa-icon>
+                                    <ion-label>
+                                        <h4 translate class="bold-font">sched-service</h4>
+                                        <p *ngFor="let service of appointment.bookedServices">{{ service }}</p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item>
+                                    <ion-icon color="secondary" slot="start" name="hourglass"></ion-icon>
+                                    <ion-label>
+                                        <h4 translate class="bold-font">duration</h4>
+                                        <p slot="end">{{ timeUtil.timeConvert(appointment.duration) }}</p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item *ngIf="appointment.numberOfSpots">
+                                    <ion-icon color="secondary" slot="start" name="people"></ion-icon>
+                                    <ion-label>
+                                        <h4 translate class="bold-font">sched-spots</h4>
+                                        <p slot="end">{{ appointment.numberOfSpots }} {{'persons' | translate}}</p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item *ngIf="!editPhone &&
+                            ((!appointment.bookAnApp && !appointment.anonymous) ||
+                            (appointment.bookAnApp && appointment.phone && !appointment.providerCustomer)) ||
+                            (appointment.anonymous && appointment.phone)">
+                                    <ion-icon color="secondary" slot="start" name="call"></ion-icon>
+                                    <ion-label>
+                                        <h4 class="bold-font ion-align-items-center" style="margin-right: 16px; display: flex"><span translate>phone</span><ion-icon class="align-icon edit-icon" *ngIf="!appointment.bookAnApp && !appointment.phone && !editPhone && !appointment.pastAppointment && !appointment.anonymous && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" color="warning" name="add" (click)="editField('phone')"></ion-icon>
+                                            <ion-icon *ngIf="!appointment.pastAppointment && appointment.phone && !appointment.anonymous  && !appointment.providerCustomer && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" class="edit-icon" color="secondary" name="create" (click)="editField('phone')"></ion-icon>
+                                        </h4>
+                                        <a *ngIf="appointment.phone" style="color: var(--ion-color-secondary); text-decoration: none" [href]="'tel:' + '+' + appointment.phone"><span>{{'+' + appointment.phone}}</span></a>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-grid style="padding-left: 16px" *ngIf="!appointment.pastAppointment && editPhone && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" class="edit-phone-div ion-align-items-center">
+                                    <ion-row style="width: 100%">
+                                        <ion-col style="display: flex; padding-bottom: 16px;" size="1" class="ion-align-items-center ion-no-padding">
+                                            <ion-icon name="call" class="edit-phone-icon" color="primary"></ion-icon>
+                                        </ion-col>
+                                        <ion-col style="border-bottom: 1px solid #ddd; padding-bottom: 16px;" size="11" class="ion-no-padding border-bottom">
+                                            <ngx-intl-tel-input style="max-width: 90%"
+                                                                [cssClass]="'intl-code-input'"
+                                                                [enableAutoCountrySelect]="true"
+                                                                [enablePlaceholder]="true"
+                                                                [searchCountryFlag]="true"
+                                                                [selectFirstCountry]="true"
+                                                                [preferredCountries]="preferredCountries"
+                                                                [maxLength]="15"
+                                                                [separateDialCode]="true"
+                                                                [phoneValidation]="true"
+                                                                [searchCountryPlaceholder]="translate.getFromKey('search')"
+                                                                formControlName="internationalPhone"></ngx-intl-tel-input>
+                                            <ion-label *ngIf="!appointment.pastAppointment && !editAppointmentForm.controls['internationalPhone'].valid" color="danger" translate>phone-error</ion-label>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
+                                <ion-item *ngIf="!appointment.bookAnApp && !appointment.providerCustomer && !appointment.anonymous && !editEmail">
+                                    <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+                                    <ion-label>
+                                        <h4 class="bold-font ion-align-items-center" style="margin-right: 16px; display: flex">
+                                            <span translate>login-email</span><ion-icon class="align-icon edit-icon" *ngIf="!appointment.pastAppointment && !appointment.email && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" color="warning" name="add" (click)="editField('email')"></ion-icon>
+                                            <ion-icon *ngIf="!appointment.pastAppointment && appointment.email && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" color="secondary" name="create" class="edit-icon" (click)="editField('email')"></ion-icon>
+                                        </h4>
+                                        <p slot="end"><span>{{ appointment.email }}</span></p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item *ngIf="!appointment.bookAnApp && !appointment.providerCustomer && !appointment.anonymous && editEmail">
+                                    <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+                                    <ion-input *ngIf="!appointment.pastAppointment && editEmail" type="email" style=" margin: 10px"
+                                               formControlName="customer_email"
+                                               email
+                                               placeholder="example@example.com"
+                                    ></ion-input>
+                                </ion-item>
+                                <ion-label class="alert-margin" *ngIf="!appointment.pastAppointment && editAppointmentForm.get('customer_email').hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+                                <ion-item *ngIf="appointment.userRemark">
+                                    <ion-icon color="secondary" slot="start" name="information"></ion-icon>
+                                    <ion-label>
+                                        <h4 class="bold-font ion-align-items-center" translate>provider-remark</h4>
+                                        <p slot="end">{{ appointment.userRemark }}</p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item *ngIf="!editNote">
+                                    <ion-icon name="information-circle-outline" color="secondary" slot="start"></ion-icon>
+                                    <ion-label class="normal-white-space">
+                                        <h4 class="bold-font ion-align-items-center" style="margin-right: 16px; display: flex"><span translate>sched-remark</span>
+                                            <ion-icon class="align-icon edit-icon" *ngIf="!appointment.providerRemark && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" color="warning" name="add" (click)="editField('note')"></ion-icon>
+                                            <ion-icon *ngIf="appointment.providerRemark && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" color="secondary" name="create" class="edit-icon" (click)="editField('note')"></ion-icon>
+                                        </h4>
+                                        <p slot="end"><span>{{ appointment.providerRemark }}</span></p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item *ngIf="editNote && !authorities.includes('SUBPROVIDER_SCHED_VIEW')">
+                                    <ion-icon name="information-circle-outline" color="secondary" slot="start"></ion-icon>
+                                    <ion-textarea auto-grow="true" rows="1" style="margin: 10px 0" *ngIf="editNote" formControlName="remark" [placeholder]="translate.getFromKey('sched-remark')"></ion-textarea>
+                                </ion-item>
+                                <ion-label *ngIf="editAppointmentForm.get('remark').hasError('minlength') || editAppointmentForm.get('remark').hasError('maxlength')"  color="danger" translate>app-remark-length-error</ion-label>
+                                <ng-container *ngIf="auth.userAuthorities$ | async as authorities">
+                                    <ion-item *ngIf="!appointment.pastAppointment && !authorities.includes('ROLE_BASIC')">
+                                        <fa-icon [icon]="smsIcon" slot="start"></fa-icon>
+                                        <ion-label>
+                                            <h2 style="align-self: center" translate>pricing-sms</h2>
+                                        </ion-label>
+                                        <ion-toggle formControlName="sendSms" color="secondary"></ion-toggle>
+                                    </ion-item>
+                                    <ion-item *ngIf="!appointment.pastAppointment && !authorities.includes('ROLE_BASIC')">
+                                        <fa-icon [icon]="smsIcon" slot="start"></fa-icon>
+                                        <ion-label>
+                                            <h2 style="align-self: center" translate>app-smssent</h2>
+                                        </ion-label>
+                                        <ion-checkbox formControlName="smsSent" color="secondary" disabled style="margin-right: 16px"></ion-checkbox>
+                                    </ion-item>
+                                    <ion-item *ngIf="appointment.pastAppointment">
+                                        <fa-icon [icon]="noShowIcon" slot="start"></fa-icon>
+                                        <ion-label>
+                                            <h2 style="align-self: center" translate>customer-missedApp</h2>
+                                        </ion-label>
+                                        <ion-toggle formControlName="noShow" color="secondary"></ion-toggle>
+                                    </ion-item>
+                                </ng-container>
+                                <button style="display: none" #editSubmitBtn></button>
+                                <ng-container *ngIf="!formChanged">
+                                    <div class="modal-submit-button-holder" *ngIf="auth.userAuthorities$| async as authorities;">
+                                        <ion-button *ngIf="!appointment.bookAnApp && !appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" (click)="cancel(appointment.id, appointment.appointmentDate)" color="danger" translate>cancel</ion-button>
+                                    </div>
+                                    <ng-container *ngIf="appointment.bookAnApp">
+                                        <ion-grid class="modal-submit-button-holder ion-no-padding" *ngIf="auth.userAuthorities$| async as authorities;">
+                                            <ion-row>
+                                                <ion-col size="4" class="ion-text-left">
+                                                    <ng-container *ngIf="auth.userAuthorities$| async as authorities;">
+                                                        <ion-button style="margin-left: 16px" *ngIf="!appointment.pastAppointment && !appointment.anonymous"  (click)="sendMessage(appointment.id, appointment.appointmentDate)" color="primary" translate>contact-contact</ion-button>
+                                                    </ng-container>
+                                                </ion-col>
+                                                <ion-col size="8" class="ion-text-end">
+                                                    <ng-container *ngIf="auth.userAuthorities$| async as authorities;">
+                                                        <ion-button *ngIf="!appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" (click)="cancel(appointment.id, appointment.appointmentDate)" color="danger" translate>cancel</ion-button>
+                                                    </ng-container>
+                                                </ion-col>
+                                            </ion-row>
+                                        </ion-grid>
+                                    </ng-container>
+                                </ng-container>
+                                <ng-container *ngIf="formChanged">
+                                    <ion-grid *ngIf="auth.userAuthorities$| async as authorities;">
+                                        <ion-row>
+                                            <ion-col size="4" class="ion-text-left">
+                                                <ng-container *ngIf="auth.userAuthorities$| async as authorities;">
+                                                    <ion-button *ngIf="!appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" (click)="cancel(appointment.id, appointment.appointmentDate)" color="danger" translate>cancel</ion-button>
+                                                </ng-container>
+                                            </ion-col>
+                                            <ion-col size="8" class="ion-text-end">
+                                                <ng-container >
+                                                    <ion-button *ngIf="!isLoading && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" translate (click)="submitEditForm()">submit</ion-button>
+                                                </ng-container>
+                                            </ion-col>
+                                        </ion-row>
+                                    </ion-grid>
+                                </ng-container>
+                            </form>
+                        </ion-list>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+    </ion-content>
+    <!--    <ion-footer class="ion-padding" *ngIf="!mobile">-->
+    <!--        <ion-grid>-->
+    <!--            <ion-row>-->
+    <!--                <ion-col size="4" class="ion-text-left">-->
+    <!--                    <ng-container *ngIf="auth.userAuthorities$| async as authorities;">-->
+    <!--                        <ion-button *ngIf="!appointment.pastAppointment && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" (click)="cancel(appointment.id, appointment.appointmentDate)" color="danger" translate>cancel</ion-button>-->
+    <!--                    </ng-container>-->
+    <!--                </ion-col>-->
+    <!--                <ion-col size="8" class="ion-text-end">-->
+    <!--                    <ion-button class="bold-600" (click)="dismiss()" fill="clear" translate>close</ion-button>-->
+    <!--                    <ng-container *ngIf="auth.userAuthorities$| async as authorities;">-->
+    <!--                        <ion-button *ngIf="formChanged && !isLoading && !authorities.includes('SUBPROVIDER_SCHED_VIEW')" translate (click)="submitEditForm()">submit</ion-button>-->
+    <!--                    </ng-container>-->
+    <!--                </ion-col>-->
+    <!--            </ion-row>-->
+    <!--        </ion-grid>-->
+    <!--    </ion-footer>-->
+</ng-container>

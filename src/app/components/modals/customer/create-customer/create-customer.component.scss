@@ -1,0 +1,87 @@
+fa-icon {
+  color: var(--ion-color-secondary);
+}
+
+.fa-margin {
+  margin: 0 36px 0 4px;
+}
+
+.fa-margin-mobile {
+  margin: 0 22px 0 4px;
+}
+
+
+.edit-icon:hover{
+  cursor: pointer;
+}
+
+.edit-phone-div {
+  display: flex;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #ddd;
+  margin-top: 16px;
+  padding-bottom: 10px;
+
+}
+
+.edit-phone-icon {
+  //margin-right: 32px;
+  width: 25px;
+  height: 25px;
+}
+
+.align-icon{
+  height: 30px;
+  width: 30px
+}
+
+::ng-deep .mat-form-field-appearance-legacy .mat-form-field-wrapper {
+  padding-bottom: 0!important;
+}
+
+.calendar-input{
+  border-bottom: 1px solid #ddd;
+}
+
+.alert-margin {
+  margin-left: 64px;
+}
+
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.avatar-holder {
+  width: 150px;
+  height: 150px;
+  position: relative;
+}
+
+.small-fab{
+  height: 40px;
+  width: 40px;
+  position: absolute;
+  bottom: 0;
+  right: -150px;
+}
+
+.small-fab ion-icon{
+  height: 30px;
+  width: 30px;
+}
+
+ion-avatar{
+  width: 150px;
+  height: 150px;
+}
+
+@media (max-width: 768px) {
+  ion-input, ion-textarea{
+    padding: 0 16px!important;
+  }
+}
+
+::ng-deep .mat-datepicker-toggle *{
+  color: var(--ion-color-primary) !important;
+}

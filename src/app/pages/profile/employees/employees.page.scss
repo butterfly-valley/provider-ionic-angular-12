@@ -1,0 +1,109 @@
+.appointment-col {
+  display: flex;
+}
+
+ion-icon{
+  height: 20px;
+  width: 20px;
+}
+
+fa-icon {
+  color: var(--ion-color-secondary);
+  //margin-right: 6px;
+}
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50% !important;
+}
+
+.segment-desktop > ion-segment-button > ion-label{
+  font-weight: 600;
+  font-size: 1.2em;
+}
+
+.segment-content-margin {
+  margin-top: 16px;
+}
+
+.button-margin {
+  margin: 0 2px;
+}
+
+.button-margin-mobile {
+  margin:0 7px;
+}
+
+.desktop-item {
+  min-width: 90%;
+}
+
+.desktop-card{
+  padding: 0;
+  margin: 3px;
+  display: flex;
+  align-items: center;
+}
+
+.subdivision-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.subdivision-title-holder{
+  margin-top: 22px;
+  margin-left: 6px;
+  display: flex;
+}
+
+.margin-16{
+  margin-left: 16px;
+  border-left: 3px solid var(--ion-color-primary);
+  margin-bottom: 6px;
+  margin-top: 6px;
+}
+
+.margin-6 {
+  margin-left: 6px;
+}
+
+.roster-item{
+  margin-bottom: 10px;
+}
+
+@media (min-width: 801px) {
+  .roster-item{
+    border: 1px solid var(--ion-color-card);
+  }
+
+}
+
+.roster-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.employee-name {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--ion-color-dark)
+}
+
+ion-reorder {
+  margin: 0!important;
+}
+
+:host ::ng-deep .mat-form-field-flex {
+  border-bottom: 1px solid var(--ion-color-gray)!important;
+}
+
+:host ::ng-deep .mat-form-field-infix {
+  border: 0!important;
+}
+
+
+.subdivision-title-holder ion-icon{
+  height: 25px;
+  width: 25px;
+  margin-left: 6px;
+}

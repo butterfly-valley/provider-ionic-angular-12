@@ -1,0 +1,52 @@
+.increaseFont {
+  font-size: 1.2em;
+}
+
+.font-20 {
+  font-size: 20px;
+}
+
+.button-margin {
+  margin-top: 10px;
+}
+
+.schedule-category-view a{
+  text-decoration: none;
+}
+
+.schedule-category-view:hover{
+  cursor: pointer;
+}
+
+.schedule-category-view{
+  margin-left: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.schedule-category-view ion-icon{
+  align-self: flex-end;
+}
+
+
+.schedule-view{
+  text-decoration: none;
+  color: var(--ion-color-secondary);
+}
+
+.schedule-view:hover{
+  cursor: pointer;
+}
+
+.small-icon{
+  height: 20px;
+}
+
+.checkbox-container{
+  position: absolute;
+  width: 100%;
+}
+
+.margin-left{
+  margin-left: 32px;
+}

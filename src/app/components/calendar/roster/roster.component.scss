@@ -1,0 +1,141 @@
+.fc-daygrid-day-events {
+  margin-bottom: 0!important;
+}
+
+.name-holder{
+  display: flex;
+  //justify-content: center;
+}
+
+.subdivision-name-holder{
+  display: flex;
+}
+.name-holder > ion-icon {
+  margin-left: 6px;
+}
+
+.name-label{
+  margin-top: 20px;
+}
+
+.name-label-mobile{
+  position: absolute;
+  top: 0;
+  z-index: 2;
+}
+
+//.first-label{
+//  position: absolute;
+//  bottom: 32px
+//}
+
+.mobile-name-holder {
+  //position: absolute;
+  width: 100%;
+  text-align: center;
+  z-index: 2;
+  font-size: 1.2em;
+}
+
+.mobile-name-holder-first{
+  top: 112px;
+}
+
+:host ::ng-deep .info-div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+ion-icon:hover{
+  cursor: pointer;
+}
+
+ion-icon{
+  height: 25px;
+  width: 25px;
+}
+
+.icon-container{
+  display: flex;
+}
+
+.icon-absolute{
+  position: absolute;
+}
+
+:host ::ng-deep .long-text {
+  word-break: break-all;
+  white-space: normal;
+}
+
+:host ::ng-deep .fc-event-time, .fc-event-title {
+  word-break: break-all;
+  white-space: normal;
+}
+
+:host ::ng-deep .fc-event-title {
+  word-break: break-all;
+  white-space: normal;
+}
+
+:host ::ng-deep .fc-header-toolbar{
+  margin-bottom: 0!important;
+}
+
+:host ::ng-deep .main > .fc-view-harness{
+  display: none;
+}
+
+:host ::ng-deep .fc-daygrid-day-events{
+  min-height: 0!important;
+}
+
+:host ::ng-deep .fc-col-header {
+  width: 100%!important;
+}
+
+.main-name {
+  position: absolute;
+  z-index: 2;
+  top: 60px;
+}
+
+.subdivision-title{
+  font-size: 20px;
+  font-weight: bold;
+}
+
+//.name-title{
+//  font-weight: bold;
+//}
+
+:host ::ng-deep .fc-daygrid-day-frame:hover{
+  cursor: pointer;
+}
+
+:host ::ng-deep .fc-event-time{
+  display: none;
+}
+
+:host ::ng-deep .fc-scroller{
+  overflow: auto!important;
+}
+
+.wide {
+  width: 3000px;
+}
+
+.name-holder, .subdivision-name-holder {
+  height: 30px;
+}
+
+.option-holder{
+  display: flex;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -o-sticky;
+  position: -ms-sticky;
+  position: sticky;
+  left: 25px;
+}

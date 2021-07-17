@@ -1,0 +1,11 @@
+:host ::ng-deep b {
+  color: var(--ion-color-primary);
+}
+
+:host ::ng-deep p {
+  color: var(--ion-color-dark);
+}
+
+:host ::ng-deep i {
+  color: var(--ion-color-gray);
+}

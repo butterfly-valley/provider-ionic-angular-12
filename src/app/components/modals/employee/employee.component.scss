@@ -1,0 +1,113 @@
+.authority-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.avatar-holder {
+  width: 150px;
+  height: 150px;
+  position: relative;
+}
+
+.small-fab{
+  height: 40px;
+  width: 40px;
+  position: absolute;
+  bottom: 0;
+  right: -150px;
+}
+
+.small-fab ion-icon{
+  height: 30px;
+  width: 30px;
+}
+
+ion-avatar{
+  width: 150px;
+  height: 150px;
+}
+
+
+.see-psswd{
+  position: absolute;
+  z-index: 2;
+  right: 32px;
+  top: 20px;
+}
+
+.see-psswd:hover{
+  cursor: pointer;
+}
+
+.edit-icon:hover{
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  ion-input, ion-textarea{
+    padding: 0 16px!important;
+  }
+}
+
+.employee-label{
+  margin: 0;
+  height: 100%;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+}
+
+ion-list {
+  background: var(--ion-color-white);
+}
+
+.btn-link {
+  color: var(--ion-color-primary)!important;
+}
+
+::ng-deep .mat-datepicker-toggle *{
+  color: var(--ion-color-primary) !important;
+}
+
+a:hover {
+  cursor: pointer;
+  color: var(--ion-color-primary);
+  opacity: 0.6;
+}
+
+a {
+  color: var(--ion-color-primary);
+}
+
+a ion-icon {
+  margin-left: 3px;
+}
+
+.attachment-holder {
+  margin: 3px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.time-request-icon {
+  height: 50px;
+  width: 50px;
+}
+
+.approve-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+}
+
+.desktop-item ion-label {
+  margin-top: 0;
+}
+
+.item-icon {
+  height: 20px;
+  width: 20px;
+  margin-right: 6px;
+}

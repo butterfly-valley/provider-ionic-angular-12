@@ -1,0 +1,15 @@
+<div class="terms-holder" [hidden]="accepted">
+    <ion-grid class="ion-no-padding">
+        <ion-row>
+            <ion-col size="10" size-md="11" class="ion-padding">
+                <div class="container" style="color: white">
+                    <ion-label translate>welcome-cookies </ion-label> <a [routerLink]="['/info/terms']" translate>footer-terms</a>&nbsp;<ion-label translate>reg-terms2</ion-label>&nbsp;
+                    <a [routerLink] ="['/info/terms']" fragment="privacy" translate>reg-terms3</a>
+                </div>
+            </ion-col>
+            <ion-col size="2" size-md="1" style="display: flex" class="ion-align-items-center">
+                <ion-button mode="md" (click)="accept()" fill="clear" size="small" style="color: white"><ion-icon slot="icon-only" name="close"></ion-icon></ion-button>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</div>

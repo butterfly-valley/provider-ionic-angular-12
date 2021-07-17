@@ -1,0 +1,602 @@
+<ion-header *ngIf="mobile" mode="ios">
+    <ion-toolbar color="toolbar">
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false"></ion-menu-button>
+        </ion-buttons>
+        <ion-buttons slot="start">
+            <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content [ngClass]="{'white' : mobile}" *ngIf="!mobile || tablet" #content>
+    <ion-fab *ngIf="!sidenavService.appointmentsSideNav" vertical="bottom" horizontal="start" slot="fixed">
+        <ion-fab-button *ngIf="!mobile || tablet" (click)="sidenavService.showAppSidenav(content)" color="warning">
+            <ion-icon name="calendar"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <ng-container *ngIf="appointmentService.appointments$ | async as appointmentMap">
+        <ion-fab *ngIf="active && appointmentMap.length>0" vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button *ngIf="!mobile || tablet" color="warning" (click)="print()">
+                <ion-icon name="print"></ion-icon>
+            </ion-fab-button>
+            <ion-fab-button size="small" *ngIf="mobile && !tablet" color="warning" (click)="print()">
+                <ion-icon name="print"></ion-icon>
+            </ion-fab-button>
+        </ion-fab>
+    </ng-container>
+    <mat-sidenav-container style="height: 100%;" class="example-container" autosize>
+        <mat-sidenav [position]="tablet ? 'start' : 'end'" mode="side"  [opened]="sidenavService.appointmentsSideNav" #sidenav style=" background: var(--ion-color-white)">
+            <ion-icon name="close" color="secondary" (click)="sidenavService.hideSideNav()" class="closeSideNav close-nav"></ion-icon>
+            <mat-calendar [selected]="selectedDate" [dateClass]="dateClass()"
+                          (selectedChange)="selectedDateChange($event)">
+            </mat-calendar>
+            <ng-container *ngIf="scheduleCategories$ | async as categories; else loadingOrError">
+                <ng-container *ngIf="treeVisible">
+                    <ion-item lines="none">
+                        <div style="display: flex; justify-content: center; width: 100%" *ngIf="categories.length > 0">
+                            <h3 translate class="ion-text-center">specialist</h3>
+                        </div>
+                    </ion-item>
+                    <div *ngFor="let category of categories" style="padding: 0 6px; background: var(--ion-color-white)">
+                        <h4 class="schedule-category-view" >
+                            <ion-label color="dark" *ngIf="category.category !== 'default' && category.category!=='###'">{{category.category}}</ion-label>
+                            <ion-label color="dark" *ngIf="category.category === 'default'" translate>provider-null-reference</ion-label>
+                            <ion-icon *ngIf="category.category !== '###'" color="dark" class="dropdown-icon" name="chevron-down-outline"></ion-icon>
+                        </h4>
+                        <div [@listAnimation]="category.schedules.length">
+                            <ng-container *ngFor="let schedule of category.schedules">
+                                <ion-item *ngIf="category.category !== '###'" style="margin-left: 16px">
+                                    <div class="schedule-checkbox-container">
+                                        <ion-checkbox  [(ngModel)]="scheduleService.schedules[schedule.scheduleId]" color="secondary" (ionChange)="addSchedule($event, schedule)"></ion-checkbox>
+                                    </div>
+                                    <ion-label class="normal-white-space margin-left">
+                                        <a class="schedule-view">{{schedule.scheduleName}}</a>
+                                    </ion-label>
+                                </ion-item>
+                            </ng-container>
+                        </div>
+                    </div>
+                </ng-container>
+            </ng-container>
+        </mat-sidenav>
+        <mat-sidenav-content  [ngClass]="{'white-background' : mobile}" class="app-content" style="margin-left: 350px">
+            <ion-refresher *ngIf="mobile" class="app-content-margin" slot="fixed" (ionRefresh)="doRefresh($event)">
+                <ion-refresher-content style="z-index: 1">
+                </ion-refresher-content>
+            </ion-refresher>
+            <ion-grid class="scheduleContainer" *ngIf="totalAppointments$ | async as total">
+                <ion-row>
+                    <ion-col class="ion-no-padding" offset-lg="2" size-lg="8">
+                        <ion-segment mode="ios" style="padding-bottom: 0; margin-top: 16px" *ngIf="enteredPage && total[1]>0" [value]="segment" (ionChange)="segmentChanged($event)">
+                            <ion-segment-button value="active">
+                                <ion-label color="dark" style="padding: 0 10px"><span translate>app-active</span>
+                                    <ion-badge color="warning" *ngIf="total[0]>0">{{total[0]}}</ion-badge>
+                                </ion-label>
+                            </ion-segment-button>
+                            <ion-segment-button value="history">
+                                <ion-label color="dark"  style="padding: 0 10px"><span translate>app-history</span>
+                                    <ion-badge color="warning" *ngIf="total[1]>0">{{total[1]}}</ion-badge>
+                                </ion-label>
+                            </ion-segment-button>
+                        </ion-segment>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+            <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+                <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+            </div>
+            <div class="loading-cover-desktop-modal" *ngIf="isDownloading">
+                <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+            </div>
+            <div *ngIf="(selectedScheduleNames && selectedScheduleNames.length>0)|| selectedDate" style="margin-top: 10px">
+                <ion-chip outline color="secondary" (click)="cancelAllFilters()">
+                    <ion-icon name="funnel" mode="ios"></ion-icon><span translate>app-filter</span>:
+                    <ion-icon name="close-circle" color="dark"></ion-icon>
+                </ion-chip>
+                <ion-chip outline color="secondary" *ngIf="selectedDate" (click)="cancelSelectedDate()">
+                    <ion-icon class="icon-aligned" name="calendar"></ion-icon><p class="span-margin">{{showAppDate(selectedDate, true)}}</p>
+                    <ion-icon name="close-circle" color="dark"></ion-icon>
+                </ion-chip>
+                <ion-chip outline color="secondary" *ngIf="selectedScheduleNames && selectedScheduleNames.length>0" (click)="cancelSchedule()">
+                    <ion-label><p style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon>
+                        <span class="span-margin" *ngFor="let selectedScheduleName of selectedScheduleNames; let isLast=last">{{ selectedScheduleName }}{{isLast ? '' : ', '}}</span>
+                    </p></ion-label>
+                    <ion-icon name="close-circle" color="dark"></ion-icon>
+                </ion-chip>
+            </div>
+            <ion-grid class="app-content scheduleContainer ion-no-padding" [hidden]="!active" *ngIf="appointmentService.appointments$ | async as appointmentMap; else loadingOrError">
+                <ion-row *ngIf="totalAppointments$ | async as total">
+                    <ion-col *ngIf="total[0]>0" size-md="8" size-lg="6" offset-md="2" offset-lg="3" style="display: flex" class="ion-align-items-center ion-no-padding ion-no-margin">
+                        <ion-searchbar style="padding-left: 0; padding-right: 0" type="text" debounce="500" [placeholder]="'search-app' | translate" (ionInput)="searchAppointments($event, false)" animated></ion-searchbar>
+                    </ion-col>
+                </ion-row>
+                <ion-row *ngIf="appointmentMap.length>0">
+                    <ion-col size="2" style="display: flex; padding: 0; align-items: center;" *ngIf="auth.userAuthorities$| async as authorities;">
+                        <div style="position: absolute; display: flex; align-items: center; padding-left: 6px; z-index: 2" *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')">
+                                   <span class="checkbox-container">
+                                       <ion-checkbox (ionChange)="selectAllCurrentCheckboxes(appointmentMap, $event)"></ion-checkbox>
+                                   </span>
+                            <ion-button style="margin-left: 66px" color="danger" *ngIf="appointmentService.appointmentsToCancel && appointmentService.appointmentsToCancel.length>0" (click)="cancelMultiple()">
+                                <ion-label translate color="white">cancel</ion-label>
+                            </ion-button>
+                        </div>
+                    </ion-col>
+                    <ion-col size="10" class="ion-no-padding">
+                        <mat-paginator [ngClass]="{'white-background' : mobile}" [length]="appointmentMap[0]['total']" *ngIf="appointmentMap.length>0 && appointmentMap[0]['total']>10" (page)="paginator($event)"
+                                       [pageSize]="10"
+                                       [pageSizeOptions]="[10, 25, 50]"
+                                       showFirstLastButtons="true">
+                        </mat-paginator>
+                    </ion-col>
+                </ion-row>
+                <ion-row class="ion-justify-content-center ion-align-items-center"style="flex-direction: column; margin-bottom: 64px" *ngIf="appointmentMap.length>0 && renderAppointments" [@listAnimation]="appointmentMap.size">
+                    <ion-col class="ion-no-padding" size="12" *ngFor="let date of appointmentMap">
+                        <div style="padding-bottom: 32px">
+                            <div style="margin-bottom: 16px">
+                                <div style="width: 100%" class="ion-text-center ion-padding">
+                                    <ion-label color="dark" [innerHTML]="showAppDate(date.appointments[0].appointmentDate, true)" class="ion-text-capitalize" style="font-weight: 600"></ion-label>
+                                </div>
+                                <mat-card *ngFor="let appointment of date.appointments" class="appointment-card" [id]="appointment.id" style="padding: 0">
+                                    <ion-grid class="ion-no-padding ion-no-margin" *ngIf="!mobile">
+                                        <ion-row class="ion-no-padding ion-no-margin">
+                                            <ion-col size="9" size-xl="10" class="ion-no-padding ion-no-margin">
+                                                <ion-item lines="none" class="ion-activatable desktop-item">
+                                                    <ion-ripple-effect></ion-ripple-effect>
+                                                    <div class="checkbox-container" *ngIf="auth.userAuthorities$| async as authorities;">
+                                                        <ion-checkbox *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" style="z-index: 2" [(ngModel)]="appointment.checked" (ionChange)="addToCancel(appointment.id, $event)"></ion-checkbox>
+                                                    </div>
+                                                    <img *ngIf="appointment.userPic" class="desktop-image" [img-preloader]="appointment.userPic" (click)="showAppointment(appointment.id)">
+                                                    <div class="time-container" (click)="showAppointment(appointment.id)">
+                                                        <ion-label class="ion-text-center">
+                                                            <h2 [innerHTML]="showAppTime(appointment.appointmentDate)"></h2>
+                                                        </ion-label>
+                                                    </div>
+                                                    <ion-label (click)="showAppointment(appointment.id)">
+                                                        <p class="p-flex" [title]="appointment.bookAnApp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                                                            <ion-icon *ngIf="!appointment.bookAnApp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                                                            <img *ngIf="appointment.bookAnApp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                                            <span class="span-margin">{{ appointment.name }}</span></p>
+                                                        <p *ngIf="appointment.numberOfSpots" class="p-flex"><ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.numberOfSpots }}  {{'persons' | translate}}</span></p>
+                                                        <p *ngIf="appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }} ({{appointment.category}})</span></p>
+                                                        <p *ngIf="!appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }}</span></p>
+                                                        <p class="p-flex" *ngIf="appointment.bookedServices && appointment.bookedServices.length>0">
+                                                            <fa-icon slot="start" [icon]="iconService.getIcon(appointment.providerCategory)"></fa-icon>
+                                                            <span *ngFor="let service of appointment.bookedServices; let isLast = last"><span class="span-margin">{{ service }}{{isLast ? '' : ', '}}</span></span>
+                                                        </p>
+                                                        <p class="p-flex"><ion-icon name="hourglass" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ timeConvert(appointment.duration) }}</span></p>
+                                                        <p *ngIf="appointment.providerRemark" class="p-flex"><ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.providerRemark }}</span></p>
+                                                    </ion-label>
+                                                </ion-item>
+                                            </ion-col>
+                                            <ion-col class="appointment-col" size="3" size-xl="2" *ngIf="auth.userAuthorities$| async as authorities;">
+                                                <ion-button style="width: 100%" size="small" *ngIf="appointment.bookAnApp && !appointment.anonymous" (click)="sendMessage(appointment.id, appointment.dateTime, appointment.name)" translate>contact-contact
+                                                </ion-button>
+                                                <ion-button style="width: 100%" size="small" *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" (click)="cancel(appointment.id, appointment.appointmentDate)"  color="danger" translate>cancel
+                                                </ion-button>
+                                            </ion-col>
+                                        </ion-row>
+                                    </ion-grid>
+                                    <ion-item-sliding *ngIf="mobile">
+                                        <ion-item *ngIf="mobile" detail>
+                                            <ion-ripple-effect></ion-ripple-effect>
+                                            <div class="checkbox-container" *ngIf="auth.userAuthorities$| async as authorities;">
+                                                <ion-checkbox *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" style="z-index: 2" [(ngModel)]="appointment.checked" (ionChange)="addToCancel(appointment.id, $event)"></ion-checkbox>
+                                                <ion-label class="ion-text-center">
+                                                    <h2 [innerHTML]="showAppTime(appointment.appointmentDate)"></h2>
+                                                </ion-label>
+                                            </div>
+                                            <img *ngIf="appointment.userPic" class="desktop-image" [img-preloader]="appointment.userPic" (click)="showAppointment(appointment.id)">
+                                            <ion-label (click)="showAppointment(appointment.id)" class="appointment-info-label">
+                                                <p class="p-flex" [title]="appointment.bookAnApp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                                                    <ion-icon *ngIf="!appointment.bookAnApp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                                                    <img *ngIf="appointment.bookAnApp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                                    <span class="span-margin">{{ appointment.name }}</span></p>
+                                                <p *ngIf="appointment.numberOfSpots" class="p-flex"><ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.numberOfSpots }}  {{'persons' | translate}}</span></p>
+                                                <p *ngIf="appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }} ({{appointment.category}})</span></p>
+                                                <p *ngIf="!appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }}</span></p>
+                                                <p class="p-flex" *ngIf="appointment.bookedServices && appointment.bookedServices.length>0">
+                                                    <fa-icon slot="start" [icon]="iconService.getIcon(appointment.providerCategory)"></fa-icon>
+                                                    <span *ngFor="let service of appointment.bookedServices; let isLast = last"><span class="span-margin">{{ service }}{{isLast ? '' : ', '}}</span></span>
+                                                </p>
+
+                                                <p *ngIf="appointment.providerRemark" class="p-flex"><ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.providerRemark }}</span></p> <p class="p-flex"><ion-icon name="hourglass" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ timeConvert(appointment.duration) }}</span></p>
+                                            </ion-label>
+                                        </ion-item>
+                                        <ion-item-options side="end" *ngIf="auth.userAuthorities$| async as authorities;">
+                                            <ion-item-option *ngIf="appointment.bookAnApp  && !appointment.anonymous">
+                                                <ion-button (click)="sendMessage(appointment.id, appointment.appointmentDate, appointment.userName)" color="secondary" fill="clear" expand="full">  <fa-icon [icon]="messageIcon" slot="icon-only"></fa-icon></ion-button>
+                                            </ion-item-option>
+                                            <ion-item-option>
+                                                <ion-button *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" (click)="cancel(appointment.id, appointment.appointmentDate)"  fill="clear" color="danger" expand="full"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+                                            </ion-item-option>
+                                        </ion-item-options>
+                                    </ion-item-sliding>
+                                </mat-card>
+                            </div>
+                        </div>
+                    </ion-col>
+                </ion-row>
+                <ion-row class="ion-justify-content-center ion-align-items-center app-icon-container" style="flex-direction: column" *ngIf="appointmentMap.length<1">
+                    <ion-col size="12" class="ion-text-center">
+                        <fa-icon [icon]="appointmentIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-primary)"></fa-icon>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+            <ng-container *ngIf="totalAppointments$ | async as total">
+                <ion-grid *ngIf="total[1]>0" class="app-content scheduleContainer ion-no-padding" [hidden]="!history">
+                    <ng-container *ngIf="appointmentService.pastAppointments$ | async as appointmentMap; else loadingOrError">
+                        <ion-row *ngIf="totalAppointments$ | async as total">
+                            <ion-col *ngIf="total[1]>0" size-md="8" size-lg="6" offset-md="2" offset-lg="3" style="display: flex" class="ion-align-items-center ion-no-padding ion-no-margin">
+                                <ion-searchbar style="padding-left: 0; padding-right: 0" type="text" debounce="500" [placeholder]="'search-app' | translate" (ionInput)="searchAppointments($event, true)" animated></ion-searchbar>
+                            </ion-col>
+                        </ion-row>
+                        <ion-row>
+                            <ion-col size="2" style="display: flex; padding: 0; align-items: center;" *ngIf="auth.userAuthorities$| async as authorities;">
+                                <div style="position: absolute; display: flex; align-items: center; padding-left: 6px; z-index: 2" *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')">
+                                   <span class="checkbox-container">
+                                       <ion-checkbox (ionChange)="selectAllCheckboxes(appointmentMap, $event)"></ion-checkbox>
+                                   </span>
+                                    <ion-button style="margin-left: 66px" color="danger" *ngIf="appointmentsToArchive.length>0" (click)="archive()">
+                                        <ion-icon name="archive"></ion-icon>
+                                        <ion-label translate>archive</ion-label>
+                                    </ion-button>
+                                </div>
+                            </ion-col>
+                            <ion-col size="10" class="ion-no-padding">
+                                <mat-paginator [ngClass]="{'white-background' : mobile}" [length]="appointmentMap[0]['total']" *ngIf="appointmentMap.length>0 && appointmentMap[0]['total']>10" (page)="historyPaginator($event)"
+                                               [pageSize]="10"
+                                               [pageSizeOptions]="[10, 25, 50]"
+                                               showFirstLastButtons="true">
+                                </mat-paginator>
+                            </ion-col>
+                        </ion-row>
+                        <ion-row class="ion-justify-content-center ion-align-items-center" style="flex-direction: column; margin-bottom: 64px" *ngIf="appointmentMap.length>0 && renderAppointments" [@listAnimation]="appointmentMap.size">
+                            <ion-col class="ion-no-padding" size="12" *ngFor="let date of appointmentMap">
+                                <div style="padding-bottom: 16px; padding-left: 6px">
+                                    <div style="margin-bottom: 16px">
+                                        <div style="width: 100%" class="ion-text-center ion-padding">
+                                            <ion-label [innerHTML]="showAppDate(date.appointments[0].appointmentDate, true)" class="ion-text-capitalize" style="font-weight: 600"></ion-label>
+                                        </div>
+                                        <mat-card *ngFor="let appointment of date.appointments" class="appointment-card" [id]="appointment.id" style="padding: 0" no-padding>
+                                            <ion-item lines="none" *ngIf="!mobile" class="ion-activatable desktop-item">
+                                                <ion-ripple-effect></ion-ripple-effect>
+                                                <div class="checkbox-container" *ngIf="auth.userAuthorities$| async as authorities;">
+                                                    <ion-checkbox *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" style="z-index: 2" [(ngModel)]="appointment.checked" (ionChange)="addToArchive(appointment.id, $event)"></ion-checkbox>
+                                                </div>
+                                                <img *ngIf="appointment.userPic" class="desktop-image" [img-preloader]="appointment.userPic" (click)="showAppointment(appointment.id)">
+                                                <div class="time-container" (click)="showAppointment(appointment.id)">
+                                                    <ion-label class="ion-text-center">
+                                                        <h2 [innerHTML]="showAppTime(appointment.appointmentDate)"></h2>
+                                                    </ion-label>
+                                                </div>
+                                                <ion-label (click)="showAppointment(appointment.id)">
+                                                    <p class="p-flex" [title]="appointment.bookAnApp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                                                        <ion-icon *ngIf="!appointment.bookAnApp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                                                        <img *ngIf="appointment.bookAnApp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                                        <span class="span-margin">{{ appointment.name }}</span></p>
+                                                    <p *ngIf="appointment.numberOfSpots" class="p-flex"><ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.numberOfSpots }}  {{'persons' | translate}}</span></p>
+                                                    <p *ngIf="appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }} ({{appointment.category}})</span></p>
+                                                    <p *ngIf="!appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }}</span></p>
+                                                    <p class="p-flex" *ngIf="appointment.bookedServices && appointment.bookedServices.length>0">
+                                                        <fa-icon slot="start" [icon]="iconService.getIcon(appointment.providerCategory)"></fa-icon>
+                                                        <span *ngFor="let service of appointment.bookedServices; let isLast = last"><span class="span-margin">{{ service }}{{isLast ? '' : ', '}}</span></span>
+                                                    </p>
+                                                    <p class="p-flex"><ion-icon name="hourglass" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ timeConvert(appointment.duration) }}</span></p>
+                                                    <p *ngIf="appointment.providerRemark" class="p-flex"><ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.providerRemark }}</span></p>
+                                                </ion-label>
+                                            </ion-item>
+                                            <ion-item-sliding *ngIf="mobile">
+                                                <ion-item *ngIf="mobile">
+                                                    <ion-ripple-effect></ion-ripple-effect>
+                                                    <div class="checkbox-container" *ngIf="auth.userAuthorities$| async as authorities;">
+                                                        <ion-checkbox *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" style="z-index: 2" [(ngModel)]="appointment.checked" (ionChange)="addToArchive(appointment.id, $event)"></ion-checkbox>
+                                                        <ion-label class="ion-text-center">
+                                                            <h2 [innerHTML]="showAppTime(appointment.appointmentDate)"></h2>
+                                                        </ion-label>
+                                                    </div>
+                                                    <img *ngIf="appointment.userPic" class="desktop-image" [img-preloader]="appointment.userPic" (click)="showAppointment(appointment.id)">
+                                                    <ion-label class="appointment-info-label" (click)="showAppointment(appointment.id)">
+                                                        <p class="p-flex" [title]="appointment.bookAnApp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                                                            <ion-icon *ngIf="!appointment.bookAnApp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                                                            <img *ngIf="appointment.bookAnApp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                                            <span class="span-margin">{{ appointment.name }}</span></p>
+                                                        <p *ngIf="appointment.numberOfSpots" class="p-flex"><ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.numberOfSpots }}  {{'persons' | translate}}</span></p>
+                                                        <p *ngIf="appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }} ({{appointment.category}})</span></p>
+                                                        <p *ngIf="!appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }}</span></p>
+                                                        <p class="p-flex" *ngIf="appointment.bookedServices && appointment.bookedServices.length>0">
+                                                            <fa-icon slot="start" [icon]="iconService.getIcon(appointment.providerCategory)"></fa-icon>
+                                                            <span *ngFor="let service of appointment.bookedServices; let isLast = last"><span class="span-margin">{{ service }}{{isLast ? '' : ', '}}</span></span>
+                                                        </p>
+                                                        <p class="p-flex"><ion-icon name="hourglass" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ timeConvert(appointment.duration) }}</span></p>
+                                                        <p *ngIf="appointment.providerRemark" class="p-flex"><ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.providerRemark }}</span></p>
+                                                    </ion-label>
+                                                </ion-item>
+                                                <ion-item-options side="end" style="background: var(--ion-color-background)">
+                                                    <ion-item-option>
+                                                        <ion-button (click)="archive(appointment.id)"  fill="clear" color="danger" expand="full"><ion-icon slot="icon-only" name="archive"></ion-icon></ion-button>
+                                                    </ion-item-option>
+                                                </ion-item-options>
+                                            </ion-item-sliding>
+                                        </mat-card>
+                                    </div>
+                                </div>
+                            </ion-col>
+                        </ion-row>
+                        <ion-row class="app-icon-container ion-justify-content-center ion-align-items-center" style="flex-direction: column" *ngIf="appointmentMap.length<1">
+                            <ion-col size="12" class="ion-text-center">
+                                <fa-icon [icon]="appointmentIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-primary)"></fa-icon>
+                            </ion-col>
+                        </ion-row>
+                    </ng-container>
+                </ion-grid>
+            </ng-container>
+            <ng-template #loadingOrError>
+                <ion-grid class="ion-no-padding ion-no-margin">
+                    <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: calc(100vh - 106px); flex-direction: column">
+                        <ion-col size="12" class="ion-text-center">
+                            <ng-container *ngIf="loadingError">
+                                <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+                            </ng-container>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ng-template>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+</ion-content>
+<ion-content class="white" *ngIf="mobile && !tablet" #content>
+    <ng-container *ngIf="appointmentService.appointments$ | async as appointmentMap">
+        <ion-fab *ngIf="active && appointmentMap.length>0" vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" color="warning" (click)="print()">
+                <ion-icon name="print"></ion-icon>
+            </ion-fab-button>
+        </ion-fab>
+    </ng-container>
+    <ion-fab *ngIf="!sidenavService.appointmentsSideNav" vertical="bottom" horizontal="start" slot="fixed">
+        <ion-fab-button size="small" (click)="sidenavService.showAppSidenav(content)" color="warning">
+            <ion-icon mode="ios" name="calendar"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <ion-fab [hidden]="!history" *ngIf="appointmentsToArchive.length>0" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button size="small" (click)="archive()" color="danger">
+            <ion-icon name="archive"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <ion-fab [hidden]="history" *ngIf="appointmentService.appointmentsToCancel && appointmentService.appointmentsToCancel.length>0" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button size="small" (click)="cancelMultiple()" color="danger">
+            <ion-icon name="trash"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <div [hidden]="!sidenavService.appointmentsSideNav" style="padding-bottom: 32px">
+        <ion-icon name="close" color="secondary" (click)="sidenavService.hideSideNav()" class="closeSideNav close-nav"></ion-icon>
+        <mat-calendar [selected]="selectedDate" [dateClass]="dateClass()"
+                      (selectedChange)="selectedDateChange($event)">
+        </mat-calendar>
+        <ng-container *ngIf="scheduleCategories$ | async as categories">
+            <ng-container *ngIf="treeVisible">
+                <ion-item lines="none">
+                    <div style="display: flex; justify-content: center; width: 100%" *ngIf="categories.length > 0">
+                        <h3 translate class="ion-text-center">specialist</h3>
+                    </div>
+                </ion-item>
+                <div *ngFor="let category of categories" style="padding: 0 6px; background: var(--ion-color-white)">
+                    <h4 class="schedule-category-view" >
+                        <ion-label *ngIf="category.category !== 'default' && category.category !== '###'">{{category.category}}</ion-label>
+                        <ion-label *ngIf="category.category === 'default'" translate>provider-null-reference</ion-label>
+                        <ion-icon *ngIf="category.category !== '###'" class="dropdown-icon" name="chevron-down-outline"></ion-icon>
+                    </h4>
+                    <ng-container *ngFor="let schedule of category.schedules">
+                        <ion-item *ngIf="category.category !== '###'" style="margin-left: 16px">
+                            <div class="schedule-checkbox-container">
+                                <ion-checkbox  [(ngModel)]="scheduleService.schedules[schedule.scheduleId]" color="secondary" (ionChange)="addSchedule($event, schedule)"></ion-checkbox>
+                            </div>
+                            <ion-label class="normal-white-space margin-left">
+                                <a class="schedule-view">{{schedule.scheduleName}}</a>
+                            </ion-label>
+                        </ion-item>
+                    </ng-container>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+    <div *ngIf="!sidenavService.appointmentsSideNav">
+        <ion-refresher *ngIf="mobile" class="app-content-margin" slot="fixed" (ionRefresh)="doRefresh($event)">
+            <ion-refresher-content style="z-index: 1">
+            </ion-refresher-content>
+        </ion-refresher>
+        <ng-container *ngIf="totalAppointments$ | async as total">
+            <ion-segment style="padding-bottom: 0; margin-top: 16px" *ngIf="enteredPage && total[1]>0" [value]="segment" (ionChange)="segmentChanged($event)"
+                         [ngClass]="{'segment-content-margin' : mobile, 'segment-desktop' : !mobile }">
+                <ion-segment-button value="active">
+                    <ion-label style="padding: 0 10px"><span translate>app-active</span>
+                        <ion-badge color="warning" *ngIf="total[0]>0">{{total[0]}}</ion-badge>
+                    </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="history">
+                    <ion-label style="padding: 0 10px"><span translate>app-history</span>
+                        <ion-badge color="warning" *ngIf="total[1]>0">{{total[1]}}</ion-badge>
+                    </ion-label>
+                </ion-segment-button>
+            </ion-segment>
+        </ng-container>
+        <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+            <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+        </div>
+        <div class="loading-cover-desktop-modal" *ngIf="isDownloading">
+            <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+        </div>
+        <div *ngIf="(selectedScheduleNames && selectedScheduleNames.length>0)|| selectedDate" style="margin-top: 10px">
+            <ion-chip outline color="secondary" (click)="cancelAllFilters()">
+                <ion-icon name="funnel" mode="ios"></ion-icon><span translate>app-filter</span>:
+                <ion-icon name="close-circle" color="dark"></ion-icon>
+            </ion-chip>
+            <ion-chip outline color="secondary" *ngIf="selectedDate" (click)="cancelSelectedDate()">
+                <ion-icon class="icon-aligned" name="calendar"></ion-icon><p class="span-margin">{{showAppDate(selectedDate, true)}}</p>
+                <ion-icon name="close-circle" color="dark"></ion-icon>
+            </ion-chip>
+            <ion-chip outline color="secondary" *ngIf="selectedScheduleNames && selectedScheduleNames.length>0" (click)="cancelSchedule()">
+                <ion-label><p style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon>
+                    <span class="span-margin" *ngFor="let selectedScheduleName of selectedScheduleNames; let isLast=last">{{ selectedScheduleName }}{{isLast ? '' : ', '}}</span>
+                </p></ion-label>
+                <ion-icon name="close-circle" color="dark"></ion-icon>
+            </ion-chip>
+        </div>
+        <ion-grid style="margin-bottom: 32px" class="app-content scheduleContainer ion-no-padding" [hidden]="!active" *ngIf="appointmentService.appointments$ | async as appointmentMap; else loadingOrError">
+            <ion-row *ngIf="totalAppointments$ | async as total">
+                <ion-col *ngIf="total[0]>0" size-md="8" size-lg="6" offset-md="2" offset-lg="3" style="display: flex" class="ion-align-items-center">
+                    <ion-searchbar type="text" debounce="500" [placeholder]="'search-app' | translate" (ionInput)="searchAppointments($event, false)" animated></ion-searchbar>
+                </ion-col>
+            </ion-row>
+            <ng-container *ngIf="appointmentMap.length>0">
+                <ion-row *ngIf="auth.userAuthorities$| async as authorities;">
+                    <ion-col *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" style="position: absolute; display: flex; align-items: center; margin-top: 16px; z-index: 2">
+                                   <span style="margin-left: 16px">
+                                            <ion-checkbox (ionChange)="selectAllCurrentCheckboxes(appointmentMap, $event)"></ion-checkbox>
+                                        </span>
+                    </ion-col>
+                </ion-row>
+            </ng-container>
+            <ion-row class="ion-justify-content-center ion-align-items-center"style="flex-direction: column" *ngIf="appointmentMap.length>0 && renderAppointments" [@listAnimation]="appointmentMap.size">
+                <ion-col *ngFor="let date of appointmentMap" size="12" [ngClass]="{'no-padding' : mobile}">
+                    <div style="margin-top: 16px; padding-right: 6px">
+                        <div style="width: 100%" class="ion-text-center">
+                            <ion-label [innerHTML]="showAppDate(date.appointments[0].appointmentDate, true)" class="ion-text-capitalize" style="font-weight: 600"></ion-label>
+                        </div>
+                        <mat-card *ngFor="let appointment of date.appointments" class="appointment-card" [id]="appointment.id" style="padding: 0; margin: 0">
+                            <ion-item-sliding>
+                                <ion-item detail>
+                                    <ion-ripple-effect></ion-ripple-effect>
+                                    <div class="checkbox-container-mobile" *ngIf="auth.userAuthorities$| async as authorities;">
+                                        <ion-checkbox *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" [(ngModel)]="appointment.checked" (ionChange)="addToCancel(appointment.id, $event)"></ion-checkbox>
+                                        <ion-label class="ion-text-center">
+                                            <h2 [innerHTML]="showAppTime(appointment.appointmentDate)"></h2>
+                                        </ion-label>
+                                    </div>
+                                    <img *ngIf="appointment.userPic" class="desktop-image" [img-preloader]="appointment.userPic" (click)="showAppointment(appointment.id)">
+                                    <ion-label class="appointment-info-label" style="margin-top: 0" (click)="showAppointment(appointment.id)">
+                                        <p class="p-flex" [title]="appointment.bookAnApp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                                            <ion-icon *ngIf="!appointment.bookAnApp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                                            <img *ngIf="appointment.bookAnApp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                            <span class="span-margin">{{ appointment.name }}</span></p>
+                                        <p *ngIf="appointment.numberOfSpots" class="p-flex"><ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.numberOfSpots }}  {{'persons' | translate}}</span></p>
+                                        <p *ngIf="appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }} ({{appointment.category}})</span></p>
+                                        <p *ngIf="!appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }}</span></p>
+                                        <p class="p-flex" *ngIf="appointment.bookedServices && appointment.bookedServices.length>0">
+                                            <fa-icon slot="start" [icon]="iconService.getIcon(appointment.providerCategory)"></fa-icon>
+                                            <span *ngFor="let service of appointment.bookedServices; let isLast = last"><span class="span-margin">{{ service }}{{isLast ? '' : ', '}}</span></span>
+                                        </p>
+                                        <p class="p-flex"><ion-icon name="hourglass" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ timeConvert(appointment.duration) }}</span></p>
+                                        <p *ngIf="appointment.providerRemark" class="p-flex"><ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.providerRemark }}</span></p>
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item-options side="end" *ngIf="auth.userAuthorities$| async as authorities;">
+                                    <ion-item-option *ngIf="appointment.bookAnApp && !appointment.anonymous">
+                                        <ion-button (click)="sendMessage(appointment.id, appointment.appointmentDate, appointment.userName)" color="secondary" fill="clear" expand="full">  <fa-icon [icon]="messageIcon" slot="icon-only"></fa-icon></ion-button>
+                                    </ion-item-option>
+                                    <ion-item-option *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')">
+                                        <ion-button (click)="cancel(appointment.id, appointment.appointmentDate)"  fill="clear" color="danger" expand="full"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+                                    </ion-item-option>
+                                </ion-item-options>
+                            </ion-item-sliding>
+                        </mat-card>
+                    </div>
+                </ion-col>
+                <div class="button-holder" *ngIf="appointmentMap.length>0 && appointmentMap[0]['total']>10">
+                    <ion-fab-button mode="ios" (click)="loadMore(appointmentMap[0]['total'])" size="small" color="warning">
+                        <ion-icon name="add" *ngIf="!isLoading"></ion-icon>
+                        <ion-spinner *ngIf="isLoading"></ion-spinner>
+                    </ion-fab-button>
+                </div>
+            </ion-row>
+            <ion-row class="ion-justify-content-center ion-align-items-center app-icon-container" style="flex-direction: column" *ngIf="appointmentMap.length<1">
+                <ion-col size="12" class="ion-text-center">
+                    <fa-icon [icon]="appointmentIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-primary)"></fa-icon>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ng-container *ngIf="totalAppointments$ | async as total">
+            <ion-grid *ngIf="total[1]>0" class="app-content scheduleContainer ion-no-padding" [hidden]="!history">
+                <ng-container *ngIf="appointmentService.pastAppointments$ | async as appointmentMap; else loadingOrError">
+                    <ion-row *ngIf="totalAppointments$ | async as total">
+                        <ion-col *ngIf="total[1]>0" size-md="8" size-lg="6" offset-md="2" offset-lg="3" style="display: flex" class="ion-align-items-center">
+                            <ion-searchbar type="text" debounce="500" [placeholder]="'search-app' | translate" (ionInput)="searchAppointments($event, true)" animated></ion-searchbar>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row *ngIf="auth.userAuthorities$| async as authorities;">
+                        <ion-col *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" style="position: absolute; display: flex; align-items: center; margin-top: 16px; z-index: 2">
+                                   <span style="margin-left: 16px">
+                                            <ion-checkbox (ionChange)="selectAllCheckboxes(appointmentMap, $event)"></ion-checkbox>
+                                        </span>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row class="ion-justify-content-center ion-align-items-center" style="flex-direction: column" *ngIf="appointmentMap.length>0 && renderAppointments" [@listAnimation]="appointmentMap.size">
+                        <ion-col *ngFor="let date of appointmentMap" size="12" class="ion-no-padding">
+                            <div style="margin-top: 32px; padding-right: 6px">
+                                <div style="width: 100%;" class="ion-text-center">
+                                    <ion-label [innerHTML]="showAppDate(date.appointments[0].appointmentDate, true)" class="ion-text-capitalize" style="font-weight: 600"></ion-label>
+                                </div>
+                                <mat-card *ngFor="let appointment of date.appointments" class="appointment-card" [id]="appointment.id" style="padding: 0">
+                                    <ion-item-sliding *ngIf="mobile">
+                                        <ion-item *ngIf="mobile" detail>
+                                            <ion-ripple-effect></ion-ripple-effect>
+                                            <div class="checkbox-container-mobile" *ngIf="auth.userAuthorities$| async as authorities;">
+                                                <ion-checkbox *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')" [(ngModel)]="appointment.checked" (ionChange)="addToArchive(appointment.id, $event)"></ion-checkbox>
+                                                <ion-label class="ion-text-center">
+                                                    <h2 [innerHTML]="showAppTime(appointment.appointmentDate)"></h2>
+                                                </ion-label>
+                                            </div>
+                                            <!--                                            <img *ngIf="appointment.userPic" class="desktop-image" [img-preloader]="appointment.userPic" (click)="showAppointment(appointment.id)">-->
+                                            <ion-label class="appointment-info-label" (click)="showAppointment(appointment.id)">
+                                                <p class="p-flex" [title]="appointment.bookAnApp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                                                    <ion-icon *ngIf="!appointment.bookAnApp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                                                    <img *ngIf="appointment.bookAnApp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                                                    <span class="span-margin">{{ appointment.name }}</span></p>
+                                                <p *ngIf="appointment.numberOfSpots" class="p-flex"><ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.numberOfSpots }}  {{'persons' | translate}}</span></p>
+                                                <p *ngIf="appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }} ({{appointment.category}})</span></p>
+                                                <p *ngIf="!appointment.category" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.schedule }}</span></p>
+                                                <p class="p-flex" *ngIf="appointment.bookedServices && appointment.bookedServices.length>0">
+                                                    <fa-icon slot="start" [icon]="iconService.getIcon(appointment.providerCategory)"></fa-icon>
+                                                    <span *ngFor="let service of appointment.bookedServices; let isLast = last"><span class="span-margin">{{ service }}{{isLast ? '' : ', '}}</span></span>
+                                                </p>
+                                                <p class="p-flex"><ion-icon name="hourglass" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ timeConvert(appointment.duration) }}</span></p>
+                                                <p *ngIf="appointment.providerRemark" class="p-flex"><ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.providerRemark }}</span></p>
+                                            </ion-label>
+                                        </ion-item>
+                                        <ion-item-options *ngIf="auth.userAuthorities$| async as authorities;" side="end" style="background: var(--ion-color-background)">
+                                            <ion-item-option *ngIf="!authorities.includes('SUBPROVIDER_SCHED_VIEW')">
+                                                <ion-button (click)="archive(appointment.id)"  fill="clear" color="danger" expand="full"><ion-icon slot="icon-only" name="archive"></ion-icon></ion-button>
+                                            </ion-item-option>
+                                        </ion-item-options>
+                                    </ion-item-sliding>
+                                </mat-card>
+                            </div>
+                        </ion-col>
+                        <div class="button-holder" *ngIf="appointmentMap.length>0 && appointmentMap[0]['total']>10">
+                            <ion-fab-button mode="ios" (click)="loadMore(appointmentMap[0]['total'])" size="small" color="warning">
+                                <ion-icon name="add" *ngIf="!isLoading"></ion-icon>
+                                <ion-spinner *ngIf="isLoading"></ion-spinner>
+                            </ion-fab-button>
+                        </div>
+                    </ion-row>
+                    <ion-row class="app-icon-container ion-justify-content-center ion-align-items-center" style="flex-direction: column" *ngIf="appointmentMap.length<1">
+                        <ion-col size="12" class="ion-text-center">
+                            <fa-icon [icon]="appointmentIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-primary)"></fa-icon>
+                        </ion-col>
+                    </ion-row>
+                </ng-container>
+            </ion-grid>
+        </ng-container>
+        <ng-template #loadingOrError>
+            <ion-grid class="ion-no-padding ion-no-margin">
+                <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: calc(100vh - 106px); flex-direction: column">
+                    <ion-col size="12" class="ion-text-center">
+                        <ng-container *ngIf="loadingError">
+                            <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+                        </ng-container>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </ng-template>
+    </div>
+</ion-content>
+

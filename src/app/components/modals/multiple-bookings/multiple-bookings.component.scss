@@ -1,0 +1,138 @@
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.input-margin {
+  margin: 13px 0 0 5px;
+}
+
+:host ::ng-deep .mat-form-field-wrapper{
+  padding-bottom: 0;
+}
+
+.picked-avatar {
+  border-radius: 25px;
+}
+
+.ios.interactive{
+  margin: 16px;
+}
+
+.desktop-title {
+  //color: var(--ion-color-primary);
+  font-weight: 700;
+}
+
+.datetime-padding {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0;
+  padding-left: 0;
+}
+
+.or-line{
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  line-height: 0.1em;
+  margin: 10px 0 20px;
+}
+
+.or-line span{
+  background:#fff; padding:0 10px;
+}
+
+.time-label{
+  margin-bottom: 0;
+  display: flex;
+}
+
+.time-picker{
+  text-align: center;
+  font-size: 1.5em;
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-top: 0;
+}
+
+
+.input-icon {
+  position: absolute;
+  z-index: 3;
+  height: 37px;
+  width: 37px;
+}
+
+.phone-icon{
+  height: 30px;
+  width: 30px;
+}
+
+.phone-holder{
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+}
+
+//number picker css
+::ng-deep .mb-3{
+  height: 38px!important;
+}
+
+::ng-deep .input-group-prepend, {
+  height: 38px!important;
+  padding-right: 1px;
+
+}
+
+::ng-deep .form-control {
+  height: 38px!important;
+}
+
+::ng-deep  .input-group>.form-control:not(:first-child){
+  font-size: inherit!important;
+}
+
+@media (max-width: 768px) {
+  ion-input, ion-textarea{
+    padding: 0 16px!important;
+  }
+}
+
+
+.slot-holder {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em
+}
+
+.time-picker-div{
+  display: flex;
+  -webkit-box-align: baseline;
+  align-items: baseline;
+  min-height: 35px;
+}
+
+::ng-deep .mat-datepicker-toggle *{
+  color: var(--ion-color-primary) !important;
+  height:27px !important;
+  width:27px !important;
+  font-size:27px !important;
+}
+
+@media (min-width: 1201px)  {
+  .container{
+    width: 1200px;
+    margin-left: calc((100vw - 1200px) / 2) !important;
+  }
+
+  .small-container{
+    width: 800px;
+    margin-left: calc((100vw - 800px) / 2) !important;
+  }
+
+  :host ::ng-deep .picker-wrapper {
+    bottom: 40%!important;
+  }
+
+}

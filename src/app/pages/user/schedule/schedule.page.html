@@ -1,0 +1,542 @@
+<ion-header *ngIf="mobile" mode="ios">
+    <ion-toolbar color="toolbar">
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false"></ion-menu-button>
+        </ion-buttons>
+        <ion-buttons slot="start">
+            <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content *ngIf="!mobile || tablet" [ngClass]="{'white-background' : mobile && !tablet}" #content>
+    <ion-fab slot="fixed" horizontal="end" vertical="center" [hidden]="scheduleService.selectedSlots.length<1" *ngIf="mobile">
+        <ion-fab-button *ngIf="(scheduleService.selectedSlots.length>0 && !scheduleService.selectedSlots[0].event['extendedProps'].noDuration || (scheduleService.selectedSlots.length === 1
+        && scheduleService.selectedSlots[0].event['extendedProps'].noDuration)) && !scheduleService.selectedSlots[0].event['extendedProps'].linkedToServiceSchedule" size="small" color="danger" [title]="'sched-unavail' | translate" (click)="unavailableSlot()">
+            <ion-icon name="remove-circle-outline" [title]="'sched-unavail' | translate"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="scheduleService.selectedSlots.length===1 &&  !scheduleService.selectedSlots[0].event['extendedProps'].linkedToServiceSchedule" size="small" color="secondary" [title]="'sched-update-timing' | translate" (click)="editSlot()">
+            <ion-icon name="create" [title]="'sched-update-timing' | translate"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="scheduleService.selectedSlots.length===1 && scheduleService.selectedSlots[0].event['extendedProps'].multipleSpotInfo" size="small" color="secondary" [title]="'info' | translate" (click)="getBookingInfo()">
+            <fa-icon [icon]="infoIcon"></fa-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="allowToBook()" size="small" color="warning" [title]="'book' | translate" (click)="bookSlot()">
+            <ion-label style="font-weight: bold; font-size: 30px">B</ion-label>
+        </ion-fab-button>
+    </ion-fab>
+    <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+        <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+    </div>
+    <ion-fab *ngIf="!sidenavService.scheduleSideNav && this.plan !== 'BASIC'" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button *ngIf="!mobile || tablet" (click)="sidenavService.showScheduleSidenav(content)" color="warning">
+            <ion-icon name="calendar"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="mobile && !tablet" size="small" (click)="sidenavService.showScheduleSidenav(content)" color="warning">
+            <ion-icon name="calendar"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <mat-sidenav-container style="min-height: 100%" class="example-container" [ngClass]="{'white-background' : mobile && !tablet}" autosize>
+            <mat-sidenav [position]="tablet ? 'start' : 'end'" mode="side" [opened]="sidenavService.scheduleSideNav" style="background: var(--ion-color-white)!important;">
+                <div class="ion-text-end">
+                    <ion-icon name="close" color="secondary" mode="ios" (click)="sidenavService.hideSideNav()" class="closeSideNav close-nav"></ion-icon>
+                </div>
+                <mat-calendar [selected]="selectedDate" [dateClass]="dateClass()"
+                              (selectedChange)="selectedDateChange($event)">
+                </mat-calendar>
+                <ng-container *ngIf="scheduleCategories$ | async as categories; else loadingOrError">
+                    <ng-container *ngIf="treeVisible">
+                        <ion-item lines="none">
+                            <div style="display: flex; justify-content: center; width: 100%; align-items: center" *ngIf="categories.length > 0">
+                                <ion-label translate class="ion-text-center bold-600" style="font-size: 22px">specialist</ion-label>
+                                <ion-fab-button color="warning" size="small" (click)="newSchedule()">
+                                    <ion-icon name="add"></ion-icon>
+                                </ion-fab-button>
+                            </div>
+                        </ion-item>
+                        <div style="background: var(--ion-color-white)">
+                            <ng-container *ngIf="treeVisible">
+                                <div *ngFor="let category of categories; let last = last" style="padding: 0 6px" [ngClass]="{'margin-bottom' : last}" [@listAnimation]="numberOfSchedules">
+                                    <h4 class="schedule-category-view" >
+                                        <ion-label color="dark" *ngIf="category.category !== 'default' && category.category !== '###'">{{category.category}}</ion-label>
+                                        <ion-label color="dark" *ngIf="category.category === 'default'  && category.category !== '###'" translate>provider-null-reference</ion-label>
+                                        <ion-label color="dark" *ngIf="category.category === '###'" translate>sched-service-btn</ion-label>
+                                        <ion-icon color="dark" class="dropdown-icon" name="chevron-down-outline"></ion-icon>
+                                    </h4>
+                                    <ion-item *ngFor="let schedule of category.schedules" style="margin-left: 32px;">
+                                        <ion-label class="normal-white-space">
+                                            <a class="schedule-view" (click)="openSchedule(schedule)">{{schedule.scheduleName}}</a>
+                                        </ion-label>
+                                        <ion-button fill="clear" class="small-button" (click)="editSchedule(schedule.scheduleId)" color="tertiary"  [title]="'edit' | translate">
+                                            <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+                                        </ion-button>
+                                        <ion-button *ngIf="!schedule.service && !schedule.freeSchedule" fill="clear" class="small-button"  (click)="shareSchedule(schedule)" color="primary" [title]="'share' | translate">
+                                            <ion-icon slot="icon-only" class="small-icon" [name]="'share-social-outline'"></ion-icon>
+                                        </ion-button>
+                                        <ion-button fill="clear" class="small-button"  (click)="deleteSchedule(schedule)" color="danger"  [title]="'delete' | translate">
+                                            <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                        </ion-button>
+                                    </ion-item>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </ng-container>
+            </mat-sidenav>
+        <mat-sidenav-content class="app-content">
+            <ion-refresher *ngIf="mobile" style="z-index: 2; min-height: calc(100vh - 75px)" slot="fixed" (ionRefresh)="doRefresh($event)">
+                <div class="spinner-holder-refresher">
+                    <ion-refresher-content style="z-index: 1">
+                    </ion-refresher-content>
+                </div>
+            </ion-refresher>
+            <ion-grid class="scheduleContainer">
+                <ng-container *ngIf="schedules$ | async as schedules; else loadingOrError">
+                    <ion-grid *ngIf="schedules.length === 0">
+                        <ion-row style="height: calc(100vh - 70px); display: flex" class="ion-align-items-center">
+                            <ion-col class="ion-text-center">
+                                <ion-chip class="new-schedule" outline color="warning" size="large" (click)="newSchedule()">
+                                    <ion-icon name="add"></ion-icon><ion-label translate>sched-new-specialist-label</ion-label>
+                                </ion-chip>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                    <ion-row size="12" *ngIf="schedules.length > 0" [@listAnimation]="numberOfSchedules">
+                        <ng-container *ngIf="!scheduleSelected && !dayScheduleSelected">
+                            <ng-container *ngIf="!mobile || tablet">
+                                <ion-col *ngFor="let schedule of schedules" size="12" size-lg="6">
+                                    <mat-card style="padding: 0;">
+                                        <ion-item lines="none" class="ion-activatable" (click)="openSchedule(schedule)">
+                                            <ion-ripple-effect></ion-ripple-effect>
+                                            <ion-avatar class="schedule-avatar" slot="start">
+                                                <img class="image-margin" *ngIf="schedule.avatar" [src]="schedule.avatar" alt="">
+                                                <img  class="image-margin" *ngIf="!schedule.avatar" src="/assets/img/avatar.svg">
+                                            </ion-avatar>
+                                            <ion-label>
+                                            <span style="font-weight: 600">
+                                            {{ schedule.scheduleName }} (<span *ngIf="schedule.scheduleCategory !== 'default'  && schedule.scheduleCategory !== '###'">{{schedule.scheduleCategory}}</span>
+                                            <span *ngIf="schedule.scheduleCategory === 'default'  && schedule.scheduleCategory !== '###'" translate>provider-null-reference</span>
+                                                <span *ngIf="schedule.scheduleCategory === '###'" translate>sched-service-btn</span>)
+                                            </span>
+                                                <p *ngIf="schedule.appointments!==0">
+                                                    <fa-icon style="color: var(--ion-color-secondary)" [icon]="appointmentIcon"></fa-icon> {{schedule.appointments}}
+                                                </p>
+                                            </ion-label>
+                                        </ion-item>
+                                    </mat-card>
+                                </ion-col>
+                            </ng-container>
+                            <ng-container *ngIf="mobile && !tablet">
+                                <ion-col *ngFor="let schedule of schedules" size="12" size-lg="6" class="ion-no-padding">
+                                    <mat-card style="padding: 0 4px">
+                                        <ion-item-sliding>
+                                            <ion-item detail class="ion-activatable" (click)="openSchedule(schedule)">
+                                                <ion-ripple-effect></ion-ripple-effect>
+                                                <ion-avatar class="schedule-avatar" slot="start">
+                                                    <img *ngIf="schedule.avatar" [src]="schedule.avatar" alt="">
+                                                    <img *ngIf="!schedule.avatar" src="/assets/img/avatar.svg">
+                                                </ion-avatar>
+                                                <ion-label>
+                                            <span style="font-weight: 600">
+                                            {{ schedule.scheduleName }} (<span *ngIf="schedule.scheduleCategory !== 'default' && schedule.scheduleCategory !== '###'">{{schedule.scheduleCategory}}</span>
+                                            <span *ngIf="schedule.scheduleCategory === 'default'" translate>provider-null-reference</span>
+                                                 <span *ngIf="schedule.scheduleCategory === '###'" translate>sched-service-btn</span>)
+                                            </span>
+                                                    <p *ngIf="schedule.appointments!==0">
+                                                        <fa-icon style="color: var(--ion-color-secondary)" [icon]="appointmentIcon"></fa-icon> {{schedule.appointments}}
+                                                    </p>
+                                                </ion-label>
+                                            </ion-item>
+                                            <ion-item-options side="end">
+                                                <ion-item-option>
+                                                    <ion-button fill="clear" class="small-button" (click)="editSchedule(schedule.scheduleId)" color="tertiary"  [title]="'edit' | translate">
+                                                        <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+                                                    </ion-button>
+                                                </ion-item-option>
+                                                <ion-item-option>
+                                                    <ion-button fill="clear" class="small-button" *ngIf="!schedule.freeSchedule && !schedule.service"  (click)="shareSchedule(schedule)" color="primary"  [title]="'share' | translate">
+                                                        <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                                    </ion-button>
+                                                </ion-item-option>
+                                                <ion-item-option>
+                                                    <ion-button fill="clear" class="small-button"  (click)="deleteSchedule(schedule)" color="danger"  [title]="'delete' | translate">
+                                                        <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                                    </ion-button>
+                                                </ion-item-option>
+                                            </ion-item-options>
+                                        </ion-item-sliding>
+                                    </mat-card>
+                                </ion-col>
+                            </ng-container>
+                        </ng-container>
+                        <ion-col>
+                            <ng-container *ngIf="dayScheduleSelected" [@enterAnimation]>
+                                <ion-item lines="none" color="background" *ngIf="!mobile" style="padding-right: 16px">
+                                    <ion-button fill="clear" (click)="backSchedule()" *ngIf="plan !== 'BASIC'">
+                                        <ion-icon name="arrow-back"></ion-icon>
+                                        <span class="ion-text-capitalize" translate>back</span>
+                                    </ion-button>
+                                    <ion-label class="ion-text-center ion-text-capitalize" style="font-size: 1.5em; font-weight: 500">{{this.showUTCDate(this.selectedDate)}}</ion-label>
+                                    <div slot="end" style="display: flex; max-width: 65%">
+                                        <ion-button fill="clear" (click)="refreshDayView()" [title]="'refresh' | translate">
+                                            <ion-icon name="refresh" slot="icon-only" class="small-icon"></ion-icon>
+                                        </ion-button>
+                                        <ion-toggle slot="end" style="margin-right: 10px; align-self: center" [checked]="scheduleService.simplifiedMode" (ionChange)="scheduleService.toggleSimplifiedMode($event)"></ion-toggle>
+                                        <ion-label style="align-self: center" slot="end" translate>simplified-mode</ion-label>
+                                        <ion-icon class="info-circle" style="align-self: center" name="information-circle" color="dark" (click)="infoPopover('simplified-mode-info', $event)"></ion-icon>
+                                        <!--                                        <ion-button fill="clear" (click)="presentDurationPopover($event)" mode="ios" size="small" translate>sched-options</ion-button>-->
+                                    </div>
+                                </ion-item>
+                                <ion-item color="background" lines="none" *ngIf="mobile">
+                                    <ion-button fill="clear" (click)="backSchedule()" *ngIf="plan !== 'BASIC'">
+                                        <ion-icon name="arrow-back"></ion-icon>
+                                        <span class="ion-text-capitalize" translate>back</span>
+                                    </ion-button>
+                                    <ion-label class="ion-text-center ion-text-capitalize" style="font-size: 1.5em; font-weight: 500">{{this.showUTCDate(this.selectedDate)}}</ion-label>
+                                    <ion-button slot="end" fill="clear" (click)="refreshDayView()" [title]="'refresh' | translate">
+                                        <ion-icon name="refresh" slot="icon-only" class="small-icon"></ion-icon>
+                                    </ion-button>
+                                </ion-item>
+                                <ion-item lines="none" color="background" *ngIf="mobile" style="margin-bottom: 16px; display: flex">
+                                    <div slot="end" style="display: flex">
+                                        <ion-toggle style="align-self: center" [checked]="scheduleService.simplifiedMode" (ionChange)="scheduleService.toggleSimplifiedMode($event)"></ion-toggle>
+                                        <ion-label style="align-self: center" translate>simplified-mode</ion-label>
+                                        <ion-icon class="info-circle" style="align-self: center" name="information-circle" color="dark" (click)="infoPopover('simplified-mode-info', $event)"></ion-icon>
+                                        <!--                                        <ion-button fill="clear" (click)="presentDurationPopover($event)" mode="ios" size="small" translate>sched-options</ion-button>-->
+                                    </div>
+
+                                </ion-item>
+                                <ion-grid class="ion-no-padding">
+                                    <ion-row [@listAnimation]="schedules.length">
+                                        <ion-col size-xs="12" size-md="6" size-xl="4" *ngFor="let schedule of schedules">
+                                            <app-fullcalendar [refresh]="refreshSubject" [scheduleCategory]="schedule.scheduleCategory" [avatar]="schedule.avatar" [scheduleId]="schedule.scheduleId" [selectedDate]="this.selectedDate" [scheduleName]="schedule.scheduleName"></app-fullcalendar>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
+                            </ng-container>
+                            <mat-card *ngIf="scheduleSelected" [@enterAnimation]>
+                                <div [hidden]="scheduleService.selectedSlots.length<1" *ngIf="!mobile"
+                                     style="position: fixed; top: 50%; left: calc(50% - 112px); display: flex; z-index: 100">
+                                    <ion-fab-button *ngIf="(scheduleService.selectedSlots.length>0 && !scheduleService.selectedSlots[0].event['extendedProps'].noDuration || (scheduleService.selectedSlots.length === 1
+                                    && scheduleService.selectedSlots[0].event['extendedProps'].noDuration)) && !scheduleService.selectedSlots[0].event['extendedProps'].linkedToServiceSchedule" size="small" color="danger" [title]="'sched-unavail' | translate" (click)="unavailableSlot()">
+                                        <ion-icon name="remove-circle-outline"></ion-icon>
+                                    </ion-fab-button>
+                                    <ion-fab-button *ngIf="scheduleService.selectedSlots.length===1 &&  !scheduleService.selectedSlots[0].event['extendedProps'].linkedToServiceSchedule" size="small" color="secondary" [title]="'sched-update-timing' | translate" (click)="editSlot()">
+                                        <ion-icon name="create"></ion-icon>
+                                    </ion-fab-button>
+                                    <ion-fab-button *ngIf="scheduleService.selectedSlots.length===1 && scheduleService.selectedSlots[0].event['extendedProps'].multipleSpotInfo" size="small" color="secondary" [title]="'info' | translate" (click)="getBookingInfo()">
+                                        <fa-icon [icon]="infoIcon"></fa-icon>
+                                    </ion-fab-button>
+                                    <ion-fab-button *ngIf="allowToBook()" size="small" color="warning" [title]="'book' | translate" (click)="bookSlot()">
+                                        <ion-label style="font-weight: bold; font-size: 30px">B</ion-label>
+                                    </ion-fab-button>
+                                </div>
+                                <ion-item *ngIf="!mobile" style="margin-top: -16px; margin-bottom: 10px">
+                                    <ion-button fill="clear" (click)="backSchedule()" *ngIf="plan !== 'BASIC'">
+                                        <ion-icon name="arrow-back"></ion-icon>
+                                        <span class="ion-text-capitalize" translate>back</span>
+                                    </ion-button>
+                                    <ion-label *ngIf="pickedSchedule.noDuration || pickedSchedule.serviceSchedule || pickedSchedule.freeSchedule" class="ion-text-center" style="font-size: 1.5em">{{selectedScheduleName}}</ion-label>
+                                    <div *ngIf="!pickedSchedule.noDuration && !pickedSchedule.serviceSchedule && !pickedSchedule.freeSchedule" style="display: flex; justify-content: center; width: 100%; align-items: center">
+                                        <ion-label class="ion-text-center bold-600" style="font-size: 22px">{{selectedScheduleName}}</ion-label>
+                                        <ion-fab-button color="warning" size="small" (click)="openMultipleBookingsModal()" [title]="'multiple-apps' | translate">
+                                            <ion-icon name="add"></ion-icon>
+                                        </ion-fab-button>
+                                    </div>
+                                    <ion-button class="small-button" fill="clear" (click)="editSchedule(scheduleId)" color="tertiary" [title]="'edit' | translate">
+                                        <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+                                    </ion-button>
+                                    <ion-button class="small-button" fill="clear" *ngIf="!pickedSchedule.serviceSchedule && !pickedSchedule.freeSchedule" (click)="shareSchedule(selectedSchedule)" color="primary" [title]="'share' | translate">
+                                        <ion-icon slot="icon-only" class="small-icon" name="share-social-outline"></ion-icon>
+                                    </ion-button>
+                                    <ion-button class="small-button" fill="clear" (click)="deleteSchedule(selectedSchedule)" color="danger" [title]="'delete' | translate">
+                                        <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                    </ion-button>
+                                    <ion-button fill="clear" (click)="refresh()" [title]="'refresh' | translate">
+                                        <ion-icon name="refresh" slot="icon-only" class="small-icon"></ion-icon>
+                                    </ion-button>
+                                    <div *ngIf="!pickedSchedule.freeSchedule && !pickedSchedule.serviceSchedule" slot="end" style="display: flex; max-width: 35%">
+                                        <ion-toggle slot="end" style="margin-right: 10px; align-self: center" [checked]="scheduleService.simplifiedMode" (ionChange)="scheduleService.toggleSimplifiedMode($event)"></ion-toggle>
+                                        <ion-label style="align-self: center" slot="end" translate>simplified-mode</ion-label>
+                                        <ion-icon class="info-circle" style="align-self: center" name="information-circle" color="dark" (click)="infoPopover('simplified-mode-info', $event)"></ion-icon>
+                                    </div>
+                                </ion-item>
+                                <ion-item lines="none" *ngIf="mobile" style="margin-top: -16px">
+                                    <ion-button fill="clear" (click)="backSchedule()" *ngIf="plan !== 'BASIC'">
+                                        <ion-icon name="arrow-back"></ion-icon>
+                                        <span class="ion-text-capitalize" translate>back</span>
+                                    </ion-button>
+                                    <!--                                    <ion-label class="ion-text-center ion-no-margin" style="font-size: 1.5em">{{selectedScheduleName}}</ion-label>-->
+                                    <ion-label *ngIf="pickedSchedule.noDuration || pickedSchedule.serviceSchedule || pickedSchedule.freeSchedule" class="ion-text-center" style="font-size: 1.5em">{{selectedScheduleName}}</ion-label>
+                                    <div *ngIf="!pickedSchedule.noDuration && !pickedSchedule.serviceSchedule && !pickedSchedule.freeSchedule" style="display: flex; justify-content: center; width: 100%; align-items: center">
+                                        <ion-label class="ion-text-center bold-600" style="font-size: 22px">{{selectedScheduleName}}</ion-label>
+                                        <ion-fab-button color="warning" size="small" (click)="openMultipleBookingsModal()" [title]="'multiple-apps' | translate">
+                                            <ion-icon name="add"></ion-icon>
+                                        </ion-fab-button>
+                                    </div>
+                                </ion-item>
+                                <ion-item *ngIf="mobile" style="margin-bottom: 10px">
+                                    <div style="display: flex; width: 100%; justify-content: center">
+                                        <ion-button class="small-button" fill="clear" (click)="editSchedule(scheduleId)" color="tertiary" [title]="'edit' | translate">
+                                            <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+                                        </ion-button>
+                                        <ion-button class="small-button" fill="clear" *ngIf="!selectedSchedule.freeSchedule && !selectedSchedule.service" (click)="shareSchedule(selectedSchedule)" color="primary" [title]="'share' | translate">
+                                            <ion-icon slot="icon-only" class="small-icon" name="share-social-outline"></ion-icon>
+                                        </ion-button>
+                                        <ion-button  class="small-button" fill="clear" (click)="deleteSchedule(selectedSchedule)" color="danger" [title]="'delete' | translate">
+                                            <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                        </ion-button>
+                                        <ion-button fill="clear" (click)="refresh()" [title]="'refresh' | translate">
+                                            <ion-icon name="refresh" slot="icon-only" class="small-icon"></ion-icon>
+                                        </ion-button>
+                                        <div style="display: flex">
+                                            <ion-toggle style="align-self: center" [checked]="scheduleService.simplifiedMode" (ionChange)="scheduleService.toggleSimplifiedMode($event)"></ion-toggle>
+                                            <ion-label style="align-self: center" translate>simplified-mode</ion-label>
+                                            <ion-icon class="info-circle" style="align-self: center" name="information-circle" color="dark" (click)="infoPopover('simplified-mode-info', $event)"></ion-icon>
+                                        </div>
+                                    </div>
+                                </ion-item>
+                                <div class="loading-cover-desktop-modal" *ngIf="fullcalendarService.slotsLoading">
+                                    <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+                                </div>
+                                <full-calendar #fullCalendar id="fullcalendar" [options]="options"></full-calendar>
+                            </mat-card>
+                        </ion-col>
+                    </ion-row>
+                </ng-container>
+            </ion-grid>
+            <ng-template #loadingOrError>
+                <ion-grid class="ion-no-margin ion-no-padding">
+                    <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: calc(100vh - 106px); flex-direction: column">
+                        <ion-col size="12" class="ion-text-center">
+                            <ng-container *ngIf="loadingError; else loading">
+                                <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+                            </ng-container>
+                            <ng-template #loading>
+                                <ion-spinner style="width: 75px;height: 75px;" color="secondary"></ion-spinner>
+                            </ng-template>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ng-template>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+</ion-content>
+<ion-content *ngIf="mobile && !tablet" #content class="white">
+    <ion-fab slot="fixed" horizontal="end" vertical="center" [hidden]="scheduleService.selectedSlots.length<1">
+        <ion-fab-button *ngIf="(scheduleService.selectedSlots.length>0 && !scheduleService.selectedSlots[0].event['extendedProps'].noDuration ||
+        (scheduleService.selectedSlots.length === 1 && scheduleService.selectedSlots[0].event['extendedProps'].noDuration)) && !scheduleService.selectedSlots[0].event['extendedProps'].linkedToServiceSchedule" size="small" color="danger" [title]="'sched-unavail' | translate" (click)="unavailableSlot()">
+            <ion-icon name="remove-circle-outline"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="scheduleService.selectedSlots.length===1 && !scheduleService.selectedSlots[0].event['extendedProps'].linkedToServiceSchedule" size="small" color="secondary" [title]="'sched-update-timing' | translate" (click)="editSlot()">
+            <ion-icon name="create"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="scheduleService.selectedSlots.length===1 && scheduleService.selectedSlots[0].event['extendedProps'].multipleSpotInfo" size="small" color="secondary" [title]="'info' | translate" (click)="getBookingInfo()">
+            <fa-icon [icon]="infoIcon"></fa-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="allowToBook()" size="small" color="warning" [title]="'book' | translate" (click)="bookSlot()">
+            <ion-label style="font-weight: bold; font-size: 30px">B</ion-label>
+        </ion-fab-button>
+    </ion-fab>
+    <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+        <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+    </div>
+    <ion-fab *ngIf="!sidenavService.scheduleSideNav && this.plan !== 'BASIC' && scheduleService.selectedSlots.length !== 1" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button *ngIf="!mobile || tablet" (click)="sidenavService.showScheduleSidenav(content)" color="warning">
+            <ion-icon name="calendar"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button *ngIf="mobile && !tablet" size="small" (click)="sidenavService.showScheduleSidenav(content)" color="warning">
+            <ion-icon name="calendar"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <div [hidden]="!sidenavService.scheduleSideNav || this.plan === 'BASIC'">
+        <div class="ion-text-end">
+            <ion-icon name="close" color="secondary" mode="ios" (click)="sidenavService.hideSideNav()" class="closeSideNav close-nav"></ion-icon>
+        </div>
+        <mat-calendar [selected]="selectedDate" [dateClass]="dateClass()"
+                      (selectedChange)="selectedDateChange($event)">
+        </mat-calendar>
+        <ng-container *ngIf="scheduleCategories$ | async as categories; else loadingOrError">
+            <ng-container *ngIf="treeVisible">
+                <ion-item lines="none">
+                    <div style="display: flex; justify-content: center; width: 100%" *ngIf="categories.length > 0">
+                        <h3 translate class="ion-text-center">specialist</h3>
+                        <ion-chip outline color="warning" size="large" (click)="newSchedule()">
+                            <ion-icon name="add"></ion-icon><ion-label translate>sched-new-specialist-label</ion-label>
+                        </ion-chip>
+                    </div>
+                </ion-item>
+                <div *ngIf="scheduleCategories$ | async as categories; else loadingOrError">
+                    <ng-container *ngIf="treeVisible">
+                        <div *ngFor="let category of categories; let last = last" style="padding: 0 6px" [ngClass]="{'margin-bottom' : last}">
+                            <h4 class="schedule-category-view" >
+                                <ion-label *ngIf="category.category !== 'default' && category.category !== '###'">{{category.category}}</ion-label>
+                                <ion-label *ngIf="category.category === 'default'" translate>provider-null-reference</ion-label>
+                                <ion-label *ngIf="category.category === '###'" translate>sched-service-btn</ion-label>
+                                <ion-icon class="dropdown-icon" name="chevron-down-outline"></ion-icon>
+                            </h4>
+                            <ion-item *ngFor="let schedule of category.schedules" style="margin-left: 32px;">
+                                <ion-label class="normal-white-space">
+                                    <a class="schedule-view" (click)="openSchedule(schedule)">{{schedule.scheduleName}}</a>
+                                </ion-label>
+                                <ion-button fill="clear" class="small-button" (click)="editSchedule(schedule.scheduleId)" color="tertiary"  [title]="'edit' | translate">
+                                    <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+                                </ion-button>
+                                <ion-button class="small-button" fill="clear" *ngIf="!schedule.freeSchedule && !schedule.service" (click)="shareSchedule(schedule)" color="primary" [title]="'share' | translate">
+                                    <ion-icon slot="icon-only" class="small-icon" name="share-social-outline"></ion-icon>
+                                </ion-button>
+                                <ion-button fill="clear" class="small-button"  (click)="deleteSchedule(schedule)" color="danger"  [title]="'delete' | translate">
+                                    <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                </ion-button>
+                            </ion-item>
+                        </div>
+                    </ng-container>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+    <div [hidden]="sidenavService.scheduleSideNav" class="app-content">
+        <ion-refresher style="z-index: 2; min-height: calc(100vh - 75px)" slot="fixed" (ionRefresh)="doRefresh($event)">
+            <div class="spinner-holder-refresher">
+                <ion-refresher-content style="z-index: 1">
+                </ion-refresher-content>
+            </div>
+        </ion-refresher>
+        <ion-grid class="scheduleContainer ion-no-padding">
+            <ng-container *ngIf="schedules$ | async as schedules; else loadingOrError">
+                <ion-row style="height: calc(100vh - 100px); display: flex" class="ion-align-items-center" *ngIf="schedules.length === 0">
+                    <ion-col style="text-align: center">
+                        <ion-chip class="new-schedule" outline color="warning" size="large" (click)="newSchedule()">
+                            <ion-icon name="add"></ion-icon><ion-label translate>sched-new-specialist-label</ion-label>
+                        </ion-chip>
+                    </ion-col>
+                </ion-row>
+                <ion-row size="12" *ngIf="schedules.length > 0" [@listAnimation]="schedules.length">
+                    <ng-container *ngIf="!scheduleSelected && !dayScheduleSelected">
+                        <ng-container>
+                            <ion-col *ngFor="let schedule of schedules" size="12" size-lg="6" class="ion-no-padding">
+                                <mat-card style="padding: 0 4px">
+                                    <ion-item-sliding>
+                                        <ion-item detail class="ion-activatable" (click)="openSchedule(schedule)">
+                                            <ion-ripple-effect></ion-ripple-effect>
+                                            <ion-avatar class="schedule-avatar" slot="start">
+                                                <img *ngIf="schedule.avatar" [src]="schedule.avatar" alt="">
+                                                <img *ngIf="!schedule.avatar" src="/assets/img/avatar.svg">
+                                            </ion-avatar>
+                                            <ion-label>
+                                            <span>
+                                            {{ schedule.scheduleName }} (<span *ngIf="schedule.scheduleCategory !== 'default' && schedule.scheduleCategory !== '###'">{{schedule.scheduleCategory}}</span>
+                                            <span *ngIf="schedule.scheduleCategory === 'default'" translate>provider-null-reference</span>
+                                                <span *ngIf="schedule.scheduleCategory === '###'" translate>sched-service-btn</span>)
+                                            </span>
+                                                <p *ngIf="schedule.appointments!==0">
+                                                    <fa-icon style="color: var(--ion-color-secondary)" [icon]="appointmentIcon"></fa-icon> {{schedule.appointments}}
+                                                </p>
+                                            </ion-label>
+                                        </ion-item>
+                                        <ion-item-options side="end">
+                                            <ion-item-option>
+                                                <ion-button fill="clear" class="small-button" (click)="editSchedule(schedule.scheduleId)" color="tertiary"  [title]="'edit' | translate">
+                                                    <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+                                                </ion-button>
+                                            </ion-item-option>
+                                            <ion-item-option>
+                                                <ion-button class="small-button" fill="clear" *ngIf="!schedule.freeSchedule && !schedule.service" (click)="shareSchedule(schedule)" color="primary" [title]="'share' | translate">
+                                                    <ion-icon slot="icon-only" class="small-icon" name="share-social-outline"></ion-icon>
+                                                </ion-button>
+                                            </ion-item-option>
+                                            <ion-item-option>
+                                                <ion-button fill="clear" class="small-button"  (click)="deleteSchedule(schedule)" color="danger"  [title]="'delete' | translate">
+                                                    <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                                </ion-button>
+                                            </ion-item-option>
+                                        </ion-item-options>
+                                    </ion-item-sliding>
+                                </mat-card>
+                            </ion-col>
+                        </ng-container>
+                    </ng-container>
+                    <ion-col>
+                        <ng-container *ngIf="dayScheduleSelected">
+                            <ion-item color="background" lines="none">
+                                <ion-button fill="clear" (click)="backSchedule()" *ngIf="plan !== 'BASIC'">
+                                    <ion-icon name="arrow-back"></ion-icon>
+                                    <span class="ion-text-capitalize" translate>back</span>
+                                </ion-button>
+                                <ion-label class="ion-text-center ion-text-capitalize" style="font-size: 1.5em; font-weight: 500">{{this.showUTCDate(this.selectedDate)}}</ion-label>
+                                <ion-button slot="end" fill="clear" (click)="refreshDayView()" [title]="'refresh' | translate">
+                                    <ion-icon name="refresh" slot="icon-only" class="small-icon"></ion-icon>
+                                </ion-button>
+                            </ion-item>
+                            <ion-item lines="none" color="background" *ngIf="mobile" style="margin-bottom: 16px; display: flex">
+                                <div slot="end" style="display: flex">
+                                    <ion-toggle style="align-self: center" [checked]="scheduleService.simplifiedMode" (ionChange)="scheduleService.toggleSimplifiedMode($event)"></ion-toggle>
+                                    <ion-label style="align-self: center" translate>simplified-mode</ion-label>
+                                    <ion-icon class="info-circle" style="align-self: center" name="information-circle" color="dark" (click)="infoPopover('simplified-mode-info', $event)"></ion-icon>
+                                </div>
+                            </ion-item>
+                            <ion-grid class="ion-no-padding">
+                                <ion-row [@listAnimation]="schedules.length">
+                                    <ion-col size-xs="12" size-md="6" size-xl="4" *ngFor="let schedule of schedules">
+                                        <app-fullcalendar [refresh]="refreshSubject" [scheduleCategory]="schedule.scheduleCategory" [avatar]="schedule.avatar" [scheduleId]="schedule.scheduleId" [selectedDate]="this.selectedDate" [scheduleName]="schedule.scheduleName"></app-fullcalendar>
+                                    </ion-col>
+                                </ion-row>
+                            </ion-grid>
+                        </ng-container>
+                        <mat-card *ngIf="scheduleSelected" [@enterAnimation]>
+                            <ion-item lines="none" style="margin-top: -16px">
+                                <ion-button fill="clear" (click)="backSchedule()" *ngIf="plan !== 'BASIC'">
+                                    <ion-icon name="arrow-back"></ion-icon>
+                                    <span class="ion-text-capitalize" translate>back</span>
+                                </ion-button>
+                                <ion-label *ngIf="pickedSchedule.noDuration || pickedSchedule.serviceSchedule || pickedSchedule.freeSchedule" class="ion-text-center" style="font-size: 1.5em">{{selectedScheduleName}}</ion-label>
+                                <div *ngIf="!pickedSchedule.noDuration && !pickedSchedule.serviceSchedule && !pickedSchedule.freeSchedule" style="display: flex; justify-content: center; width: 100%; align-items: center">
+                                    <ion-label class="ion-text-center bold-600" style="font-size: 22px">{{selectedScheduleName}}</ion-label>
+                                    <ion-fab-button color="warning" size="small" (click)="openMultipleBookingsModal()" [title]="'multiple-apps' | translate">
+                                        <ion-icon name="add"></ion-icon>
+                                    </ion-fab-button>
+                                </div>
+                            </ion-item>
+                            <ion-item style="margin-bottom: 10px">
+                                <div style="display: flex; width: 100%; justify-content: center">
+                                    <ion-button class="small-button" fill="clear" (click)="editSchedule(scheduleId)" color="tertiary" [title]="'edit' | translate">
+                                        <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+                                    </ion-button>
+                                    <ion-button  class="small-button" fill="clear" (click)="deleteSchedule(selectedSchedule)" color="danger" [title]="'delete' | translate">
+                                        <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+                                    </ion-button>
+                                    <ion-button fill="clear" (click)="refresh()" [title]="'refresh' | translate">
+                                        <ion-icon name="refresh" slot="icon-only" class="small-icon"></ion-icon>
+                                    </ion-button>
+                                    <div *ngIf="!pickedSchedule.freeSchedule && !pickedSchedule.serviceSchedule" style="display: flex">
+                                        <ion-toggle style="align-self: center" [checked]="scheduleService.simplifiedMode" (ionChange)="scheduleService.toggleSimplifiedMode($event)"></ion-toggle>
+                                        <ion-label style="align-self: center" translate>simplified-mode</ion-label>
+                                        <ion-icon class="info-circle" style="align-self: center" name="information-circle" color="dark" (click)="infoPopover('simplified-mode-info', $event)"></ion-icon>
+                                    </div>
+                                </div>
+                            </ion-item>
+                            <div class="loading-cover-desktop-modal" *ngIf="fullcalendarService.slotsLoading">
+                                <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+                            </div>
+                            <full-calendar #fullCalendar id="fullcalendar" [options]="options"></full-calendar>
+                        </mat-card>
+                    </ion-col>
+                </ion-row>
+            </ng-container>
+        </ion-grid>
+    </div>
+    <ng-template #loadingOrError>
+        <ion-grid class="ion-no-margin ion-no-padding">
+            <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: calc(100vh - 106px); flex-direction: column">
+                <ion-col size="12" class="ion-text-center">
+                    <ng-container *ngIf="loadingError; else loading">
+                        <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+                    </ng-container>
+                    <ng-template #loading>
+                        <ion-spinner style="width: 75px;height: 75px;" color="secondary"></ion-spinner>
+                    </ng-template>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ng-template>
+
+</ion-content>

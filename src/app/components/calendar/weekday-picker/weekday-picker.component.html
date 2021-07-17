@@ -1,0 +1,62 @@
+<ng-container [formGroup]="scheduleForm">
+  <ng-container [formGroupName]="'schedule'">
+    <div [formGroupName]="'days'" class="hours" *ngIf="days">
+      <ion-label style="margin-left: 16px" *ngIf="formSubmitted && scheduleForm.get('schedule.days.day').hasError('required')"  color="danger" translate>sched-choose-day-error</ion-label>
+      <div [formArrayName]="'day'">
+        <ion-item class="weekday-holder" *ngFor="let weekday of weekdays; index as i">
+          <ion-grid style="width: 100%" class="ion-no-padding">
+            <ion-row>
+              <ion-col size-xs="10" size-md="11" class="ion-no-padding">
+                <ion-grid class="ion-no-padding" style="margin-top: 6px">
+                  <ion-row>
+                    <ion-col offset="1" offset-md="0">
+                      <ion-label translate class="bold-600" style="font-size: 1.2em">{{weekday.name}}
+                      </ion-label>
+                    </ion-col>
+                  </ion-row>
+                  <div *ngFor="let day of scheduleForm.get('schedule.days.day')['controls']; index as dayIndex" [formGroupName]="dayIndex">
+                    <div [formArrayName]="'schedule'" *ngIf="day.value.weekday === weekday.name">
+                      <ion-item lines="none">
+                        <ion-checkbox [checked]="hoursCopied && copyHours.index===i" (ionChange)="copyHour(weekday, i, $event)"></ion-checkbox>
+                        <ion-label translate class="ion-margin">copy-hours</ion-label>
+                      </ion-item>
+                      <ion-row *ngFor="let day of this.weekDaysHourControls(dayIndex); index as index" [formGroupName]="index">
+                        <ion-col size="2" size-md="1" class="ion-text-end flex-col ion-no-padding">
+                          <div class="hover" *ngIf="index>0" (click)="deleteHour(weekday.name, index)">
+                            <ion-icon slot="icon-only" class="delete-hour-button" color="danger" size="normal" name="trash"></ion-icon>
+                          </div>
+                        </ion-col>
+                        <ion-col size="10" size-md="4" class="timepicker-col  ion-text-center flex-col ion-no-padding">
+                          <ngb-timepicker [formControlName]="'start'" [meridian]="translate.getLocale().includes('en')"></ngb-timepicker>
+                        </ion-col>
+                        <ion-col *ngIf="!mobile || tablet" size="1" class="align-content">
+                          -
+                        </ion-col>
+                        <ion-col offset-xs="2" offset-md="0" size="10" size-md="4" class="timepicker-col ion-text-center flex-col ion-no-padding">
+                          <ngb-timepicker [formControlName]="'end'" [meridian]="translate.getLocale().includes('en')"></ngb-timepicker>
+                        </ion-col>
+                        <ion-col size="12" class="ion-text-center ion-no-padding" *ngIf="day.controls.start.hasError('required') || day.controls.end.hasError('required')">
+                          <p  style="color: var(--ion-color-danger)" translate>ops-choose-hours-error</p>
+                        </ion-col>
+                      </ion-row>
+                      <ion-row>
+                        <ion-col class="ion-text-center">
+                          <ion-chip outline color="warning" (click)="addTimeInterval(weekday.name)">
+                            <ion-icon name="add"></ion-icon><ion-label translate>interval</ion-label>
+                          </ion-chip>
+                        </ion-col>
+                      </ion-row>
+                    </div>
+                  </div>
+                </ion-grid>
+              </ion-col>
+              <ion-col size="2" size-md="1" class="ion-align-items-center" style="display: flex">
+                <ion-toggle  [ngModelOptions]="{standalone: true}" [(ngModel)]="weekday.checked" (ionChange)="pushWeekday($event, weekday, i)"></ion-toggle>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-item>
+      </div>
+    </div>
+  </ng-container>
+</ng-container>

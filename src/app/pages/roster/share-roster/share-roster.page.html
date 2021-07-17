@@ -1,0 +1,150 @@
+<ion-header>
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button text=""></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<app-mainmenu [menuId]="'roster'" [isAuthenticated]="!anonymous"></app-mainmenu>
+<ion-content [ngClass]="{'white': mobile}">
+  <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+    <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+  </div>
+  <ng-container *ngIf="allDivisionsMap$ | async as employeesDivisionMap">
+    <ng-container *ngIf="employeesDivisionMap.size > 0">
+      <ion-grid class="ion-no-padding" style="max-width: 1200px; margin-top: 16px">
+        <ion-row *ngIf="allEmployeesMap$ | async as employeesDivisionMap">
+          <ion-col size="12" size-lg="4" offset-lg="8">
+            <mat-form-field style="width: 100%;">
+              <mat-select [placeholder]="'employees' | translate" (selectionChange)="pickEmployeeRoster($event)">
+                <div *ngFor="let division of employeesDivisionMap | keyvalue">
+                  <mat-option [value]="'divisionId=' + getDivisionId(division.key)">
+                    <b>{{division.key}}</b>
+                  </mat-option>
+                  <div class="margin-6" *ngFor="let subdivision of division.value | keyvalue">
+                    <mat-option [value]="'subdivisionId=' + subdivision.value[0].subdivisionId">
+                      <i>{{subdivision.key}}</i>
+                    </mat-option>
+                    <div class="margin-16" *ngFor="let employee of subdivision.value">
+                      <mat-option [value]="'employeeId=' + employee.id">
+                        {{employee.name}}
+                      </mat-option>
+                    </div>
+                  </div>
+                </div>
+              </mat-select>
+            </mat-form-field>
+          </ion-col>
+        </ion-row>
+        <ion-item lines="none" class="roster-item" style="width: 100%; --inner-padding-end: 0px;  --padding-start:0px">
+          <app-roster style="width: 100%" [index]="0" [anonymous]="anonymous" [preferredView]="preferredView"></app-roster>
+        </ion-item>
+        <div>
+          <ion-row *ngFor="let division of employeesDivisionMap | keyvalue">
+            <ion-col size="12" [className]="mobile ? 'ion-text-center' : ''">
+              <div class="subdivision-title-holder ion-text-uppercase">
+                <ion-label *ngIf="division.key !== 'null'" class="subdivision-title" color="dark">{{division.key}}</ion-label>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <ion-reorder-group disabled="false" (ionItemReorder)="doReorder($event)" >
+                <ng-container *ngFor="let subdivision of division.value | keyvalue; index as index">
+                  <ion-item *ngIf="subdivision.value[0].subdivisionId" class="roster-item" [lines]="!mobile ? 'none' : true" style="margin-bottom: 10px">
+                    <div style="overflow: auto">
+                      <div>
+                        <app-roster [anonymous]="anonymous" [subdivision]="subdivision.value" [index]="1" [preferredView]="preferredView"></app-roster>
+                      </div>
+                      <div *ngFor="let emp of subdivision.value; index as i">
+                        <app-roster [anonymous]="anonymous" [employee]="emp" [index]="i+2" [preferredView]="preferredView"></app-roster>
+                      </div>
+                    </div>
+                    <ion-reorder slot="end"></ion-reorder>
+                  </ion-item>
+                </ng-container>
+                <ng-container *ngFor="let subdivision of division.value | keyvalue; index as index">
+                  <ng-container *ngIf="!subdivision.value[0].subdivisionId">
+                    <ion-item [lines]="!mobile ? 'none' : true" *ngFor="let employee of subdivision.value" class="roster-item" lines="none" style="margin-bottom: 10px">
+                      <div style="overflow: auto">
+                        <div>
+                          <app-roster [anonymous]="anonymous" [employee]="employee" [index]="index+1" [preferredView]="preferredView"></app-roster>
+                        </div>
+                      </div>
+                      <ion-reorder slot="end"></ion-reorder>
+                    </ion-item>
+                  </ng-container>
+                </ng-container>
+              </ion-reorder-group>
+            </ion-col>
+
+            <ion-col>
+              <div class="align-content" style="justify-content: flex-start">
+                <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="warning" name="alert-circle-outline"></ion-icon>
+                <ion-label color="dark"> <span> - </span><span translate>roster-unpublished</span></ion-label>
+              </div>
+              <div class="align-content" style="justify-content: flex-start">
+                <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="warning" name="alert-outline"></ion-icon>
+                <ion-label color="dark"> <span> - </span><span translate>time-off-to-approve</span></ion-label>
+              </div>
+              <div class="align-content" style="justify-content: flex-start">
+                <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="success" name="checkmark-outline"></ion-icon>
+                <ion-label color="dark"> <span> - </span><span translate>time-off-approved</span></ion-label>
+              </div>
+              <div class="align-content" style="justify-content: flex-start">
+                <ion-icon style="height: 18px; width: 18px; margin-right: 4px;" color="danger" name="close-outline"></ion-icon>
+                <ion-label color="dark"> <span> - </span><span translate>time-off-denied</span></ion-label>
+              </div>
+            </ion-col>
+          </ion-row>
+        </div>
+      </ion-grid>
+    </ng-container>
+
+    <ng-container *ngIf="employeesDivisionMap.size < 1">
+      <ion-row>
+        <ion-col style="height: calc(100vh - 60px); display: flex; justify-content: center; align-items: center; flex-direction: column">
+          <ion-icon name="sad-outline" style="height: 300px; width: 300px" color="gray"></ion-icon>
+          <ion-label translate color="gray" style="font-weight: bold; font-size: 30px">roster-share-no</ion-label>
+        </ion-col>
+      </ion-row>
+    </ng-container>
+  </ng-container>
+  <ion-row>
+    <ion-col class="ion-text-center" size="12" size-md="6" offset-md="3" offset-lg="4" size-lg="4" style="margin-top: 16px; margin-bottom: 32px" *ngIf="anonymous">
+      <mat-card style="border: none; margin: 6px; background: var(--ion-color-white)">
+        <form [formGroup]="signInForm" (ngSubmit)="onSignIn()" class="ion-text-center">
+          <h3 translate>login-header</h3>
+          <button style="display: none" #submitBtn></button>
+          <ion-item lines="none">
+            <ion-input type="email"
+                       formControlName="username"
+                       email
+                       autocomplete="username"
+                       [placeholder]="'login-email' | translate"
+            ></ion-input>
+          </ion-item>
+          <ion-label color="danger" *ngIf="loginFailure">{{ loginFailure }}</ion-label>
+          <ion-label *ngIf="signInForm.controls['username'].hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+          <ion-item lines="none" style="margin-top: 16px">
+            <ion-input [type]="showPassword('login')"
+                       formControlName="password"
+                       [placeholder]="'login-password' | translate"
+            ></ion-input>
+            <ion-icon style="position: absolute; right: 16px; z-index: 2" name="eye" (click)="setShowPassword('login')" class="ion-align-self-center"></ion-icon>
+          </ion-item>
+          <ion-label *ngIf="signInForm.controls['password'].hasError('pattern')" color="danger" translate>login-psswd-error</ion-label>
+          <ion-button (click)="submitForm()" [disabled]="!signInForm.valid" style="margin-top: 16px; width: 100%" color="primary" translate>
+            <ion-label translate *ngIf="!isLoading">login-header</ion-label>
+            <ion-spinner color="light" *ngIf="isLoading" class="ion-margin"></ion-spinner>
+          </ion-button>
+        </form>
+      </mat-card>
+    </ion-col>
+  </ion-row>
+</ion-content>
+

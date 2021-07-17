@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission\/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bookanapp",
+      "sha256_cert_fingerprints": [
+        "55:36:01:A4:93:90:54:28:33:9D:CB:CD:EC:58:B1:54:AC:8D:2B:98:A3:C5:A2:72:CA:57:2C:00:99:47:8F:B5"
+      ]
+    }
+  }
+]
+

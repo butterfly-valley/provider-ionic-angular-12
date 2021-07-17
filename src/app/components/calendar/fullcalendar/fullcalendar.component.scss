@@ -1,0 +1,16 @@
+.multipleCalendar {
+  width: 25%;
+}
+
+.button-row{
+  display: flex;
+}
+
+.schedule-avatar {
+  height: 40px;
+  width: 40px;
+}
+
+:host ::ng-deep .fc-toolbar.fc-header-toolbar {
+  margin: 0!important;
+}

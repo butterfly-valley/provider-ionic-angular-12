@@ -1,0 +1,117 @@
+<ion-header *ngIf="mobile" mode="ios">
+    <ion-toolbar color="toolbar">
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false"></ion-menu-button>
+        </ion-buttons>
+        <ion-buttons slot="start">
+            <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content [ngClass]="{'white' : mobile}">
+    <ion-refresher *ngIf="mobile" slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content>
+        </ion-refresher-content>
+    </ion-refresher>
+    <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+        <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+    </div>
+    <ng-container *ngIf="messageThreads$ | async as messageThreads; else loadingOrError">
+        <ion-grid *ngIf="messageThreads.length>0" class="pane-container ion-no-padding">
+            <ion-row class="ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+                <ion-col class="ion-no-padding">
+                    <mat-card [id]="threadId(messageThread)" *ngFor="let messageThread of messageThreads" style="padding: 0; margin: 3px">
+                        <ion-grid class="ion-no-padding ion-no-margin" *ngIf="!mobile">
+                            <ion-row class="ion-no-margin">
+                                <ion-col size="9" size-xl="10" class="ion-no-padding ion-no-margin">
+                                    <ion-item lines="none" *ngIf="!mobile" class="ion-activatable" (click)="showMessage(messageThread)">
+                                        <ion-ripple-effect></ion-ripple-effect>
+                                        <ion-icon *ngIf="messageThread.threadId === 0 && messageThread.appointmentId === 0" name="alert-circle-outline" color="danger" style="font-size: 40px"></ion-icon>
+                                        <ion-avatar slot="start" *ngIf="messageThread.threadId !== 0 || messageThread.appointmentId !== 0">
+                                            <img class="avatar" [img-preloader]="messageThread.avatar">
+                                            <div *ngIf="messageThread.unreadMessages>0" class="badge">{{messageThread.unreadMessages}}</div>
+                                        </ion-avatar>
+                                        <div style="margin: 16px 32px 16px 16px; display: flex; align-items: flex-end">
+                                            <ion-label class="ion-text-center">
+                                                <h2 [ngClass]="{ 'text-bold': !messageThread.lastMessage.readByProvider, '' : messageThread.lastMessage.readByProvider }" [innerHTML]="showDateTime(messageThread.lastMessage.sent)"></h2>
+                                            </ion-label>
+                                            <span class="tick-holder" *ngIf="!messageThread.notification">
+                                    <img *ngIf="!messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByUser" src="/assets/icon/double-tick-unread.svg" alt="">
+                                        <img *ngIf="!messageThread.lastMessage.fromUser && messageThread.lastMessage.readByUser" src="/assets/icon/double-tick-read.svg" alt="">
+                                    </span>
+                                        </div>
+                                        <ion-label>
+                                            <h2 [ngClass]="{ 'text-bold': messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByProvider }" *ngIf="messageThread.lastMessage.fromUser">{{ messageThread.lastMessage.from }}</h2>
+                                            <h2 *ngIf="messageThread.threadId === 0 && messageThread.appointmentId === 0">{{ getNotificationTitle(messageThread.lastMessage) }}</h2>
+                                            <p [ngClass]="{ 'text-bold': messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByProvider }" *ngIf="messageThread.threadId !== 0 || messageThread.appointmentId !== 0">
+                                                <span *ngIf="!messageThread.lastMessage.attachmentName">{{messageText(messageThread.lastMessage)}}</span>
+                                                <ion-icon color="primary" *ngIf="messageThread.lastMessage.attachmentName && (messageThread.lastMessage.attachment.includes('pdf') || messageThread.lastMessage.attachment.includes('PDF'))" name="document"></ion-icon>
+                                                <ion-icon color="primary" *ngIf="messageThread.lastMessage.attachmentName && !(messageThread.lastMessage.attachment.includes('pdf') || messageThread.lastMessage.attachment.includes('PDF'))" name="image"></ion-icon>
+                                            </p>
+                                            <p [ngClass]="{ 'text-bold': messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByProvider }" *ngIf="messageThread.threadId === 0 && messageThread.appointmentId === 0" [innerHTML]="messageThread.lastMessage.from + ' ' + getNotification(messageThread.lastMessage)"></p>
+                                        </ion-label>
+                                    </ion-item>
+                                </ion-col>
+                                <ion-col class="appointment-col" size="3" size-xl="2">
+                                    <ion-button style="width: 100%" size="small" (click)="deleteMessage(messageThread)" color="danger" translate>delete</ion-button>
+                                </ion-col>
+                            </ion-row>
+                        </ion-grid>
+                        <ion-item-sliding *ngIf="mobile">
+                            <ion-item (click)="showMessage(messageThread)" detail style="margin-right: 3px">
+                                <ion-icon slot="start" *ngIf="messageThread.threadId === 0 && messageThread.appointmentId === 0" name="alert-circle-outline" color="danger" style="font-size: 36px"></ion-icon>
+                                <ion-avatar slot="start" *ngIf="messageThread.threadId !== 0 || messageThread.appointmentId !== 0">
+                                    <img class="avatar" [img-preloader]="messageThread.avatar">
+                                    <div *ngIf="messageThread.unreadMessages>0" class="badge mobile">{{messageThread.unreadMessages}}</div>
+                                </ion-avatar>
+                                  <ion-label>
+                                    <div style="display: flex; align-items: flex-end">
+                                        <h4 [ngClass]="{ 'text-bold': !messageThread.lastMessage.readByProvider, '' : messageThread.lastMessage.readByProvider  }" [innerHTML]="showDateTime(messageThread.lastMessage.sent)"></h4>
+                                        <span class="tick-holder" *ngIf="!messageThread.notification">
+                                       <img *ngIf="!messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByUser" src="/assets/icon/double-tick-unread.svg" alt="">
+                                        <img *ngIf="!messageThread.lastMessage.fromUser && messageThread.lastMessage.readByUser" src="/assets/icon/double-tick-read.svg" alt="">
+                                    </span>
+                                    </div>
+                                    <h2 [ngClass]="{ 'text-bold': messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByProvider }" *ngIf="messageThread.lastMessage.fromUser">{{ messageThread.lastMessage.from }}</h2>
+                                    <h2 *ngIf="messageThread.threadId === 0 && messageThread.appointmentId === 0">{{ getNotificationTitle(messageThread.lastMessage) }}</h2>
+                                      <p [ngClass]="{ 'text-bold': messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByProvider }" *ngIf="messageThread.threadId !== 0 || messageThread.appointmentId !== 0">
+                                          <span *ngIf="!messageThread.lastMessage.attachmentName">{{messageText(messageThread.lastMessage)}}</span>
+                                          <ion-icon color="primary" *ngIf="messageThread.lastMessage.attachmentName && (messageThread.lastMessage.attachment.includes('pdf') || messageThread.lastMessage.attachment.includes('PDF'))" name="document"></ion-icon>
+                                          <ion-icon color="primary" *ngIf="messageThread.lastMessage.attachmentName && !(messageThread.lastMessage.attachment.includes('pdf') || messageThread.lastMessage.attachment.includes('PDF'))" name="image"></ion-icon>
+                                      </p>
+                                    <p [ngClass]="{ 'text-bold': messageThread.lastMessage.fromUser && !messageThread.lastMessage.readByProvider }" *ngIf="messageThread.threadId === 0 && messageThread.appointmentId === 0" [innerHTML]="messageThread.lastMessage.from + ' ' + getNotification(messageThread.lastMessage)"></p>
+                                </ion-label>
+                            </ion-item>
+                            <ion-item-options side="end">
+                                <ion-item-option>
+                                    <ion-button  (click)="deleteMessage(messageThread)"  fill="clear" color="danger" expand="full"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+                                </ion-item-option>
+                            </ion-item-options>
+                        </ion-item-sliding>
+                    </mat-card>
+                    <div class="button-holder" *ngIf="messageThreads[messageThreads.length - 1].nextPage">
+                        <ion-fab-button mode="ios" (click)="loadMore()" size="large" color="warning"><ion-icon name="add"></ion-icon></ion-fab-button>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ion-grid *ngIf="messageThreads.length<1" class="ion-no-margin ion-no-padding">
+            <ion-row style="min-height: calc(100vh - 100px); display: flex; align-items: center">
+                <ion-col size="12" class="ion-text-center">
+                    <fa-icon [icon]="messageIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-primary)"></fa-icon>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ng-container>
+    <ng-template #loadingOrError>
+        <ion-grid class="ion-no-margin ion-no-padding">
+            <ion-row class="iconContainer ion-justify-content-center ion-align-items-center" style="min-height: calc(100vh - 106px); flex-direction: column">
+                <ion-col size="12" class="ion-text-center">
+                    <ng-container *ngIf="loadingError">
+                        <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+                    </ng-container>
+                    </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ng-template>
+</ion-content>

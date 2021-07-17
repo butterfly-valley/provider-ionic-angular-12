@@ -1,0 +1,17 @@
+<ion-searchbar style="padding-left: 0; padding-right: 0" type="text" debounce="500" [placeholder]="searchbarPlaceholder()" (ionInput)="autocompleteProviderByName($event)" animated [color]="color"></ion-searchbar>
+<div *ngIf="isLoading" text-center><ion-spinner [color]="color"></ion-spinner></div>
+<ion-list *ngIf="isListAvailable" no-padding>
+    <ion-item *ngFor="let provider of foundProviders" [color]="color" [style.border]="rowBorder">
+        <ion-grid no-margin no-padding>
+            <ion-row>
+                <ion-col size="12" text-center>
+                    <h4><i style="font-weight: bolder">{{ provider.name | uppercase }}</i></h4></ion-col>
+                <ion-col size="12"><span>{{ provider.address }}</span></ion-col>
+                <div class="button-holder"><ion-button mode="md" [color]="buttonColor" expand="outline" fill="clear" translate (click)="onProviderClick(provider.id)">result-availability-btn</ion-button></div>
+            </ion-row>
+        </ion-grid>
+    </ion-item>
+</ion-list>
+<ion-list *ngIf="noResults">
+    <ion-item text-center="" lines="none"><ion-label translate color="primary">no-results</ion-label></ion-item>
+</ion-list>

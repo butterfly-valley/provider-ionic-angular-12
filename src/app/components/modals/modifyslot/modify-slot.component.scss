@@ -1,0 +1,28 @@
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.datetime-padding {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0;
+  padding-left: 0;
+}
+
+.time-label{
+  margin-bottom: 0;
+  display: flex;
+}
+
+.timepicker-col{
+  display: flex;
+  justify-content: center;
+  align-items: baseline
+}
+
+.time-picker{
+  text-align: center;
+  font-size: 2em;
+  padding-bottom: 0;
+  padding-left: 0;
+}

@@ -1,0 +1,60 @@
+.appointment-col {
+  display: flex;
+}
+
+ion-icon{
+  height: 20px;
+  width: 20px;
+}
+
+fa-icon {
+  color: var(--ion-color-secondary);
+  //margin-right: 6px;
+}
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50% !important;
+}
+
+.segment-desktop > ion-segment-button > ion-label{
+  font-weight: 600;
+  font-size: 1.2em;
+}
+
+.segment-content-margin {
+  margin-top: 16px;
+}
+
+.button-margin {
+  margin: 0 2px;
+}
+
+.button-margin-mobile {
+  margin:0 7px;
+}
+
+.desktop-item {
+  min-width: 90%;
+}
+
+.desktop-card{
+  padding: 0;
+  margin: 3px;
+  display: flex;
+  align-items: center;
+}
+
+
+.sc-ion-segment-ios-h {
+  margin-top: 16px;
+}
+
+:host ::ng-deep .mat-form-field-flex {
+  border-bottom: 1px solid var(--ion-color-gray)!important;
+}
+
+:host ::ng-deep .mat-form-field-infix {
+  border: 0!important;
+}
+

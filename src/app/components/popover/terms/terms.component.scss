@@ -1,0 +1,22 @@
+.terms-holder {
+  position: fixed;
+  bottom: 0;
+  z-index: 2;
+  background-color: #182931;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 304 304' width='304' height='304'%3E%3Cpath fill='%239C92AC'%3C/svg%3E");
+  max-height: 150px;
+  min-height: 50px;
+  min-width: 100%;
+  opacity: 0.9;
+  color: white;
+
+}
+
+ion-icon:hover {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: underline;
+  color: white;
+}

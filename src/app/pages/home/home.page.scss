@@ -1,0 +1,273 @@
+
+ion-content *, ion-header * {
+  font-family: 'Cabin-bold', 'Roboto',"Segoe UI",Roboto,"Helvetica Neue",Arial,
+  "Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"!important;
+}
+
+
+.label[floating],
+.label[stacked],
+.input-has-focus .label[floating] {
+  color: black ;
+}
+
+
+.line{
+  border:1px solid currentColor;
+  clear:both;
+  display:block;
+  height: 0;
+}
+
+
+.searchbar-input{
+  color: white!important;
+  background: #3880ff!important;
+}
+
+.pac-container, .pac-item {
+  width: inherit !important;
+  background: inherit!important;
+  color: white!important;
+}
+
+.hidden{
+  display: none;
+}
+
+.visible{
+  display: block;
+}
+
+
+//::ng-deep .mat-form-field-underline {
+//  display: none;
+//}
+//
+//
+//::ng-deep .mat-form-field-infix {
+//  border: none;
+//}
+//
+//::ng-deep .mat-form-field-wrapper {
+//  padding-bottom: 0 !important;
+//}
+
+.iosRow.ios{
+  margin-top: 10px;
+}
+
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+h2{
+  color: white;
+}
+
+.search-card{
+  -webkit-box-shadow: 10px 10px 130px -85px rgba(255,255,255,1);
+  -moz-box-shadow: 10px 10px 130px -85px rgba(255,255,255,1);
+  box-shadow: 10px 10px 130px -85px rgba(255,255,255,1);
+  /*  box-shadow: none!important;*/
+  max-width: 600px !important;
+  border: 1px solid var(--ion-color-light);
+}
+
+.home-link {
+  color: var(--ion-color-black);
+  text-decoration: none;
+  margin-right: 16px;
+  font-weight: 600;
+  //margin-top: 16px;
+  //font-size: 0.8em;
+}
+
+
+.home-link-desktop {
+  color: var(--ion-color-dark);
+  text-decoration: none;
+  margin-right: 16px;
+  font-weight: 600;
+}
+
+.home-link-desktop:hover{
+  cursor: pointer;
+  opacity: 0.8;
+  //color: var(--ion-color-medium);
+}
+
+
+.desktop-background {
+  min-height: 93vh!important;
+}
+
+//ion-item{ --ion-color-shade: var(--ion-color-light)!important; }
+
+.grayInput::placeholder {
+  color: var(--ion-color-light);
+}
+.grayInput {
+  background: rgba(0,0,0,0);
+}
+
+::ng-deep .home-search mat-select *{
+  color: var(--ion-color-light)!important;
+}
+
+ion-segment-button > ion-label{
+  color: var(--ion-color-light);
+}
+
+.segment-button-checked > .ios{
+  color: var(--ion-color-primary)!important;
+}
+
+.logo-holder:hover {
+  cursor: pointer;
+}
+
+.logo-holder{
+  align-self: center;
+}
+
+.wave-container {
+  background: url(/assets/img/wave.svg) no-repeat;
+  height: 700px;
+  background-size: 1200px 700px;
+  margin-top: -150px;
+}
+
+.welcome-icon{
+  height: 40px; width: 40px
+}
+
+.welcome-card{
+  border: none;
+  background: var(--ion-color-background);
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  color: var(--ion-color-dark);
+  //box-shadow: none;
+  box-shadow: rgba(0, 0, 0, 0.12) 0 4px 16px;
+  font-size: 1em;
+}
+
+.pricing-card{
+  //height: 770px;
+  display: flex;
+  flex-direction: column;
+  color: var(--ion-color-dark);
+  background: var(--ion-color-white);
+  font-size: 1.3em;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.12) 0 4px 16px;
+}
+
+.pricing-card ion-item{
+  //--background: var(--ion-color-background)!important;
+}
+
+.pricing-item{
+  width: 100%;
+  --inner-padding-end: 0px;
+  --padding-start:0px;
+  background: var(--ion-color-white);
+}
+
+.pricing-label{
+  width: 100%;
+  white-space: normal;
+}
+
+.margin-left{
+  margin-left: 6px;
+}
+
+.pricing-h1{
+  margin-top: 0;
+}
+
+.pricing-h1 ion-label {
+  font-family: Arial, sans-serif!important;
+  font-weight: 600;
+  font-size: 40px;
+}
+
+.about-us p{
+  margin: 32px 0;
+}
+
+.follow{
+  margin: 0 6px;
+}
+
+.smaller-font{
+  text-align: center!important;
+}
+
+.try-btn{
+  --border-radius: 30px;
+  margin-right: 10px;
+  //font-size: 1em;
+  font-weight: 600;
+  //margin: 16px;
+}
+
+.desktop-margin{
+  margin-top: 32px;
+
+}
+
+.main-container-desktop{
+  //background: var(--ion-color-primary);
+  margin-top: -35px;
+}
+
+.description-pricing {
+  text-align: left;
+}
+
+tr {
+  border-bottom: 1px solid var(--ion-color-card);
+}
+
+td {
+  padding: 6px;
+}
+
+th {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+table {
+  font-size: 1.3em;
+}
+
+table ion-icon{
+  width: 30px;
+  height: 30px;
+}
+
+.table-wrapper
+{
+  display: flex;
+  overflow: auto;
+}
+
+@media (min-width: 1201px) {
+  .pricing-container{
+    max-width: 1240px;
+    margin-left: calc((100vw - 1280px) / 2) !important;
+  }
+}
+
+
+::ng-deep .swiper-pagination {
+  bottom: -10px!important;
+  padding-bottom: 6px;
+
+}

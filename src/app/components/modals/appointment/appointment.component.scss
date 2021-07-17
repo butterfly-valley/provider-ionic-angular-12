@@ -1,0 +1,83 @@
+//ion-item{
+//  --inner-padding-end: 0px;
+//  --padding-start:0px
+//}
+
+.providerLink:hover{
+  cursor: pointer;
+}
+
+.list-desktop > ion-item > ion-label > h4{
+  font-weight: 600;
+  //color: var(--ion-color-primary);
+
+}
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50%!important;
+}
+
+.bookanapp-image {
+  height: 24px;
+  width: 24px;
+  object-fit: cover;
+}
+
+.align-icon{
+  align-self: center;
+  height: 30px;
+  width: 30px
+}
+
+.edit-icon:hover{
+  cursor: pointer;
+
+}
+
+.datetime-padding {
+  margin-top: 10px;
+  text-align: center;
+  padding-left: 0;
+  color: var(--ion-color-primary);
+}
+
+.date-time-font{
+  margin-top: 0;
+  font-size: 2em;
+  padding: 0;
+}
+
+.calendar-input{
+  border-bottom: 1px solid #ddd;
+}
+
+mat-form-field{
+  margin: 0!important;
+  max-width: 100%;
+}
+
+.bold-font{
+  font-weight: 600;
+}
+
+.alert-margin {
+  margin-left: 64px;
+}
+
+fa-icon {
+  color: var(--ion-color-secondary);
+  margin-left: 3px
+}
+
+.edit-phone-icon {
+  //margin-right: 32px;
+  width: 25px;
+  height: 25px;
+}
+
+@media (max-width: 768px) {
+  ion-input, ion-textarea{
+    padding: 0 16px!important;
+  }
+}

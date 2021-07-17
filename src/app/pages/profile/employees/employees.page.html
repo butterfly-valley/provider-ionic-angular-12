@@ -1,0 +1,256 @@
+<ion-header *ngIf="mobile" mode="ios">
+    <ion-toolbar color="toolbar">
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false"></ion-menu-button>
+        </ion-buttons>
+        <ion-buttons slot="start">
+            <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-grid class="ion-no-padding ion-no-margin full-height" *ngIf="isDownloading">
+    <ion-row class="full-height">
+        <ion-col size="12" class="ion-text-center full-height ion-align-items-center">
+            <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+        </ion-col>
+    </ion-row>
+</ion-grid>
+<ion-content #container [ngClass]="{'white': mobile}" [hidden]="isDownloading">
+    <div class="loading-cover-desktop-modal" *ngIf="isPaginatorLoading">
+        <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+    </div>
+    <div class="loading-cover-desktop-modal" style="display: flex; justify-content: center; align-items: center; flex-direction: column" *ngIf="!authorized">
+        <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; height: 200px; width: 200px"></ion-icon>
+        <ion-label class="ion-text-uppercase ion-text-center" color="danger" style="opacity: 0.5; font-size: 1.5em">
+            <span translate>plan-upgrade-pro</span>
+            <a routerLink="/user/profile/payments"><ion-icon name="open" color="primary"></ion-icon></a>
+        </ion-label>
+    </div>
+    <ion-fab *ngIf="mobile && !tablet && employeesIds.length>0" vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button size="small" color="danger" (click)="deleteEmployees()">
+            <ion-icon name="trash"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <ion-refresher *ngIf="mobile" class="app-content-margin" slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content style="z-index: 1">
+        </ion-refresher-content>
+    </ion-refresher>
+    <ng-container *ngIf="!rosterView">
+    <ion-grid class="pane-container ion-no-padding">
+        <ion-row>
+            <ion-col class="ion-no-padding" offset-lg="3" size-lg="6">
+                <ion-segment #segment *ngIf="!mobile" style="margin-bottom: 16px" mode="ios" (ionChange)="segmentChanged($event)" value="employees">
+                    <ion-segment-button value="employees">
+                        <ion-label style="padding: 0 10px"><span translate>employees</span>
+                        </ion-label>
+                    </ion-segment-button>
+                    <ion-segment-button value="schedule">
+                        <ion-label style="padding: 0 10px"><span translate>roster</span>
+                        </ion-label>
+                    </ion-segment-button>
+                </ion-segment>
+                <ion-segment #segment *ngIf="mobile" style="margin-bottom: 16px" (ionChange)="segmentChanged($event)" value="employees">
+                    <ion-segment-button value="employees">
+                        <ion-label style="padding: 0 10px"><span translate>employees</span>
+                        </ion-label>
+                    </ion-segment-button>
+                    <ion-segment-button value="schedule">
+                        <ion-label style="padding: 0 10px"><span translate>roster</span>
+                        </ion-label>
+                    </ion-segment-button>
+                </ion-segment>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <ion-grid class="pane-container ion-no-padding" *ngIf="employees">
+        <ion-row [hidden]="isPaginatorLoading || !authorized" style="display: flex; justify-content: center">
+            <ng-container *ngIf="employeeMap$ | async as employeeMap; else loadingOrError">
+                <ng-container *ngIf="allEmployeesMap$ | async as employeesDivisionMap">
+                    <!--            <ion-col *ngIf="employees$ | async as employees" size="2" size-lg="1" style="display: flex; align-items: center; padding-left: 16px">-->
+                    <!--                <ion-checkbox *ngIf="employees.length>0" (ionChange)="selectAllCheckboxes(employees, $event)"></ion-checkbox>-->
+                    <!--                <ion-button color="danger" style="margin-left: 16px" class="ion-no-padding" fill="clear" *ngIf="employees.length>0 && employeesIds.length>0 && (!mobile || tablet)" (click)="deleteEmployees()">-->
+                    <!--                    <ion-icon name="trash" slot="icon-only"></ion-icon>-->
+                    <!--                </ion-button>-->
+                    <!--            </ion-col>-->
+                    <ion-col size="10" size-md="8" size-lg="5" style="display: flex" class="ion-align-items-center">
+                        <ion-searchbar style="padding-left: 0; padding-right: 0" type="text" debounce="500" [placeholder]="'search' | translate" (ionInput)="searchEmployees($event)" animated></ion-searchbar>
+                        <ion-button *ngIf="mobile" color="warning" style="border-radius: 25px!important;" fill="clear" (click)="addNew()">
+                            <ion-icon style="height: 30px; width: 30px" name="add" mode="ios"></ion-icon>
+                        </ion-button>
+                    </ion-col>
+                    <ion-col size="12" size-lg="5" class="ion-text-center" *ngIf="!searchingEmployee">
+                        <mat-form-field style="width: 90%;" class="no-padding">
+                            <mat-select [placeholder]="'employees' | translate" (selectionChange)="pickEmployee($event)">
+                                <mat-option value="all">
+                                    {{'customer-all' | translate}}
+                                </mat-option>
+                                <div *ngFor="let division of employeesDivisionMap | keyvalue">
+                                    <mat-option *ngIf="getDivisionId(division.key)" [value]="'divisionId=' + getDivisionId(division.key)">
+                                        <b>{{division.key}}</b>
+                                    </mat-option>
+                                    <div class="margin-6" *ngFor="let subdivision of division.value | keyvalue">
+                                        <mat-option *ngIf="subdivision.value[0].subdivisionId" [value]="'subdivisionId=' + subdivision.value[0].subdivisionId">
+                                            <i>{{subdivision.key}}</i>
+                                        </mat-option>
+                                        <div class="margin-16" *ngFor="let employee of subdivision.value">
+                                            <mat-option [value]="'employeeId=' + employee.id">
+                                                {{employee.name}}
+                                            </mat-option>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
+                    </ion-col>
+                    <ion-col *ngIf="!mobile" size-lg="2" class="ion-text-left" style="display: flex">
+                        <ion-chip *ngIf="!mobile" color="warning" (click)="addNew()" class="ion-align-self-center">
+                            <ion-icon name="add" mode="ios"></ion-icon>
+                            <ion-label translate>employee</ion-label>
+                        </ion-chip>
+                    </ion-col>
+                    <!--            <ng-container *ngIf="totalEmployees$ | async as totalEmployees">-->
+                    <!--                <ion-col size="12" size-xl="6" *ngIf="(!mobile || tablet) && totalEmployees>10">-->
+                    <!--                    <mat-paginator style="background: var(&#45;&#45;ion-color-background)" [ngClass]="{'white-background' : mobile && !tablet}" [length]="totalEmployees" (page)="paginator($event)"-->
+                    <!--                                   [pageSize]="10"-->
+                    <!--                                   [pageSizeOptions]="[10, 25, 50]"-->
+                    <!--                                   showFirstLastButtons="true">-->
+                    <!--                    </mat-paginator>-->
+                    <!--                </ion-col>-->
+                    <!--            </ng-container>-->
+                </ng-container>
+            </ng-container>
+        </ion-row>
+    </ion-grid>
+    <ion-grid style="padding-right: 6px" class="app-content pane-container ion-no-padding" [hidden]="!employees">
+        <ng-container *ngIf="employeeMap$ | async as employeeMap; else loadingOrError">
+        <ion-row *ngFor="let subdivision of employeeMap | keyvalue">
+            <ion-col size="12" class="ion-text-center">
+                <div class="subdivision-title-holder align-content">
+                    <ion-label *ngIf="subdivision.key !== 'null'" class="subdivision-title" color="dark">{{subdivision.key}}</ion-label>
+                    <ion-icon *ngIf="subdivision.value[0].subdivisionId" color="primary" name="create" class="hover" (click)="editSubdivision(subdivision.value[0].subdivisionId, subdivision.value[0].divisionId, subdivision.value[0].subdivision, subdivision.value[0].division)">
+                    </ion-icon>
+                </div>
+            </ion-col>
+            <ion-col size="12">
+            <ion-row [@listAnimation]="employeesLength">
+            <ion-col class="ion-no-padding ion-no-margin" *ngFor="let employee of subdivision.value" size="12" sizeLg="6">
+                <mat-card class="appointment-card" style="padding: 0; margin: 3px">
+                    <ion-grid class="ion-no-padding ion-no-margin" *ngIf="!mobile">
+                        <ion-row class="ion-no-padding ion-no-margin">
+                            <ion-col size="10" class="ion-no-padding ion-no-margin">
+                                <ion-item lines="none" *ngIf="!mobile" class="desktop-item ion-activatable">
+                                    <ion-ripple-effect></ion-ripple-effect>
+                                    <!--                                        <span slot="start" class="checkbox-container">-->
+                                    <!--                                            <ion-checkbox [(ngModel)]="employee.checked" (ionChange)="addToDeleteEmployee(employee.id, $event)"></ion-checkbox>-->
+                                    <!--                                        </span>-->
+                                    <ion-avatar slot="start">
+                                        <img *ngIf="employee.avatar" class="avatar" [img-preloader]="employee.avatar">
+                                        <img *ngIf="!employee.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                    </ion-avatar>
+                                    <ion-label class="employee-label" (click)="openEmployee(employee)">
+                                        <span class="employee-name">{{employee.name}}</span>
+                                        <p *ngIf="employee.jobTitle">{{employee.jobTitle}}</p>
+                                    </ion-label>
+                                </ion-item>
+                            </ion-col>
+                            <ion-col class="appointment-col ion-justify-content-center ion-align-items-center" size="2" *ngIf="!mobile">
+                                <ion-button color="primary" [title]="('edit' | translate) + ' ' + ('roster' | translate | lowercase)" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="rosterService.editRoster(employee)">
+                                    <ion-icon slot="icon-only" name="calendar" ></ion-icon>
+                                </ion-button>
+                                <!--                                    <ion-button color="danger" [title]="('delete' | translate) + ' ' + ('roster' | translate | lowercase)" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="rosterService.deleteRoster(employee)">-->
+                                <!--                                        <ion-icon slot="icon-only" name="calendar" ></ion-icon>-->
+                                <!--                                    </ion-button>-->
+                                <ion-button [title]="'delete' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" color="danger" fill="clear" (click)="deleteEmployee(employee.id)">
+                                    <ion-icon slot="icon-only" name="trash" ></ion-icon>
+                                </ion-button>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                    <ion-grid class="ion-no-padding ion-no-margin" *ngIf="mobile && tablet">
+                        <ion-row class="ion-no-padding ion-no-margin">
+                            <ion-col size="11" class="ion-no-padding ion-no-margin">
+                                <ion-item *ngIf="tablet" class="desktop-item ion-activatable">
+                                    <ion-ripple-effect></ion-ripple-effect>
+                                    <!--                                        <span slot="start" class="checkbox-container">-->
+                                    <!--                                            <ion-checkbox [(ngModel)]="employee.checked" (ionChange)="addToDeleteEmployee(employee.id, $event)"></ion-checkbox>-->
+                                    <!--                                        </span>-->
+                                    <ion-avatar slot="start">
+                                        <img *ngIf="employee.avatar" class="avatar" [img-preloader]="employee.avatar">
+                                        <img *ngIf="!employee.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                    </ion-avatar>
+                                    <ion-label class="employee-label" (click)="openEmployee(employee)">
+                                        <span class="employee-name">{{employee.name}}</span>
+                                        <p *ngIf="employee.jobTitle">{{employee.jobTitle}}</p>
+                                    </ion-label>
+                                    <ion-button color="primary" [title]="('edit' | translate) + ' ' + ('roster' | translate | lowercase)" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="rosterService.editRoster(employee)">
+                                        <ion-icon slot="icon-only" name="calendar" ></ion-icon>
+                                    </ion-button>
+                                    <!--                                        <ion-button color="danger" [title]="('delete' | translate) + ' ' + ('roster' | translate | lowercase)" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="rosterService.deleteRoster(employee)">-->
+                                    <!--                                            <ion-icon slot="icon-only" name="calendar" ></ion-icon>-->
+                                    <!--                                        </ion-button>-->
+                                    <ion-button [title]="'delete' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" color="danger" fill="clear" (click)="deleteEmployee(employee.id)">
+                                        <ion-icon slot="icon-only" name="trash" ></ion-icon>
+                                    </ion-button>
+                                </ion-item>
+                            </ion-col>
+                            <ion-col class="appointment-col ion-justify-content-center ion-align-items-center" size="1" *ngIf="!mobile">
+                                <ion-button [title]="'delete' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" color="danger" fill="clear" (click)="deleteEmployee(employee.id)">
+                                    <ion-icon slot="icon-only" name="trash" ></ion-icon>
+                                </ion-button>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                    <ion-item-sliding *ngIf="mobile && !tablet">
+                        <ion-item detail>
+                            <!--                            <span slot="start" class="checkbox-container">-->
+                            <!--                                <ion-checkbox [(ngModel)]="employee.checked" (ionChange)="addToDeleteEmployee(employee.id, $event)"></ion-checkbox>-->
+                            <!--                            </span>-->
+                            <ion-avatar style="margin-right: 16px">
+                                <img *ngIf="employee.avatar" class="avatar" [img-preloader]="employee.avatar">
+                                <img *ngIf="!employee.avatar" class="avatar" src="/assets/img/avatar.svg">
+                            </ion-avatar>
+                            <ion-label class="employee-label" (click)="openEmployee(employee)">
+                                {{employee.name}}
+                                <p *ngIf="employee.jobTitle">{{employee.jobTitle}}</p>
+                            </ion-label>
+                        </ion-item>
+                        <ion-item-options side="end">
+                            <ion-item-option color="primary" (click)="rosterService.editRoster(employee)">
+                                <ion-icon slot="icon-only" name="calendar" ></ion-icon>
+                            </ion-item-option>
+                            <!--                                <ion-item-option (click)="rosterService.deleteRoster(employee)">-->
+                            <!--                                    <ion-icon slot="icon-only" color="danger" name="calendar" ></ion-icon>-->
+                            <!--                                </ion-item-option>-->
+                            <ion-item-option color="danger" (click)="deleteEmployee(employee.id)" size="small">
+                                <ion-icon slot="icon-only" name="trash"></ion-icon>
+                            </ion-item-option>
+                        </ion-item-options>
+                    </ion-item-sliding>
+                </mat-card>
+            </ion-col>
+            </ion-row>
+            </ion-col>
+        </ion-row>
+
+        <ion-row class="app-icon-container" style="flex-direction: column; height: 80vh" *ngIf="employeeMap.length===0 && !rosterView">
+            <ion-col size="12" style="display: flex" class="ion-justify-content-center ion-align-items-center">
+                <fa-icon [icon]="employeeIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-primary)"></fa-icon>
+            </ion-col>
+        </ion-row>
+        </ng-container>
+    </ion-grid>
+    </ng-container>
+    <app-roster-list [hidden]="!schedule"></app-roster-list>
+    <ng-template #loadingOrError>
+        <ion-grid class="ion-no-padding ion-no-margin">
+            <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: calc(100vh - 106px); flex-direction: column">
+                <ion-col size="12" class="ion-text-center">
+                    <ng-container *ngIf="loadingError">
+                        <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; height: 200px; width: 200px"></ion-icon>
+                    </ng-container>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ng-template>
+</ion-content>
+

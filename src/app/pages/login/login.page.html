@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button text=""></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<app-mainmenu [menuId]="'login'"></app-mainmenu>
+<ion-content class="white">
+  <ion-grid class="ion-no-padding ion-no-margin">
+    <ion-row style="width: 100%; height: calc(100vh - 40px); display: flex; align-items: center; ">
+      <ion-col *ngIf="!mobile || tablet" class="ion-no-padding ion-no-margin" size="12" size-md="5" size-lg="5" [ngClass]="{'login-background login-background-desktop' : !mobile || tablet}" style="display: flex; justify-content: center; align-items: center">
+        <img src="/assets/img/login.svg" height="250px">
+      </ion-col>
+      <ion-col class="ion-no-padding ion-no-margin" size="12" size-md="7" size-lg="5" size-xl="4" style="display: flex; flex-direction: column">
+        <mat-card style="border: none; margin: 6px; background: var(--ion-color-white)">
+          <form [formGroup]="signInForm" (ngSubmit)="onSignIn()" style="width: 100%; max-width: 600px" class="ion-text-center" [hidden]="showSignUpForm">
+            <h3 translate>login-header</h3>
+            <button style="display: none" #submitBtn></button>
+            <ion-item lines="none">
+              <ion-input type="email"
+                         formControlName="username"
+                         email
+                         autocomplete="username"
+                         [placeholder]="'login-email' | translate"
+              ></ion-input>
+            </ion-item>
+            <ion-label color="danger" *ngIf="loginFailure">{{ loginFailure }}</ion-label>
+            <p>
+            <ion-button fill="clear" *ngIf="sendVerificationEmail" mode="ios" class="ion-no-padding" (click)="resendVerificationEmail()" translate>login-resend</ion-button>
+            </p>
+            <ion-label *ngIf="signInForm.controls['username'].hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+            <ion-item lines="none" style="margin-top: 16px">
+              <ion-input [type]="showPassword('login')"
+                         formControlName="password"
+                         [placeholder]="'login-password' | translate"
+              ></ion-input>
+              <ion-icon style="position: absolute; right: 16px; z-index: 2" name="eye" (click)="setShowPassword('login')" class="ion-align-self-center"></ion-icon>
+            </ion-item>
+            <ion-label *ngIf="signInForm.controls['password'].hasError('pattern')" color="danger" translate>login-psswd-error</ion-label>
+            <ion-button (click)="submitForm()" [disabled]="!signInForm.valid" style="margin-top: 16px; width: 100%" color="warning" translate>
+              <ion-label translate *ngIf="!isLoading">login-header</ion-label>
+              <ion-spinner color="light" *ngIf="isLoading" class="ion-margin"></ion-spinner>
+            </ion-button>
+          </form>
+          <ion-grid class="ion-no-padding">
+            <ion-row>
+              <ion-col class="ion-no-padding">
+                <ion-button style="margin-right: 20px" fill="clear" mode="ios" class="ion-no-padding" routerLink="/register" translate>no-account</ion-button>
+              </ion-col>
+              <ion-col class="ion-text-end ion-no-padding">
+                <ion-button translate (click)="resetPasswordSendEmailModal()" fill="clear" mode="ios" class="ion-no-padding">login-forgot-psswd</ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </mat-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <app-terms *ngIf="showTermsContainer"></app-terms>
+</ion-content>

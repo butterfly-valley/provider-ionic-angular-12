@@ -1,3 +1,12 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-router-outlet>
+    <ion-content id="content">
+    </ion-content>
+      <ngx-guided-tour
+              [backText]="localizationService.getFromKey('back')"
+              [skipText]="localizationService.getFromKey('skip')"
+              [doneText]="localizationService.getFromKey('close')"
+              [nextText]="localizationService.getFromKey('reg-next')">
+      </ngx-guided-tour>
+  </ion-router-outlet>
 </ion-app>

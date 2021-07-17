@@ -1,0 +1,177 @@
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+mat-expansion-panel {
+  border: 1px solid #ddd;
+  margin-top: 16px;
+}
+
+.margin-left-service-error {
+  margin-left: 70px;
+}
+
+.hover:hover {
+  cursor: pointer;
+}
+
+.list-avatar-image {
+  vertical-align: middle;
+  border-radius: 50% !important;
+  height: 40px;
+  width: 40px;
+}
+
+.list-avatar-image:hover {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+.datetime-padding {
+  padding: 0;
+}
+
+::ng-deep .mat-expansion-panel-body{
+  padding: 0!important;
+}
+
+.calendar-input{
+  border-bottom: 1px solid #ddd;
+}
+
+.time-picker{
+  text-align: center;
+  padding-bottom: 0;
+  padding-left: 0;
+  color: var(--ion-color-secondary);
+}
+
+
+@media (max-width: 767px) {
+  .delete-hours-button{
+    position: absolute;
+    top: -2px;
+    left: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .time-picker{
+    font-size: 1.5em;
+  }
+}
+
+.avatar-holder {
+  width: 64px;
+  height: 64px;
+  position: relative;
+}
+
+.small-fab{
+  height: 25px;
+  width: 25px;
+  position: absolute;
+  bottom: 0;
+  right: -64px;
+}
+
+.small-fab ion-icon{
+  height: 20px;
+  width: 20px;
+}
+
+ion-avatar{
+  width: 64px;
+  height: 64px;
+}
+
+//number picker css
+::ng-deep .mb-3{
+  height: 38px!important;
+}
+
+::ng-deep .input-group-prepend, {
+  height: 38px!important;
+  padding-right: 1px;
+
+}
+
+::ng-deep .form-control {
+  height: 38px!important;
+}
+
+::ng-deep  .input-group>.form-control:not(:first-child){
+  font-size: inherit!important;
+}
+
+.align-items-center {
+  display: flex;
+  align-items: center;
+}
+
+ion-list{
+  padding: 0;
+  background: var(--ion-color-white);
+}
+
+mat-expansion-panel{
+  background: var(--ion-color-white);
+}
+
+ion-label{
+  color: var(--ion-color-dark);
+}
+
+ion-input{
+  color: var(--ion-color-dark);
+}
+
+::ng-deep input::placeholder{
+  color: var(--ion-color-gray)!important;
+}
+
+::ng-deep .mat-expansion-indicator::after{
+  color: var(--ion-color-dark)!important;
+}
+
+@media (max-width: 768px) {
+  ion-input, ion-textarea{
+    padding: 0 16px!important;
+  }
+}
+
+.checkbox-container {
+  width: 50px;
+  position: absolute;
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  flex-direction: column;
+  -webkit-box-align: center;
+  align-items: center;
+}
+
+.weekday-holder:hover{
+  --background: var(--ion-color-white)!important;
+}
+
+::ng-deep .mat-datepicker-toggle *{
+  color: var(--ion-color-primary) !important;
+}
+
+:host ::ng-deep .mat-form-field-flex {
+  border-bottom: 1px solid var(--ion-color-gray)!important;
+}
+
+:host ::ng-deep .mat-form-field-infix {
+  border: 0!important;
+}

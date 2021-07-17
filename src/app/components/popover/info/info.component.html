@@ -1,0 +1,9 @@
+<div style="width: 100%; background: var(--ion-color-background)" class="ion-text-center ion-padding">
+  <ion-label [innerHTML]="info | noSanitize"></ion-label>
+  <p *ngIf="link">
+    <a target="_blank" [href]="link">
+      <span translate>example</span>
+    <ion-icon name="link" color="primary"></ion-icon>
+    </a>
+  </p>
+</div>

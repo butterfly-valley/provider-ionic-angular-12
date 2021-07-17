@@ -1,0 +1,166 @@
+<ion-header *ngIf="mobile">
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons>
+      <ion-button *ngIf="!tablet" (click)="dismiss()" fill="clear">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <ion-label color="dark">
+        <span>{{dateTimeUtil.showMomentDate(translate.getLocale(), date)}}</span>
+      </ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="!isLoading" (click)="submitForm()" fill="clear" color="warning" translate>submit</ion-button>
+      <ion-spinner color="warning" *ngIf="isLoading" class="ion-align-self-center"></ion-spinner>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <ion-row>
+    <ion-col size="12">
+      <ion-item *ngIf="!mobile">
+        <div class="ion-text-center" style="width: 100%; padding: 0 16px">
+          <h4 style="margin: 0">
+            <span>{{dateTimeUtil.showMomentDate(translate.getLocale(), date)}}</span>
+          </h4>
+        </div>
+      </ion-item>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col class="ion-no-padding">
+      <ion-segment *ngIf="!mobile" mode="ios" (ionChange)="segmentChanged($event)" value="timeOff">
+        <ion-segment-button value="timeOff">
+          <ion-label style="padding: 0 10px"><span translate>time-off</span>
+          </ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="absence">
+          <ion-label style="padding: 0 10px"><span translate>absence</span>
+          </ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="overtime">
+          <ion-label style="padding: 0 10px"><span translate>overtime</span>
+          </ion-label>
+        </ion-segment-button>
+      </ion-segment>
+      <ion-segment *ngIf="mobile" (ionChange)="segmentChanged($event)" value="timeOff">
+        <ion-segment-button value="timeOff">
+          <ion-label style="padding: 0 10px"><span translate>time-off</span>
+          </ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="absence">
+          <ion-label style="padding: 0 10px"><span translate>absence</span>
+          </ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="overtime">
+          <ion-label style="padding: 0 10px"><span translate>overtime</span>
+          </ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-col>
+  </ion-row>
+  <form [formGroup]="timeOffRequestForm" (ngSubmit)="onSubmit()" [style.height]="mobile ? '100%' : 'auto'" *ngIf="timeOff">
+    <ion-row>
+      <ion-col size="12" class="ion-padding">
+        <ion-list>
+          <ion-item lines="none">
+            <ion-row>
+              <ion-col size="12" class="align-content" style="flex-direction: column">
+                <div [style.max-width]="mobile && !tablet ? '50%' : '30%'" [hidden]="halfDay">
+                  <ng-number-picker [min]="halfDay ? 0.5 : 1" [max]="employee.timeOffBalance.vacationDays" step="1" [value]="halfDay ? 0.5 : 1"
+                                    (valueChange)="updateTimeOffInput($event)"></ng-number-picker>
+                </div>
+                <ion-item lines="none">
+                  <ion-checkbox (ionChange)="checkHalfDay($event)" style="margin: 0"></ion-checkbox>
+                  <ion-label translate style="margin-left: 6px">half-day</ion-label>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12">
+                <span translate>pick-time-off-balance</span>
+                <ion-list>
+                  <ion-radio-group (ionChange)="timeOffBalanceSource($event)" formControlName="balanceType">
+                    <ion-item *ngIf="employee.timeOffBalance.vacationDays>0">
+                      <ion-label><span translate>vacation-days</span> <span class="available-days"> ({{'time-off-available' | translate}}{{': ' + employee.timeOffBalance.vacationDays + ')'}}</span></ion-label>
+                      <ion-radio slot="start" mode="md" value="VACS"></ion-radio>
+                    </ion-item>
+                    <ion-item *ngIf="employee.timeOffBalance.vacationRolloverDays>0">
+                      <ion-label><span translate>vacation-days-rollover</span> <span class="available-days"> ({{'time-off-available' | translate}}{{': ' + employee.timeOffBalance.vacationRolloverDays + ')'}}</span></ion-label>
+                      <ion-radio slot="start" mode="md" value="VACSROLLOVER"></ion-radio>
+                    </ion-item>
+                    <ion-item>
+                      <ion-label><span translate>bank-holiday-days</span> <span class="available-days"> ({{'time-off-available' | translate}}{{': ' + employee.timeOffBalance.complimentaryBankHolidayDays + ')'}}</span></ion-label>
+                      <ion-radio slot="start" mode="md" value="BANK"></ion-radio>
+                    </ion-item>
+                    <ion-item>
+                      <ion-label><span translate>bank-holiday-rollover</span> <span class="available-days"> ({{'time-off-available' | translate}}{{': ' + employee.timeOffBalance.complimentaryBankHolidayRolloverDays + ')'}}</span></ion-label>
+                      <ion-radio slot="start" mode="md" value="BANKROLLOVER"></ion-radio>
+                    </ion-item>
+                    <ion-item>
+                      <ion-label><span translate>comp-days</span> <span class="available-days"> ({{'time-off-available' | translate}}{{': ' + employee.timeOffBalance.compensationDays + ')'}}</span></ion-label>
+                      <ion-radio slot="start" mode="md" value="COMP"></ion-radio>
+                    </ion-item>
+                    <ion-item>
+                      <ion-label><span translate>comp-days-rollover</span> <span class="available-days"> ({{'time-off-available' | translate}}{{': ' + employee.timeOffBalance.compensationRolloverDays + ')'}}</span></ion-label>
+                      <ion-radio slot="start" mode="md" value="COMPROLLOVER"></ion-radio>
+                    </ion-item>
+                  </ion-radio-group>
+                  <ion-label translate color="danger" *ngIf="formSubmitted && timeOffRequestForm.get('balanceType').hasError('required')">pick-timeoff-balance-error</ion-label>
+                </ion-list>
+              </ion-col>
+            </ion-row>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+    <button style="display: none" #submitBtn></button>
+  </form>
+  <form class="ion-padding" [formGroup]="absenceForm" (ngSubmit)="onSubmitTimeRequest()" [style.height]="mobile ? '100%' : 'auto'" *ngIf="absence || overtime">
+    <ion-item class="wide">
+      <ion-row class="wide">
+        <ion-col size="12" class="ion-text-center"><ion-label translate color="dark">interval</ion-label></ion-col>
+        <ion-col size="10" offset-md="1" size-md="4" class="timepicker-col  ion-text-center flex-col ion-no-padding">
+          <ngb-timepicker [formControlName]="'start'" [meridian]="translate.getLocale().includes('en')"></ngb-timepicker>
+        </ion-col>
+        <ion-col *ngIf="!mobile || tablet" size="2" class="align-content">
+          <div style="border-bottom: 2px solid var(--ion-color-dark); width: 20px"></div>
+        </ion-col>
+        <ion-col offset-xs="2" offset-md="0" size="4" size-md="5" class="timepicker-col flex-col ion-no-padding">
+          <ngb-timepicker [formControlName]="'end'" [meridian]="translate.getLocale().includes('en')"></ngb-timepicker>
+        </ion-col>
+        <ion-col size="12" class="ion-text-center ion-no-padding" *ngIf="absenceForm.controls.start.hasError('required') || absenceForm.controls.end.hasError('required')">
+          <p  style="color: var(--ion-color-danger)" translate>sched-invalid-interval</p>
+        </ion-col>
+      </ion-row>
+    </ion-item>
+    <ion-item class="wide" [lines]="!mobile ? 'none' : undefined">
+      <ion-label color="dark" position="floating" translate>provider-booking-comments</ion-label>
+      <ion-textarea [style.margin-bottom]="mobile ? '16px' : '0'" auto-grow="true" formControlName="comments" [placeholder]="'provider-booking-comments' | translate"></ion-textarea>
+    </ion-item>
+    <ion-item class="wide">
+      <input type="file" accept="image/x-png,image/jpeg,application/pdf" style="display: none" #filePicker (change)="onFilePicked($event)">
+      <ion-label>
+        <span translate>attachment</span>
+        <ng-container *ngIf="pickedFiles.length>0">
+          <p *ngFor="let file of pickedFiles" class="align-content" style="justify-content: flex-start">
+            <ion-icon name="trash" class="hover" style="height: 20px; width: 20px" color="danger" (click)="removeAttachment(file.name)"></ion-icon>
+            <ion-label>
+              {{file.name}}
+            </ion-label>
+          </p>
+        </ng-container>
+      </ion-label>
+      <ion-button *ngIf="pickedFiles.length<10" (click)="openFilePicker()" fill="clear" size="large"><ion-icon name="attach-outline"></ion-icon></ion-button>
+
+    </ion-item>
+    <button style="display: none" #submitBtn></button>
+  </form>
+</ion-content>
+<ion-footer *ngIf="!mobile" style="display: flex; justify-content: flex-end;" class="ion-padding">
+  <ion-button (click)="dismiss()" fill="clear" color="dark" translate="">close</ion-button>
+  <ion-button *ngIf="!isLoading" type="submit" (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+  <ion-spinner color="primary" *ngIf="isLoading" class="ion-align-self-center"></ion-spinner>
+</ion-footer>

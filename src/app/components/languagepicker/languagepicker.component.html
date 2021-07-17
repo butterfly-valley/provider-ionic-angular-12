@@ -1,0 +1,11 @@
+<a (click)="changeLocale()" style="display: flex">
+  <ion-icon [color]="color" name="globe" style="font-size: 26px"></ion-icon>
+  <ion-label [color]="color" style="margin-left: 5px" *ngIf="this.localizationService.getLocale() === 'pt-PT'">
+    Português (Portugal)        </ion-label>
+  <ion-label [color]="color" style="margin-left: 5px" *ngIf="this.localizationService.getLocale() === 'en-US'">
+    English
+  </ion-label>
+  <ion-label [color]="color" style="margin-left: 5px" *ngIf="this.localizationService.getLocale() === 'ru-RU'">
+    Русский
+  </ion-label>
+</a>

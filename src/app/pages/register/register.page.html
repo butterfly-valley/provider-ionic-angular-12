@@ -1,0 +1,406 @@
+<ion-header>
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button text=""></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<app-mainmenu [menuId]="'register'"></app-mainmenu>
+<ion-content [ngClass]="{'white' : mobile}">
+  <div class="loading-cover-desktop-modal" *ngIf="loading">
+    <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+  </div>
+  <ion-grid class="container ion-no-padding ion-align-items-center ion-no-margin" style="display: flex; min-height: calc(100vh - 60px)" *ngIf="singUpForm">
+    <ion-row style="width: 100%">
+      <ion-col size="12" size-md="10" offset-md="1" offset-lg="2" size-lg="8" class="ion-no-padding">
+        <mat-card style="padding: 0; padding-top: 16px">
+          <h3 translate class="ion-text-center ion-text-uppercase">welcome-try-btn</h3>
+          <form [formGroup]="singUpForm" (ngSubmit)="onSubmitForm()">
+            <button style="display: none" #submitBtn></button>
+            <mat-vertical-stepper #stepper style="color: var(--ion-color-background)">
+              <!-- Define the edit icon, by default is 'create' -->
+              <ng-template matStepperIcon="edit">
+                <ion-icon style="margin-top: 3px" name="checkmark"></ion-icon>
+              </ng-template>
+              <mat-step [label]="'plan' | translate" [completed]="false">
+                <ion-radio-group value="BUSINESS" formControlName="plan">
+                  <ion-item>
+                    <ion-label>BUSINESS (<span translate>trial</span>)</ion-label>
+                    <ion-radio slot="start" value="BUSINESS"></ion-radio>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>PRO (<span translate>trial</span>)</ion-label>
+                    <ion-radio slot="start" value="PRO"></ion-radio>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>PLUS (<span translate>trial</span>)</ion-label>
+                    <ion-radio slot="start" value="PLUS"></ion-radio>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>BASIC</ion-label>
+                    <ion-radio slot="start" value="BASIC"></ion-radio>
+                  </ion-item>
+                </ion-radio-group>
+                <ion-label *ngIf="singUpForm.controls['type'].hasError('minlength') || singUpForm.controls['type'].hasError('maxlength') || singUpForm.controls['type'].hasError('required')" color="danger" translate>reg-vat-error</ion-label>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'account-type' | translate" [completed]="false">
+                <ion-radio-group value="business" formControlName="type">
+                  <ion-item>
+                    <ion-label translate>account-business</ion-label>
+                    <ion-radio slot="start" value="business"></ion-radio>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label translate>account-personal</ion-label>
+                    <ion-radio slot="start" value="personal"></ion-radio>
+                  </ion-item>
+                </ion-radio-group>
+                <ion-label *ngIf="singUpForm.controls['type'].hasError('minlength') || singUpForm.controls['type'].hasError('maxlength') || singUpForm.controls['type'].hasError('required')" color="danger" translate>account-type-invalid</ion-label>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'reg-name' | translate" [completed]="false">
+                <ion-item lines="none">
+                  <ion-input  formControlName="name" required [placeholder]="translate.getFromKey('reg-name-your') + '*'"></ion-input>
+                </ion-item>
+                <ion-label *ngIf="!formSubmitted && singUpForm.controls.name.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-label *ngIf="!formSubmitted && singUpForm.controls.name.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-label *ngIf="formSubmitted && singUpForm.controls.name.hasError('required')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-label *ngIf="formSubmitted && singUpForm.controls.name.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-label *ngIf="formSubmitted && singUpForm.controls.name.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-item lines="none" style="margin-top: 16px">
+                  <ion-input   formControlName="companyName" [placeholder]="translate.getFromKey('reg-name-company')"></ion-input>
+                </ion-item>
+                <ion-label *ngIf="formSubmitted && singUpForm.controls.companyName.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-label *ngIf="formSubmitted && singUpForm.controls.companyName.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-label *ngIf="!formSubmitted && singUpForm.controls.companyName.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+                <ion-label *ngIf="!formSubmitted && singUpForm.controls.companyName.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'address-billing' | translate" [completed]="false">
+                <ion-grid class="ion-no-padding" style="margin-bottom: 16px" formGroupName="address">
+                  <ion-row class="ion-no-padding">
+                    <ion-col class="ion-no-padding" size="12">
+                      <ion-input style=" margin-top: 16px; max-width: 100%"
+                                 [placeholder]="'address-line-1' | translate"
+                                 formControlName="street1"
+                      ></ion-input>
+                      <ion-label color="danger" translate *ngIf="formSubmitted && (singUpForm.get('address.street1').hasError('required') || singUpForm.get('address.street1').hasError('minlength')) ">reg-address-error</ion-label>
+                    </ion-col>
+                    <ion-col class="ion-no-padding" size="12">
+                      <ion-input style=" margin-top: 16px; max-width: 100%"
+                                 formControlName="street2"
+                                 [placeholder]="'address-line-2' | translate"
+                      ></ion-input>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="ion-no-padding">
+                    <ion-col size="12" size-md="5" class="ion-no-padding">
+                      <ion-input style=" margin-top: 16px"
+                                 formControlName="postalCode"
+                                 [placeholder]="('reg-zip' | translate) + '*'"
+                      ></ion-input>
+                      <ion-label color="danger" translate *ngIf="formSubmitted && (singUpForm.get('address.postalCode').hasError('required') || singUpForm.get('address.postalCode').hasError('minlength'))">navbar-CP4BindError</ion-label>
+                    </ion-col>
+                    <ion-col size="12" offset-md="1" size-md="6" class="ion-no-padding">
+                      <ion-input style=" margin-top: 16px"
+                                 formControlName="city"
+                                 [placeholder]="('reg-place' | translate) + '*'"
+                      ></ion-input>
+                      <ion-label color="danger" translate *ngIf="formSubmitted && (singUpForm.get('address.city').hasError('required') || singUpForm.get('address.city').hasError('minlength'))">reg-place-error</ion-label>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="ion-no-padding" style="margin-top: 16px">
+                    <ion-col size="12" size-md="6" class="ion-no-padding" style="display: flex; align-items: center">
+                      <ion-input style=""
+                                 formControlName="province"
+                                 [placeholder]="'reg-province' | translate"
+                      ></ion-input>
+                    </ion-col>
+                    <ion-col size="12" size-md="5" offset-md="1" class="ion-no-padding ion-text-left ion-align-items-center">
+                      <mat-form-field style="width: 100%" *ngIf="!mobile">
+                        <mat-select placeholder="{{ 'reg-country' | translate }}*" formControlName="country">
+                          <mat-option *ngFor="let country of countryCodesService.getCodes()" [value]="country.name">
+                            {{country.name}}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      <div class="select-holder" *ngIf="mobile">
+                        <select formControlName="country" style="width: 100%; margin-top: 16px">
+                          <option [ngValue]="null">{{ 'reg-country' | translate }}*</option>
+                          <option *ngFor="let country of countryCodesService.getCodes()" [value]="country.name">{{country.name}}</option>
+                        </select>
+                        <ion-icon style="margin-top: 16px" class="select-dropdown-icon" color="dark" name="chevron-down-outline"></ion-icon>
+                      </div>
+                      <ion-label color="danger" translate *ngIf="formSubmitted && (singUpForm.get('address.country').hasError('required') || singUpForm.get('address.country').hasError('minlength'))">reg-country-error</ion-label>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+                <div *ngIf="vatNumberMandatory">
+                  <ion-input type="text" style="margin: 16px 0"
+                             [placeholder]="translate.getFromKey('reg-vat') + '*'" maxlength="15" minlength="8"
+                             formControlName="vat"></ion-input>
+                  <ion-label *ngIf="singUpForm.controls['vat'].hasError('minlength') || singUpForm.controls['vat'].hasError('maxlength')" color="danger" translate>reg-vat-error</ion-label>
+                </div>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'login-email' | translate" [completed]="false">
+                <ion-item lines="none" style="margin-bottom: 10px">
+                  <ion-input type="email"
+                             [placeholder]="translate.getFromKey('login-email') + '*'"
+                             formControlName="username"></ion-input>
+                </ion-item>
+                <ion-label *ngIf="singUpForm.controls['username'].hasError('pattern') || (formSubmitted && singUpForm.controls['username'].hasError('required'))" color="danger" translate>login-email-error</ion-label>
+
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'phone' | translate" [completed]="false">
+                <ion-grid formGroupName="phones" style="color: var(--ion-color-dark)" class="ion-no-padding">
+                  <ng-container *ngFor="let phone of phoneControls; index as i">
+                    <ion-row [formGroupName]="i">
+                      <ion-col class="ion-no-padding ion-justify-content-center ion-align-items-center phone-holder" size="12" size-md="5" style="display: flex">
+                        <ion-button fill="clear" color="danger" class="ion-no-margin" (click)="removePhone(i)">
+                          <ion-icon size="small" name="trash" slot="icon-only"></ion-icon>
+                        </ion-button>
+                        <div class="select-holder" *ngIf="mobile">
+                          <select formControlName="type" style="margin-bottom: 6px">
+                            <option value="CELL">
+                              {{'prof-cell' | translate}}
+                            </option>
+                            <option value="LANDLINE">
+                              {{'prof-landline' | translate}}
+                            </option>
+                            <option value="MISC">
+                              {{'phone-misc' | translate}}
+                            </option>
+                          </select>
+                          <ion-icon class="select-dropdown-icon" name="chevron-down-outline"></ion-icon>
+                        </div>
+                        <mat-form-field style="width: 70%;" class="no-padding" *ngIf="!mobile">
+                          <mat-select [placeholder]="'pay-type' | translate" formControlName="type">
+                            <mat-option value="CELL">
+                              {{'prof-cell' | translate}}
+                            </mat-option>
+                            <mat-option value="LANDLINE">
+                              {{'prof-landline' | translate}}
+                            </mat-option>
+                            <mat-option value="MISC">
+                              {{'phone-misc' | translate}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </ion-col>
+                      <ion-col class="ion-no-padding ion-align-items-center" style="display: flex" size="12" size-md="7">
+                        <ngx-intl-tel-input
+                                [cssClass]="'intl-code-input'"
+                                [enableAutoCountrySelect]="true"
+                                [enablePlaceholder]="true"
+                                [searchCountryFlag]="true"
+                                [selectFirstCountry]="true"
+                                [preferredCountries]="preferredCountries"
+                                [maxLength]="15"
+                                [separateDialCode]="true"
+                                [phoneValidation]="true"
+                                [searchCountryPlaceholder]="translate.getFromKey('search')"
+                                formControlName="phone"></ngx-intl-tel-input>
+                      </ion-col>
+                      <ion-col class="ion-no-padding ion-text-center">
+                        <div *ngIf="formSubmitted && phone.controls.type.hasError('required')">F
+                          <ion-label color="danger" translate>phone-type-error</ion-label>
+                        </div>
+                        <div *ngIf="!phone.controls.phone.valid">
+                          <ion-label color="danger" translate>phone-error</ion-label>
+                        </div>
+                      </ion-col>
+                    </ion-row>
+                  </ng-container>
+                  <div class="button-holder">
+                    <ion-chip outline color="warning" (click)="addPhoneField()">
+                      <ion-icon name="add"></ion-icon>
+                      <ion-label translate>phone</ion-label>
+                    </ion-chip>
+                  </div>
+                </ion-grid>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'login-password' | translate" [completed]="false">
+                <ion-item lines="none">
+                  <div style="width: 100%">
+                    <div class="margin-top">
+                      <ion-input type="password"
+                                 formControlName="password"
+                                 [placeholder]="'login-password' | translate"
+                      ></ion-input>
+                    </div>
+                    <div style="margin-top: 5px" class="margin-left">
+                      <div *ngIf="singUpForm.controls['password'].hasError('hasCapitalCase') || (singUpForm.value.password==null || singUpForm.value.password.length<1)">
+                        <ion-label color="danger">
+                          <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-cap1</span>
+                        </ion-label>
+                      </div>
+                      <div  *ngIf="!singUpForm.controls['password'].hasError('hasCapitalCase') && singUpForm.value.password!=null && singUpForm.value.password.length>0">
+                        <ion-label color="success">
+                          <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-cap1</span>
+                        </ion-label>
+                      </div>
+                      <div *ngIf="singUpForm.controls['password'].hasError('hasSmallCase') || (singUpForm.value.password==null || singUpForm.value.password.length<1)">
+                        <ion-label color="danger">
+                          <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-reg1</span>
+                        </ion-label>
+                      </div>
+                      <div *ngIf="!singUpForm.controls['password'].hasError('hasSmallCase') && singUpForm.value.password!=null && singUpForm.value.password.length>0">
+                        <ion-label color="success">
+                          <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-reg1</span>
+                        </ion-label>
+                      </div>
+                      <div *ngIf="singUpForm.controls['password'].hasError('hasNumber') || (singUpForm.value.password==null || singUpForm.value.password.length<1)">
+                        <ion-label color="danger">
+                          <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-fig1</span>
+                        </ion-label>
+                      </div>
+                      <div *ngIf="!singUpForm.controls['password'].hasError('hasNumber') && singUpForm.value.password!=null && singUpForm.value.password.length>0">
+                        <ion-label color="success">
+                          <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-fig1</span>
+                        </ion-label>
+                      </div>
+                      <div *ngIf="singUpForm.controls['password'].hasError('minlength') || (singUpForm.value.password==null || singUpForm.value.password.length<1)">
+                        <ion-label color="danger">
+                          <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-char8</span>
+                        </ion-label>
+                      </div>
+                      <div *ngIf="!singUpForm.controls['password'].hasError('minlength') && singUpForm.value.password!=null && singUpForm.value.password.length>0">
+                        <ion-label color="success">
+                          <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-char8</span>
+                        </ion-label>
+                      </div>
+                    </div>
+                    <div class="margin-top">
+                      <ion-input type="password" style=" margin-bottom: 16px"
+                                 formControlName="matchingPassword"
+                                 [placeholder]="'reg-cfm-psswd' | translate"
+                      ></ion-input>
+                    </div>
+                    <div class="margin-left" *ngIf="singUpForm.controls['matchingPassword'].hasError('matchOther')">
+                      <ion-label color="danger" translate>reg-psswd-match-error</ion-label>
+                    </div>
+                  </div>
+                </ion-item>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'welcome-services' | translate" [completed]="false">
+                <ion-item lines="none" style="margin-bottom: 10px">
+                  <ion-grid class="ion-no-padding">
+                    <ion-row>
+                      <ion-col size-md="8" offset-md="2">
+                        <mat-form-field style="width: 100%" *ngIf="!mobile">
+                          <mat-select placeholder="{{ 'welcome-services' | translate }}*" formControlName="serviceType">
+                            <mat-option *ngFor="let category of categories | orderTranslate" [value]="category">{{category | translate}}</mat-option>
+                            <mat-option value="MISC">{{'MISC' | translate}}</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                        <div class="select-holder" *ngIf="mobile">
+                          <select style="width: 100%" formControlName="serviceType" id="service">
+                            <option [ngValue]="null">{{ 'welcome-services' | translate }}*</option>
+                            <option *ngFor="let category of categories | orderTranslate" [value]="category">{{category | translate}}</option>
+                            <option value="MISC">{{'MISC' | translate}}</option>
+                          </select>
+                          <ion-icon class="select-dropdown-icon" name="chevron-down-outline"></ion-icon>
+                        </div>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </ion-item>
+                <ion-label *ngIf="formSubmitted && singUpForm.controls['serviceType'].hasError('required')" color="danger" translate>reg-service-error</ion-label>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="('address' | translate) + '*'" [completed]="false">
+                <ion-item lines="none" style="margin-bottom: 10px" [hidden]="addressPicked === ''">
+                  <ion-icon name="trash" slot="start" color="danger" (click)="resetFacilityAddress()"></ion-icon>
+                  <ion-label style="white-space: normal" *ngIf="addressPicked">{{addressPicked}}</ion-label>
+                </ion-item>
+                <ion-item lines="none" style="margin-bottom: 10px" [hidden]="addressPicked !== ''">
+                  <div style="width: 100%">
+                    <input class="search-location" type="text" #googlePlacesAutocomplete placeholder="{{ 'reg-start-typing' | translate }}"/>
+                  </div>
+                </ion-item>
+                <ion-item lines="none" style="margin-bottom: 10px" [hidden]="addressPicked !== ''">
+                  <ion-label>* - <span>{{('reg-fill-address' | translate) + ' '}}</span><span translate>reg-schedule</span></ion-label>
+                </ion-item>
+                <div formGroupName="facilityAddress">
+                  <input type="hidden" data-minlength="3" id="route" formControlName="route" />
+                  <input type="hidden" formControlName="street_number" id="street_number" />
+                  <input type="hidden"  id="postal_code"  formControlName="postal_code"/>
+                  <input type="hidden" id="locality" formControlName="locality" />
+                  <input type="hidden" id="administrative_area_level_1" tabindex="7" formControlName="administrative_area_level_1"/>
+                  <input type="hidden" id="country" formControlName="country" />
+                </div>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="('reg-business-hours' | translate) + '*'" [completed]="false">
+                <div formGroupName="schedule">
+                    <app-weekday-picker [scheduleForm]="singUpForm" [days]="true" [formSubmitted]="formSubmitted" [opsHours]="[]"></app-weekday-picker>
+                    </div>
+                <div style="margin-top: 32px">
+                  <ion-label color="dark">* - <span translate>reg-schedule</span></ion-label>
+                </div>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+                  <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+                </div>
+              </mat-step>
+              <mat-step [label]="'reg-finishing-touches' | translate" [completed]="false">
+                <div>
+                  <div>
+                    <ion-item lines="none">
+                      <ion-toggle formControlName="acceptTerms" slot="start"></ion-toggle>
+                      <ion-label style="white-space: normal" color="dark">
+                        <span translate>reg-terms1</span>&nbsp;<a [routerLink]="['/info/terms']" translate>footer-terms</a>&nbsp;<span translate>reg-terms2</span>&nbsp;
+                        <a [routerLink] ="['/info/terms']" fragment="privacy" translate>reg-terms3</a>
+                      </ion-label>
+                    </ion-item>
+                    <ion-label *ngIf="formSubmitted && singUpForm.get('acceptTerms').hasError('pattern')" color="danger" translate>reg-terms-error</ion-label>
+                  </div>
+                </div>
+                <div class="ion-text-end" style="margin-top: 16px">
+                  <ion-button translate (click)="submitForm()">submit</ion-button>
+                </div>
+              </mat-step>
+            </mat-vertical-stepper>
+          </form>
+        </mat-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <app-terms *ngIf="showTermsContainer"></app-terms>
+</ion-content>

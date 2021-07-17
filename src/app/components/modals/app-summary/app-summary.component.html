@@ -1,0 +1,77 @@
+<ion-header *ngIf="mobile">
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!tablet" (click)="dismiss()" fill="clear">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark">{{dateTimeUtil.showUTCTime(locale, date, duration)}}</ion-label>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <h4 class="modal-title ion-padding" *ngIf="!mobile">
+    <ion-label class="desktop-title">{{dateTimeUtil.showUTCTime(locale, date, duration)}}</ion-label>
+  </h4>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        <mat-card *ngFor="let appointment of appSummary" class="appointment-card" style="padding: 0; margin-bottom: 16px">
+          <ion-grid class="ion-no-padding ion-no-margin">
+            <ion-row class="ion-no-padding ion-no-margin">
+              <ion-col size="12" class="ion-no-padding">
+                <ion-item lines="none" class="ion-activatable desktop-item" *ngIf="!mobile">
+                  <ion-ripple-effect></ion-ripple-effect>
+                  <ion-label (click)="showAppointment(appointment.appointmentId)">
+                    <p class="p-flex" [title]="appointment.bookanapp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                      <ion-icon *ngIf="!appointment.bookanapp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                      <img *ngIf="appointment.bookanapp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                      <span class="span-margin">{{ appointment.bookingName }}</span></p>
+                    <p class="p-flex">
+                      <ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.bookedSpots }}  {{'persons' | translate}}</span>
+                    </p>
+                    <p *ngIf="appointment.scheduleCategory"><fa-icon [icon]="scheduleIcon"></fa-icon>
+                      <span class="span-margin" *ngIf="appointment.scheduleCategory !== 'default'">{{ appointment.scheduleName }} ({{appointment.scheduleCategory}})</span>
+                      <span class="span-margin" *ngIf="appointment.scheduleCategory === 'default'">{{ appointment.scheduleName }} ({{'provider-null-reference' | translate}})</span>
+                    </p>
+                    <p *ngIf="!appointment.scheduleCategory" style="padding-left: 3px"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.scheduleName }}</span></p>
+                    <p class="p-flex" *ngIf="appointment.remark">
+                      <ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{appointment.remark}}</span>
+                    </p>
+                  </ion-label>
+                </ion-item>
+                <ion-item *ngIf="mobile">
+                  <ion-ripple-effect></ion-ripple-effect>
+                  <ion-label (click)="showAppointment(appointment.appointmentId)">
+                    <p class="p-flex" [title]="appointment.bookanapp ? ('client-bookanapp' | translate) : ('customer-mycustomer' | translate)">
+                      <ion-icon *ngIf="!appointment.bookanapp" name="person" color="secondary" class="icon-aligned"></ion-icon>
+                      <img *ngIf="appointment.bookanapp" class="bookanapp-image avatar" src="/assets/logo/ios-logo.png">
+                      <span class="span-margin">{{ appointment.bookingName }}</span></p>
+                    <p class="p-flex"><ion-icon name="people" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{ appointment.bookedSpots }}  {{'persons' | translate}}</span></p>
+                    <p *ngIf="appointment.scheduleCategory"><fa-icon [icon]="scheduleIcon"></fa-icon>
+                      <span class="span-margin" *ngIf="appointment.scheduleCategory !== 'default'">{{ appointment.scheduleName }} ({{appointment.scheduleCategory}})</span>
+                      <span class="span-margin" *ngIf="appointment.scheduleCategory === 'default'">{{ appointment.scheduleName }} ({{'provider-null-reference' | translate}})</span>
+                    </p>
+                    <p *ngIf="!appointment.scheduleCategory"><fa-icon [icon]="scheduleIcon"></fa-icon><span class="span-margin">{{ appointment.scheduleName }}</span></p>
+                    <p class="p-flex" *ngIf="appointment.remark">
+                      <ion-icon name="information-circle" color="secondary" class="icon-aligned"></ion-icon><span class="span-margin">{{appointment.remark}}</span>
+                    </p>
+                  </ion-label>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </mat-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>
+<ion-footer *ngIf="!mobile" style="text-align: right" class="ion-padding">
+  <ion-button (click)="dismiss()" fill="clear" color="seconary" class="bold-600" translate>close</ion-button>
+</ion-footer>
+

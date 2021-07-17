@@ -1,0 +1,29 @@
+
+<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+  <!-- This is the tree node template for leaf nodes -->
+  <mat-tree-node *matTreeNodeDef="let node">
+    <ion-item style="width: 100%; padding-right: 16px; margin-left: 16px">
+      <div class="checkbox-container" *ngIf="!schedulePage">
+        <ion-checkbox  [(ngModel)]="scheduleService.schedules[node.scheduleId]"  color="secondary" slot="start" (ionChange)="addScheduleIds(node.scheduleId + '$$$' + node.name, $event)"></ion-checkbox>
+      </div>
+      <ion-label class="normal-white-space" [ngClass]="{'margin-left' : !schedulePage}">
+        <a class="schedule-view" (click)="openScheduleInParent(node.scheduleId + '$$$' + node.name + '###' + node.freeSchedule)">{{node.name}}</a>
+      </ion-label>
+    <ion-button *ngIf="schedulePage" fill="clear" class="small-button" (click)="editScheduleInParent(node.scheduleId)" color="tertiary"  [title]="'edit' | translate">
+      <ion-icon slot="icon-only" class="small-icon" name="create"></ion-icon>
+    </ion-button>
+    <ion-button *ngIf="schedulePage" fill="clear" class="small-button"  (click)="deleteScheduleInParent(node.scheduleId + '$$$' + node.name)" color="danger"  [title]="'delete' | translate">
+      <ion-icon slot="icon-only" class="small-icon" name="trash"></ion-icon>
+    </ion-button>
+    </ion-item>
+  </mat-tree-node>
+  <!-- This is the tree node template for expandable nodes -->
+  <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+    <h4 class="schedule-category-view" [attr.aria-label]="'toggle ' + node.name" matTreeNodeToggle>
+        <ion-label *ngIf="node.name !== 'default'">{{node.name}}</ion-label>
+        <ion-label *ngIf="node.name === 'default'" translate>provider-null-reference</ion-label>
+      <ion-icon name="chevron-down-outline"></ion-icon>
+    </h4>
+  </mat-tree-node>
+</mat-tree>
+

@@ -1,0 +1,16 @@
+<mat-form-field style="right: 10px">
+  <fa-icon [icon]="profileIcon" style="position: absolute; right: 15px"></fa-icon>
+  <mat-select #userSelect panelClass="my-select-panel-class">
+    <mat-option (click)="navigateToProfile()" style="padding-left: 20px">
+      <fa-icon [icon]="profileIcon" style="margin-right: 5px"></fa-icon><ion-label translate text-uppercase="">navbar-profile</ion-label>
+    </mat-option>
+    <mat-option>
+      <app-languagepicker class="language-picker"></app-languagepicker>
+    </mat-option>
+    <mat-option style="padding-left: 20px" (click)="signOut()">
+      <div class="vertical-align">
+        <fa-icon [icon]="signOutIcon" style="margin-right: 5px; color: #F40000; font-size: 22px"></fa-icon><ion-label translate color="danger" text-uppercase="">leave</ion-label>
+      </div>
+    </mat-option>
+  </mat-select>
+</mat-form-field>

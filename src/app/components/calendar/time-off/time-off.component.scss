@@ -1,0 +1,21 @@
+:host ::ng-deep .fc-daygrid-day-frame:hover{
+  cursor: pointer;
+}
+
+:host ::ng-deep .no-time-grid .fc-view-harness {
+  display: none;
+}
+
+:host ::ng-deep .no-time-grid .fc-header-toolbar {
+  margin-bottom: 0!important;
+}
+
+:host ::ng-deep .fc-toolbar-title:first-letter {
+  text-transform: capitalize;
+}
+
+:host ::ng-deep .fc-event-time {
+  display: none;
+}
+
+

@@ -1,0 +1,325 @@
+<ion-header mode="ios" class="desktop-modal-header">
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!tablet && mobile" (click)="dismiss()" fill="clear">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="mobile && tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+      <ion-button *ngIf="!mobile" fill="clear" (click)="dismiss()">
+        <ion-icon name="arrow-back"></ion-icon>
+        <span class="ion-text-capitalize" translate>back</span>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark">{{subdivision ? employee.subdivision + ' (' + employee.division + ')' : division ? employee.division : employee.name}}</ion-label>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <div class="modal-container">
+    <ion-segment [value]="division ? 'publish' : 'add'" *ngIf="!mobile" mode="ios" (ionChange)="mainSegmentChanged($event)">
+      <ion-segment-button value="add" *ngIf="!division">
+        <ion-label translate>edit</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="publish">
+        <ion-label translate>publish</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="delete">
+        <ion-label translate>delete</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <ion-segment [value]="division ? 'publish' : 'add'" *ngIf="mobile" (ionChange)="mainSegmentChanged($event)">
+      <ion-segment-button value="add" *ngIf="!division">
+        <ion-label translate>edit</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="publish">
+        <ion-label translate>publish</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="delete">
+        <ion-label translate>delete</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <ion-segment value="days" *ngIf="mobile && addRoster" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="days">
+        <ion-label translate>roster-days</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pattern">
+        <ion-label translate>roster-pattern</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <ion-segment value="days" *ngIf="!mobile  && addRoster" mode="ios" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="days">
+        <ion-label translate>roster-days</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pattern">
+        <ion-label translate>roster-pattern</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <form [formGroup]="scheduleForm" *ngIf="scheduleForm && days && addRoster && !division" (ngSubmit)="onSubmitForm()">
+      <button type="submit" style="display: none" #submitBtn></button>
+      <mat-vertical-stepper #stepper>
+        <mat-step [label]="'sched-choose-year-months' | translate" [completed]="false" formGroupName="schedule">
+          <mat-form-field class="ion-margin">
+            <input class="calendar-input" matInput [placeholder]="'sched-start-date' | translate" formControlName="startDate" [matDatepicker]="startDate">
+            <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+            <mat-datepicker #startDate [dateClass]="dateClass()"
+                            startView="year">
+            </mat-datepicker>
+          </mat-form-field>
+          <mat-form-field class="ion-margin">
+            <input class="calendar-input" matInput [matDatepicker]="endDate" [placeholder]="'sched-end-date' | translate" formControlName="endDate">
+            <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+            <mat-datepicker #endDate [dateClass]="dateClass()"
+                            startView="year">
+            </mat-datepicker>
+          </mat-form-field>
+          <div class="ion-text-end" style="margin-top: 16px">
+            <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+          </div>
+        </mat-step>
+        <p *ngIf="formSubmitted && (scheduleForm.controls.schedule['controls'].endDate.hasError('required') || scheduleForm.controls.schedule['controls'].startDate.hasError('required'))"  style="color: var(--ion-color-danger)" translate>sched-choose-date-error</p>
+        <mat-step [label]="'roster-days' | translate" [completed]="false" formGroupName="schedule">
+        <ng-container *ngIf="opsHours$ | async as opsHours">
+          <app-weekday-picker *ngIf="opsHoursFetched" [scheduleForm]="scheduleForm" [days]="days" [formSubmitted]="formSubmitted" [opsHours]="opsHours"></app-weekday-picker>
+        </ng-container>
+          <div class="ion-text-end" style="margin-top: 16px">
+            <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+            <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+          </div>
+        </mat-step>
+        <mat-step [label]="'reg-finishing-touches' | translate" [completed]="false">
+          <ng-container *ngIf="allSlotColor$ | async as colors">
+            <ion-list style="width: 100%">
+              <ion-list-header>
+                <ion-label translate>color</ion-label>
+              </ion-list-header>
+              <ion-radio-group (ionChange)="setColor($event)">
+                <ion-item *ngFor="let color of colors">
+                  <ion-avatar [style.background]="color.color" slot="start"></ion-avatar>
+                  <ion-label>{{color.name}}</ion-label>
+                  <ion-radio slot="start" mode="md" [value]="color.color"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label translate>phone-misc</ion-label>
+                  <ion-radio slot="start" mode="md" value="other"></ion-radio>
+                </ion-item>
+              </ion-radio-group>
+            </ion-list>
+            <div style="display: flex; align-items: center; justify-content: center;" *ngIf="setCustomColor || colors.length < 1">
+              <input class="color-picker" [(colorPicker)]="color" [style.background]="color"/>
+              <ion-item lines="none" style="width: calc(100% - 100px)">
+                <ion-label translate position="floating">roster-color-name</ion-label>
+                <ion-input formControlName="colorName" [placeholder]="translate.getFromKey('roster-color-name')"></ion-input>
+              </ion-item>
+            </div>
+          </ng-container>
+          <ion-item lines="none">
+            <ion-label translate position="floating">note</ion-label>
+            <ion-textarea auto-grow="true" rows="1" style="margin: 10px 0" formControlName="note" [placeholder]="translate.getFromKey('note')"></ion-textarea>
+          </ion-item>
+          <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+            <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+            <ion-button *ngIf="!isLoading" (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+            <ion-spinner color="primary" *ngIf="isLoading"  class="ion-align-self-center"></ion-spinner>
+          </div>
+        </mat-step>
+      </mat-vertical-stepper>
+    </form>
+    <form action="" [formGroup]="patternForm" *ngIf="patternForm && pattern  && addRoster  && !division" (ngSubmit)="onSubmitForm()">
+      <button type="submit" style="display: none" #submitBtn></button>
+      <mat-vertical-stepper #stepper>
+        <mat-step [label]="'sched-choose-year-months' | translate" [completed]="false" formGroupName="schedule">
+          <mat-form-field class="ion-margin">
+            <input class="calendar-input" matInput [placeholder]="'sched-start-date' | translate" formControlName="startDate" [matDatepicker]="startDate">
+            <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+            <mat-datepicker #startDate [dateClass]="dateClass()"
+                            startView="year">
+            </mat-datepicker>
+          </mat-form-field>
+          <mat-form-field class="ion-margin">
+            <input class="calendar-input" matInput [matDatepicker]="endDate" [placeholder]="'sched-end-date' | translate" formControlName="endDate">
+            <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+            <mat-datepicker #endDate [dateClass]="dateClass()"
+                            startView="year">
+            </mat-datepicker>
+          </mat-form-field>
+          <div class="ion-text-end" style="margin-top: 16px">
+            <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+          </div>
+        </mat-step>
+        <mat-step [label]="'roster-pattern' | translate" [completed]="false">
+          <ng-container *ngIf="allSlotPatterns$ | async as patterns">
+            <ion-list *ngIf="pattern">
+              <ion-radio-group (ionChange)="setPattern($event)">
+                <ion-item *ngFor="let pattern of patterns">
+                  <ion-label>{{pattern.name + ' (' + pattern.pattern + ', ' + showPatternTime(pattern.start)+ '-' + showPatternTime(pattern.end)  + ')'}}</ion-label>
+                  <ion-radio slot="start" mode="md" [value]="pattern.name" slot="start"></ion-radio>
+                </ion-item>
+                <ion-item *ngIf="patterns.length > 0">
+                  <ion-label translate>phone-misc</ion-label>
+                  <ion-radio slot="start" mode="md" value="other" slot="start"></ion-radio>
+                </ion-item>
+              </ion-radio-group>
+              <ion-item lines="none" *ngIf="patterns.length < 1 || setCustomPattern">
+                <ion-label translate position="floating">roster-pattern-name</ion-label>
+                <ion-textarea auto-grow="true" rows="1" style="margin: 10px 0" formControlName="patternName" [placeholder]="translate.getFromKey('roster-pattern-name')"></ion-textarea>
+              </ion-item>
+              <ion-radio-group *ngIf="patterns.length < 1 || setCustomPattern" value="1/1" (ionChange)="patternChange($event)" formControlName="pattern">
+                <ion-item>
+                  <ion-label>1/1</ion-label>
+                  <ion-radio slot="start" mode="md" value="1/1"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label>2/2</ion-label>
+                  <ion-radio slot="start" mode="md" value="2/2"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label>3/2</ion-label>
+                  <ion-radio slot="start" mode="md"  value="3/2"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label>4/2</ion-label>
+                  <ion-radio slot="start" mode="md"  value="4/2"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label>5/2</ion-label>
+                  <ion-radio slot="start" mode="md" value="5/2"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label>6/2</ion-label>
+                  <ion-radio slot="start" mode="md" value="6/2"></ion-radio>
+                </ion-item>
+                <ion-item>
+                  <ion-label translate>  phone-misc</ion-label>
+                  <ion-radio slot="start" mode="md" value="other"></ion-radio>
+                </ion-item>
+              </ion-radio-group>
+              <ng-container *ngIf="patterns.length < 1 || setCustomPattern">
+                <ion-grid *ngIf="customPattern" [style.margin-left]="!mobile || tablet ? '64px' : '0'">
+                  <ion-row>
+                    <ion-col class="ion-no-padding ion-text-sm-left" size="5" size-md="4">
+                      <ng-number-picker min="1" max="30" step="1" [value]="1" (valueChange)="customPatternSetter($event, 1)"></ng-number-picker>
+                    </ion-col>
+                    <ion-col style="display: flex" class="ion-align-items-center ion-justify-content-center" size="2">
+                      <div style="margin-bottom: 1rem; font-size: 25px">
+                        /
+                      </div>
+                    </ion-col>
+                    <ion-col class="ion-no-padding ion-text-sm-left" size="5" size-md="4">
+                      <ng-number-picker min="1" max="30" step="1" [value]="1" (valueChange)="customPatternSetter($event, 2)"></ng-number-picker>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ng-container>
+              <ion-list-header *ngIf="patterns.length < 1 || setCustomPattern">
+                <ion-label translate>sched-choose-hour</ion-label>
+              </ion-list-header >
+              <ion-grid style="width: 100%" class="ion-no-padding" *ngIf="patterns.length < 1 || setCustomPattern">
+                <ion-row>
+                  <ion-col size="10" size-md="4" class="timepicker-col  ion-text-center flex-col ion-no-padding">
+                    <ngb-timepicker formControlName="patternStart" [meridian]="translate.getLocale().includes('en')"></ngb-timepicker>
+                  </ion-col>
+                  <ion-col *ngIf="!mobile || tablet" size="1" class="separator-holder">
+                    -
+                  </ion-col>
+                  <ion-col offset-xs="2" offset-md="0" size="10" size-md="4" class="timepicker-col ion-text-center flex-col ion-no-padding">
+                    <ngb-timepicker formControlName="patternEnd" [meridian]="translate.getLocale().includes('en')"></ngb-timepicker>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-list>
+          </ng-container>
+          <div class="ion-text-end" style="margin-top: 16px">
+            <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+            <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+          </div>
+        </mat-step>
+        <mat-step [label]="'reg-finishing-touches' | translate" [completed]="false">
+          <ng-container *ngIf="allSlotColor$ | async as colors">
+            <ion-list style="width: 100%">
+              <ion-list-header>
+                <ion-label translate>color</ion-label>
+              </ion-list-header>
+              <ion-radio-group (ionChange)="setColor($event)">
+                  <ion-item *ngFor="let color of colors">
+                    <ion-avatar [style.background]="color.color" slot="start"></ion-avatar>
+                    <ion-label>{{color.name}}</ion-label>
+                    <ion-radio slot="start" mode="md" [value]="color.color"></ion-radio>
+                  </ion-item>
+                <ion-item>
+                  <ion-label translate>phone-misc</ion-label>
+                  <ion-radio slot="start" mode="md" value="other"></ion-radio>
+                </ion-item>
+              </ion-radio-group>
+            </ion-list>
+            <div style="display: flex; align-items: center; justify-content: center;" *ngIf="setCustomColor || colors.length < 1">
+              <input class="color-picker" [(colorPicker)]="color" [style.background]="color"/>
+              <ion-item lines="none" style="width: calc(100% - 100px)">
+                <ion-label translate position="floating">roster-color-name</ion-label>
+                <ion-input formControlName="colorName" [placeholder]="translate.getFromKey('roster-color-name')"></ion-input>
+              </ion-item>
+            </div>
+          </ng-container>
+          <ion-item lines="none">
+            <ion-label translate position="floating">note</ion-label>
+            <ion-textarea auto-grow="true" rows="1" style="margin: 10px 0" formControlName="note" [placeholder]="translate.getFromKey('note')"></ion-textarea>
+          </ion-item>
+          <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+            <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+            <ion-button *ngIf="!isLoading" (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+            <ion-spinner color="primary" *ngIf="isLoading"  class="ion-align-self-center"></ion-spinner>
+          </div>
+        </mat-step>
+      </mat-vertical-stepper>
+    </form>
+    <form class="ion-padding" [formGroup]="publishOrDeleteForm" *ngIf="publishRoster" (ngSubmit)="onSubmitPublishOrDeleteForm(false)">
+      <button style="display: none" #submitBtn></button>
+      <div class="ion-text-center">
+        <mat-form-field class="ion-margin">
+          <input class="calendar-input" matInput [placeholder]="'sched-start-date' | translate" formControlName="startDate" [matDatepicker]="startDate">
+          <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+          <mat-datepicker #startDate [dateClass]="dateClass()"
+                          startView="year">
+          </mat-datepicker>
+        </mat-form-field>
+        <mat-form-field class="ion-margin">
+          <input class="calendar-input" matInput [matDatepicker]="endDate" [placeholder]="'sched-end-date' | translate" formControlName="endDate">
+          <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+          <mat-datepicker #endDate [dateClass]="dateClass()"
+                          startView="year">
+          </mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+        <ion-button *ngIf="!isLoading" (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+        <ion-spinner color="primary" *ngIf="isLoading"  class="ion-align-self-center"></ion-spinner>
+      </div>
+    </form>
+    <form class="ion-padding" [formGroup]="publishOrDeleteForm" *ngIf="deleteRoster" (ngSubmit)="onSubmitPublishOrDeleteForm(true)">
+      <button style="display: none" #submitBtn></button>
+      <div class="ion-text-center">
+        <mat-form-field class="ion-margin">
+          <input class="calendar-input" matInput [placeholder]="'sched-start-date' | translate" formControlName="startDate" [matDatepicker]="startDate">
+          <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+          <mat-datepicker #startDate [dateClass]="dateClass()"
+                          startView="year">
+          </mat-datepicker>
+        </mat-form-field>
+        <mat-form-field class="ion-margin">
+          <input class="calendar-input" matInput [matDatepicker]="endDate" [placeholder]="'sched-end-date' | translate" formControlName="endDate">
+          <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+          <mat-datepicker #endDate [dateClass]="dateClass()"
+                          startView="year">
+          </mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+        <ion-button *ngIf="!isLoading" (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+        <ion-spinner color="primary" *ngIf="isLoading"  class="ion-align-self-center"></ion-spinner>
+      </div>
+    </form>
+  </div>
+</ion-content>
+

@@ -1,0 +1,810 @@
+<ion-header mode="ios">
+  <ion-toolbar color="toolbar" mode="ios" *ngIf="mobile">
+    <ion-buttons slot="start">
+      <ion-button size="small" *ngIf="!tablet" (click)="dismiss()" fill="clear">
+        <ion-icon *ngIf="!id" name="close" slot="icon-only" mode="md"></ion-icon>
+        <ion-icon *ngIf="id" md="arrow-back" ios="chevron-back"></ion-icon>
+        <ion-label  *ngIf="id" translate>employees</ion-label>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark" >
+        <span translate *ngIf="employeeService.employee$ | async as employee">{{employee.name}}</span>
+        <span translate *ngIf="!id">emp-new</span>
+      </ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="warning" style="font-weight: 600" translate (click)="submitForm()" fill="clear">submit</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="toolbar" *ngIf="!mobile" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="arrow-back"></ion-icon>
+        <span class="ion-text-capitalize" translate>back</span>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark" *ngIf="!id" translate>emp-new</ion-label>
+      <ng-container *ngIf="employeeService.employee$ | async as employee">
+        <ion-label color="dark" *ngIf="id">{{employee.name}}</ion-label>
+        <ion-icon *ngIf="id" class="edit-icon" color="secondary" name="create" (click)="editField('name')"></ion-icon>
+      </ng-container>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <ion-grid class="ion-no-padding ion-no-margin full-height" *ngIf="isLoading">
+    <ion-row class="full-height">
+      <ion-col size="12" class="ion-text-center full-height ion-align-items-center">
+        <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-toolbar color="toolbar" mode="ios">
+    <div *ngIf="!isLoading && !id" style="display: flex; margin: 16px 0" class="ion-justify-content-center">
+      <div class="avatar-holder">
+        <ng-container *ngIf="employeeService.imageSrc$ | async as imageSrc">
+          <ion-avatar>
+            <input type="file" accept="image/x-png,image/jpeg" style="display: none" #createImagePicker (change)="onCreateImagePicked($event)">
+            <img *ngIf="imageSrc !== 'no-pic'" [src]="imageSrc" class="avatar">
+            <img *ngIf="imageSrc === 'no-pic'" src="/assets/img/avatar.svg" class="avatar">
+          </ion-avatar>
+          <ion-fab class="delete-button">
+            <ion-fab-button (click)="editPickedPic(imageSrc)" class="ion-no-margin small-fab" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+          </ion-fab>
+        </ng-container>
+      </div>
+    </div>
+    <div *ngIf="!isLoading &&  id" style="display: flex; margin: 16px 0" class="ion-justify-content-center">
+      <ng-container *ngIf="employeeService.employee$ | async as employee">
+        <div *ngIf="!isLoading" class="avatar-holder" [@enterAnimation]>
+          <ion-avatar>
+            <input type="file" accept="image/x-png,image/jpeg" style="display: none" #imagePicker (change)="onImagePicked($event)">
+            <img [src]="employee.avatar || '/assets/img/avatar.svg'" class="avatar">
+          </ion-avatar>
+          <ion-fab class="delete-button">
+            <ion-fab-button (click)="choosePic(employee)" class="ion-no-margin small-fab" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+          </ion-fab>
+        </div>
+      </ng-container>
+    </div>
+    <ion-grid *ngIf="!isLoading && id" style="width: 100%;">
+      <ion-row class="modal-container">
+        <ion-col size="12" size-lg="6" offset-lg="3" class="ion-text-center" style="padding-bottom: 0" *ngIf="employeeService.employee$ | async as employee">
+          <ion-chip outline color="primary" (click)="roster(employee)">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <ion-label translate>roster</ion-label>
+          </ion-chip>
+          <ng-container *ngIf="timeRequests$ | async as timeRequests; else loading">
+            <ion-chip outline color="warning" [@enterAnimation] (click)="openTimeRequests(true)" *ngIf="timeRequests.length > 0 && profile;">
+              <ion-icon name="calendar-number"></ion-icon>
+              <ion-label translate>time-management</ion-label>
+            </ion-chip>
+          </ng-container>
+          <ng-template #loading>
+          <ion-chip outline color="warning" style="border: none">
+            <ion-spinner color="warning"></ion-spinner>
+          </ion-chip>
+          </ng-template>
+        </ion-col>
+        <ion-col size="12" class="ion-no-padding" style="margin-bottom: 10px">
+          <ion-button color="danger" expand="full" translate (click)="performDelete()">delete</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+  <ng-container *ngIf="schedules$ | async as schedules">
+    <div [ngClass]="{'modal-container' : !mobile}">
+      <form class="ion-padding" [formGroup]="createForm" (ngSubmit)="onSubmitForm()" *ngIf="!isLoading && !id">
+        <button style="display: none" #submitBtn></button>
+        <mat-vertical-stepper #stepper>
+          <mat-step [label]="'reg-name' | translate" [completed]="false">
+            <ion-item lines="none">
+              <ion-input type="text" style="margin: 10px 0; " formControlName="name" [placeholder]="'reg-name' | translate"></ion-input>
+            </ion-item>
+            <div *ngIf="formSubmitted || (createForm.get('name').value && createForm.get('name').value.length>0)">
+              <ion-label class="alert-margin" *ngIf="createForm.get('name').hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+              <ion-label class="alert-margin" *ngIf="createForm.get('name').hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+              <ion-label class="alert-margin" *ngIf="createForm.get('name').hasError('required')"  color="danger" translate>sched-name-error</ion-label>
+            </div>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+              <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+            </div>
+          </mat-step>
+          <mat-step [label]="'job-title' | translate" [completed]="false">
+            <ng-container *ngIf="allSubdivisions$ | async as subdivisions">
+              <ng-container *ngIf="subdivisions.length>0">
+                <ion-list style="width: 100%">
+                  <ion-list-header>
+                    <ion-label translate>subdivision</ion-label>
+                  </ion-list-header>
+                  <ion-radio-group (ionChange)="otherSubdivision($event)" formControlName="subdivisionId">
+                    <ion-item *ngFor="let subdivision of subdivisions">
+                      <ion-label>{{subdivision.subdivision + ' (' + subdivision.division + ')'}}</ion-label>
+                      <ion-radio [value]="subdivision.subdivisionId"></ion-radio>
+                    </ion-item>
+                    <ion-item>
+                      <ion-label translate>phone-misc</ion-label>
+                      <ion-radio value="other"></ion-radio>
+                    </ion-item>
+                  </ion-radio-group>
+                  <ng-container *ngIf="alternateSubdivision">
+                    <ion-item lines="none">
+                      <ion-input type="text" style="margin: 10px 0; " formControlName="division" [placeholder]="'division' | translate"></ion-input>
+                    </ion-item>
+                    <ion-label *ngIf="formSubmitted && createForm.controls.division.hasError('required')" color="danger" translate>login-email-error</ion-label>
+                    <ion-label *ngIf="createForm.controls.division.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+                    <ion-label *ngIf="createForm.controls.division.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+                    <ion-item lines="none">
+                      <ion-input type="text" style="margin: 10px 0; " formControlName="subdivision" [placeholder]="'subdivision' | translate"></ion-input>
+                    </ion-item>
+                    <ion-label *ngIf="formSubmitted && createForm.controls.subdivision.hasError('required')" color="danger" translate>login-email-error</ion-label>
+                    <ion-label *ngIf="createForm.controls.subdivision.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+                    <ion-label *ngIf="createForm.controls.subdivision.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+                  </ng-container>
+                </ion-list>
+              </ng-container>
+              <ng-container *ngIf="subdivisions.length===0">
+                <ion-item lines="none">
+                  <ion-input type="text" style="margin: 10px 0; " formControlName="division" [placeholder]="'division' | translate"></ion-input>
+                </ion-item>
+                <ion-label *ngIf="formSubmitted && createForm.controls.division.hasError('required')" color="danger" translate>login-email-error</ion-label>
+                <ion-label *ngIf="createForm.controls.division.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+                <ion-label *ngIf="createForm.controls.division.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+                <ion-item lines="none">
+                  <ion-input type="text" style="margin: 10px 0; " formControlName="subdivision" [placeholder]="'subdivision' | translate"></ion-input>
+                </ion-item>
+                <ion-label *ngIf="formSubmitted && createForm.controls.subdivision.hasError('required')" color="danger" translate>login-email-error</ion-label>
+                <ion-label *ngIf="createForm.controls.subdivision.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+                <ion-label *ngIf="createForm.controls.subdivision.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+              </ng-container>
+            </ng-container>
+            <ion-item lines="none">
+              <ion-input type="text" style="margin: 10px 0; " formControlName="jobTitle" [placeholder]="'job-title' | translate"></ion-input>
+            </ion-item>
+            <div *ngIf="formSubmitted || (createForm.get('jobTitle').value && createForm.get('jobTitle').value.length>0)">
+              <ion-label class="alert-margin" *ngIf="createForm.get('jobTitle').hasError('minlength')"  color="danger" translate>division-name-length-error</ion-label>
+              <ion-label class="alert-margin" *ngIf="createForm.get('jobTitle').hasError('maxlength')"  color="danger" translate>division-name-length-error</ion-label>
+              <ion-label class="alert-margin" *ngIf="createForm.get('jobTitle').hasError('required')"  color="danger" translate>division-name-length-error</ion-label>
+            </div>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+              <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+              <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+            </div>
+          </mat-step>
+          <mat-step [label]="'login-email' | translate" [completed]="false">
+            <ion-item lines="none">
+              <ion-input type="email" style="margin: 10px 0;
+"
+                         formControlName="email"
+                         email
+                         [placeholder]="'login-email' | translate"
+              ></ion-input>
+            </ion-item>
+            <ion-label class="alert-margin" *ngIf="formSubmitted && (createForm.get('email').hasError('pattern') || createForm.get('email').hasError('required'))" color="danger" translate>login-email-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="!formSubmitted && createForm.get('email').hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="!formSubmitted && createForm.get('email').hasError('maxlength')" color="danger" translate>sched-name-error</ion-label>
+            <ion-item lines="none">
+              <ion-input type="email" style="margin: 10px 0;
+"
+                         formControlName="personalEmail"
+                         email
+                         [placeholder]="'personal-email' | translate"
+              ></ion-input>
+            </ion-item>
+            <ion-label class="alert-margin" *ngIf="formSubmitted && (createForm.get('personalEmail').hasError('pattern'))" color="danger" translate>login-email-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="!formSubmitted && createForm.get('personalEmail').hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="!formSubmitted && createForm.get('personalEmail').hasError('maxlength')" color="danger" translate>sched-name-error</ion-label>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+              <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+              <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+            </div>
+          </mat-step>
+          <mat-step [label]="'login-password' | translate" [completed]="false">
+            <ion-item lines="none">
+              <div style="width: 100%">
+                <div>
+                  <ion-input [type]="showPassword()" style="margin: 10px 0;
+"
+                             formControlName="password"
+                             [placeholder]="'login-password' | translate"
+                  ></ion-input>
+                  <ion-icon name="eye" slot="end" (click)="setShowPassword()" color="primary" class="see-psswd"></ion-icon>
+                </div>
+                <div style="margin-top: 6px">
+                  <div *ngIf="(createForm.controls['password'].hasError('hasCapitalCase') || (createForm.value.password==null || createForm.value.password.length<1))">
+                    <ion-label color="danger">
+                      <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-cap1</span>
+                    </ion-label>
+                  </div>
+                  <div *ngIf="!createForm.controls['password'].hasError('hasCapitalCase') && createForm.value.password!=null && createForm.value.password.length>0">
+                    <ion-label color="success">
+                      <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-cap1</span>
+                    </ion-label>
+                  </div>
+                  <div *ngIf="createForm.controls['password'].hasError('hasSmallCase') || (createForm.value.password==null || createForm.value.password.length<1)">
+                    <ion-label color="danger">
+                      <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-reg1</span>
+                    </ion-label>
+                  </div>
+                  <div *ngIf="!createForm.controls['password'].hasError('hasSmallCase') && createForm.value.password!=null && createForm.value.password.length>0">
+                    <ion-label color="success">
+                      <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-reg1</span>
+                    </ion-label>
+                  </div>
+                  <div *ngIf="createForm.controls['password'].hasError('hasNumber') || (createForm.value.password==null || createForm.value.password.length<1)">
+                    <ion-label color="danger">
+                      <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-fig1</span>
+                    </ion-label>
+                  </div>
+                  <div *ngIf="!createForm.controls['password'].hasError('hasNumber') && createForm.value.password!=null && createForm.value.password.length>0">
+                    <ion-label color="success">
+                      <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-fig1</span>
+                    </ion-label>
+                  </div>
+                  <div *ngIf="createForm.controls['password'].hasError('minlength') || (createForm.value.password==null || createForm.value.password.length<1)">
+                    <ion-label color="danger">
+                      <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-char8</span>
+                    </ion-label>
+                  </div>
+                  <div *ngIf="!createForm.controls['password'].hasError('minlength') && createForm.value.password!=null && createForm.value.password.length>0">
+                    <ion-label color="success">
+                      <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-char8</span>
+                    </ion-label>
+                  </div>
+                </div>
+              </div>
+            </ion-item>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+              <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+              <ion-button (click)="nextStep()" translate>sched-next-step</ion-button>
+            </div>
+          </mat-step>
+          <mat-step [label]="'prof-auths' | translate" [completed]="false">
+            <ion-item>
+              <div style="width: 100%; text-align: center; margin-top: 16px">
+                <ion-list class="ion-no-padding ion-no-margin" style="width: 100%">
+                  <ion-item class="authority-item">
+                    <ion-label translate>prof-norestrictions</ion-label>
+                    <ion-checkbox slot="start" value="SUBPROVIDER_FULL" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_FULL', pickedAuthorities)"></ion-checkbox>
+                  </ion-item>
+                  <ion-item class="authority-item">
+                    <ion-label translate>specialist</ion-label>
+                    <ion-checkbox slot="start" value="SUBPROVIDER_SCHED" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_SCHED', pickedAuthorities)"></ion-checkbox>
+                  </ion-item>
+                  <ion-item class="authority-item">
+                    <ion-label translate>prof-schedule-view</ion-label>
+                    <ion-checkbox slot="start" value="SUBPROVIDER_SCHED_VIEW" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_SCHED_VIEW', pickedAuthorities)"></ion-checkbox>
+                  </ion-item>
+                  <ion-item class="authority-item">
+                    <ion-label translate>prof-admin</ion-label>
+                    <ion-checkbox slot="start" value="SUBPROVIDER_ADMIN" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_ADMIN', pickedAuthorities)"></ion-checkbox>
+                  </ion-item>
+                  <ion-item class="authority-item">
+                    <ion-label translate>roster</ion-label>
+                    <ion-checkbox slot="start" value="SUBPROVIDER_ROSTER" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_ROSTER', pickedAuthorities)"></ion-checkbox>
+                  </ion-item>
+                  <ion-item lines="none" class="authority-item">
+                    <ion-label translate>prof-payments</ion-label>
+                    <ion-checkbox slot="start" value="SUBPROVIDER_PAY" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_PAY', pickedAuthorities)"></ion-checkbox>
+                  </ion-item>
+                </ion-list>
+                <ion-list class="ion-no-padding ion-no-margin" style="width: 100%"  *ngIf="schedules.length>0 && showSchedules">
+                  <ion-list-header>
+                    <ion-label translate>prof-schedules</ion-label>
+                  </ion-list-header>
+                  <ion-item class="authority-item" *ngFor="let schedule of schedules; index as index">
+                    <ion-label>{{schedule.scheduleName}}</ion-label>
+                    <ion-checkbox slot="start" [value]="schedule.scheduleId" [checked]="checkIfChecked(schedule.scheduleId, pickedSchedules)" (ionChange)="addControlToArray($event, 'availabilityIds', pickedSchedules)"></ion-checkbox>
+                  </ion-item>
+                </ion-list>
+                <ng-container *ngIf="allSubdivisions$ | async as subdivisions">
+                  <ng-container *ngIf="subdivisions.length>0 && showRosters">
+                    <ion-list style="width: 100%">
+                      <ion-list-header>
+                        <ion-label translate>authorized-rosters</ion-label>
+                      </ion-list-header>
+                      <ion-item class="authority-item"  *ngFor="let subdivision of subdivisions">
+                        <ion-label>{{subdivision.subdivision + ' (' + subdivision.division + ')'}}</ion-label>
+                        <ion-checkbox slot="start" [value]="subdivision.subdivisionId" [checked]="checkIfChecked(subdivision.subdivisionId, pickedSubdivisions)" (ionChange)="addControlToArray($event, 'subdivisionIds', pickedSchedules)"></ion-checkbox>
+                      </ion-item>
+                    </ion-list>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </ion-item>
+            <ion-label translate color="danger" *ngIf="formSubmitted && createForm.controls.authorizations.hasError('required')">authority-pick-error</ion-label>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end">
+              <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+              <ion-button *ngIf="!isSubmitting" (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+              <ion-spinner color="primary" *ngIf="isSubmitting"  class="ion-align-self-center"></ion-spinner>
+            </div>
+          </mat-step>
+        </mat-vertical-stepper>
+      </form>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="employeeService.employee$ | async as employee">
+    <div [ngClass]="{'modal-container' : !mobile}" [@enterAnimation] [hidden]="!profile">
+      <form class="ion-padding" [formGroup]="editForm" (ngSubmit)="onSubmitEditForm()" *ngIf="!isLoading">
+        <button style="display: none" #submitBtn></button>
+        <ion-item *ngIf="!editName && mobile">
+          <ion-icon color="secondary" slot="start" name="person"></ion-icon>
+          <ion-label>
+            <span translate>reg-name</span><ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('name')"></ion-icon>
+            <p>{{employee.name}}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="editName">
+          <ion-icon color="secondary" slot="start" name="person"></ion-icon>
+          <ion-input type="text" style="margin: 10px 0; " formControlName="name" [placeholder]="'reg-name' | translate"></ion-input>
+        </ion-item>
+        <ion-item *ngIf="!editHireDate">
+          <ion-icon name="briefcase" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <span translate>employee-from</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('hireDate')"></ion-icon>
+            <p><span>{{timeUtil.showDob(employee.registerDate, translate.getLocale())}}</span>
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="editHireDate">
+          <ion-icon name="briefcase" slot="start" color="primary"></ion-icon>
+          <mat-form-field>
+            <input class="calendar-input" formControlName="hireDate" matInput [matDatepicker]="hireDate">
+            <mat-datepicker-toggle matSuffix [for]="hireDate"></mat-datepicker-toggle>
+            <mat-datepicker #hireDate startView="multi-year"></mat-datepicker>
+          </mat-form-field>
+        </ion-item>
+        <ion-item *ngIf="!editSubdivision">
+          <ion-icon color="secondary" slot="start" name="business"></ion-icon>
+          <ion-label>
+            <span translate>subdivision</span><ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('subdivision')"></ion-icon>
+            <p *ngIf="employee.subdivision && employee.division">{{employee.subdivision + ' (' + employee.division + ')' }}</p>
+          </ion-label>
+        </ion-item>
+        <div *ngIf="editSubdivision">
+          <ng-container *ngIf="allSubdivisions$ | async as subdivisions">
+            <ng-container *ngIf="subdivisions.length>0">
+              <ion-list style="width: 100%">
+                <ion-list-header>
+                  <ion-label translate>subdivision</ion-label>
+                </ion-list-header>
+                <ion-radio-group (ionChange)="otherSubdivision($event)" formControlName="subdivisionId">
+                  <ion-item *ngFor="let subdivision of subdivisions">
+                    <ion-label>{{subdivision.subdivision + ' (' + subdivision.division + ')'}}</ion-label>
+                    <ion-radio [value]="subdivision.subdivisionId" slot="end"></ion-radio>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label translate>phone-misc</ion-label>
+                    <ion-radio value="other" slot="end"></ion-radio>
+                  </ion-item>
+                </ion-radio-group>
+                <ng-container *ngIf="alternateSubdivision">
+                  <ion-item lines="none">
+                    <ion-input type="text" style="margin: 10px 0; " formControlName="division" [placeholder]="'division' | translate"></ion-input>
+                  </ion-item>
+                  <ion-label *ngIf="formSubmitted && editForm.controls.division.hasError('required')" color="danger" translate>login-email-error</ion-label>
+                  <ion-label *ngIf="editForm.controls.division.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+                  <ion-label *ngIf="editForm.controls.division.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+                  <ion-item lines="none">
+                    <ion-input type="text" style="margin: 10px 0; " formControlName="subdivision" [placeholder]="'subdivision' | translate"></ion-input>
+                  </ion-item>
+                  <ion-label *ngIf="formSubmitted && editForm.controls.subdivision.hasError('required')" color="danger" translate>login-email-error</ion-label>
+                  <ion-label *ngIf="editForm.controls.subdivision.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+                  <ion-label *ngIf="editForm.controls.subdivision.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+                </ng-container>
+              </ion-list>
+            </ng-container>
+            <ng-container *ngIf="subdivisions.length===0">
+              <ion-item lines="none">
+                <ion-input type="text" style="margin: 10px 0; " formControlName="division" [placeholder]="'division' | translate"></ion-input>
+              </ion-item>
+              <ion-label *ngIf="formSubmitted && editForm.controls.division.hasError('required')" color="danger" translate>login-email-error</ion-label>
+              <ion-label *ngIf="editForm.controls.division.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+              <ion-label *ngIf="editForm.controls.division.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+              <ion-item lines="none">
+                <ion-input type="text" style="margin: 10px 0; " formControlName="subdivision" [placeholder]="'subdivision' | translate"></ion-input>
+              </ion-item>
+              <ion-label *ngIf="formSubmitted && editForm.controls.subdivision.hasError('required')" color="danger" translate>login-email-error</ion-label>
+              <ion-label *ngIf="editForm.controls.subdivision.hasError('minlength')" color="danger" translate>division-name-length-error</ion-label>
+              <ion-label *ngIf="editForm.controls.subdivision.hasError('maxlength')" color="danger" translate>division-name-length-error</ion-label>
+            </ng-container>
+          </ng-container>
+          <ion-item lines="none" style="margin-bottom: 16px">
+            <ion-label position="floating" translate>job-title</ion-label>
+            <ion-input type="text" style="margin: 10px 0; " formControlName="jobTitle" [placeholder]="'job-title' | translate"></ion-input>
+          </ion-item>
+          <div *ngIf="formSubmitted || (editForm.get('jobTitle').value && editForm.get('jobTitle').value.length>0)">
+            <ion-label class="alert-margin" *ngIf="editForm.get('jobTitle').hasError('minlength')"  color="danger" translate>division-name-length-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="editForm.get('jobTitle').hasError('maxlength')"  color="danger" translate>division-name-length-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="editForm.get('jobTitle').hasError('required')"  color="danger" translate>division-name-length-error</ion-label>
+          </div>
+        </div>
+        <ion-item *ngIf="!editTaxId">
+          <ion-icon name="cash" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <span translate>tax-payer-id</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('taxId')"></ion-icon>
+            <p *ngIf="employee.taxPayerId">{{employee.taxPayerId}}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="editTaxId">
+          <ion-icon name="cash" slot="start" color="primary"></ion-icon>
+          <ion-label translate position="floating">tax-payer-id</ion-label>
+          <ion-input style="max-width: 100%"
+                     [placeholder]="'tax-payer-id' | translate"
+                     formControlName="taxId"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="card" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <span translate>bank-account</span>
+            <p *ngIf="employee.bankAccount">{{employee.bankAccount}}</p>
+          </ion-label>
+        </ion-item>
+        <div *ngIf="formSubmitted || (editForm.get('name').value && editForm.get('name').value.length>0)">
+          <ion-label class="alert-margin" *ngIf="editForm.get('name').hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label class="alert-margin" *ngIf="editForm.get('name').hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label class="alert-margin" *ngIf="editForm.get('name').hasError('required')"  color="danger" translate>sched-name-error</ion-label>
+        </div>
+        <ion-item *ngIf="editEmail">
+          <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+          <ion-input type="email" style="margin: 10px 0;
+"
+                     formControlName="email"
+                     email
+                     placeholder="example@example.com"
+          ></ion-input>
+        </ion-item>
+        <ion-label class="alert-margin" *ngIf="!formSubmitted && editForm.get('email').hasError('maxlength')" color="danger" translate>sched-name-error</ion-label>
+        <ion-item *ngIf="!editEmail">
+          <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+          <ion-label>
+            <span translate>login-email</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('email')"></ion-icon>
+            <p>{{employee.username}}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="!editPersonalEmail">
+          <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+          <ion-label>
+            <span translate>personal-email</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('personalEmail')"></ion-icon>
+            <p *ngIf="employee.personalEmail">{{employee.personalEmail}}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none" *ngIf="editPersonalEmail">
+          <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+          <ion-label position="floating" translate>personal-email</ion-label>
+          <ion-input style="margin: 10px 0;
+"
+                     formControlName="personalEmail"
+                     email
+                     [placeholder]="'personal-email' | translate"
+          ></ion-input>
+        </ion-item>
+        <ion-label class="alert-margin" *ngIf="editForm.get('email').hasError('maxLength')" color="danger" translate>login-email-error</ion-label>
+        <ion-item *ngIf="editPassword">
+          <ion-icon color="secondary" slot="start" name="lock-closed"></ion-icon>
+          <div style="width: 100%">
+            <div>
+              <ion-input [type]="showPassword()" style="margin: 10px 0;
+"
+                         formControlName="password"
+                         [placeholder]="'login-password' | translate"
+              ></ion-input>
+              <ion-icon name="eye" slot="end" (click)="setShowPassword()" color="primary" class="see-psswd"></ion-icon>
+            </div>
+            <div style="margin-top: 6px">
+              <div *ngIf="(editForm.controls['password'].hasError('hasCapitalCase') || (editForm.value.password==null || editForm.value.password.length<1))">
+                <ion-label color="danger">
+                  <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-cap1</span>
+                </ion-label>
+              </div>
+              <div *ngIf="!editForm.controls['password'].hasError('hasCapitalCase') && editForm.value.password!=null && editForm.value.password.length>0">
+                <ion-label color="success">
+                  <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-cap1</span>
+                </ion-label>
+              </div>
+              <div *ngIf="editForm.controls['password'].hasError('hasSmallCase') || (editForm.value.password==null || editForm.value.password.length<1)">
+                <ion-label color="danger">
+                  <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-reg1</span>
+                </ion-label>
+              </div>
+              <div *ngIf="!editForm.controls['password'].hasError('hasSmallCase') && editForm.value.password!=null && editForm.value.password.length>0">
+                <ion-label color="success">
+                  <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-reg1</span>
+                </ion-label>
+              </div>
+              <div *ngIf="editForm.controls['password'].hasError('hasNumber') || (editForm.value.password==null || editForm.value.password.length<1)">
+                <ion-label color="danger">
+                  <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-fig1</span>
+                </ion-label>
+              </div>
+              <div *ngIf="!editForm.controls['password'].hasError('hasNumber') && editForm.value.password!=null && editForm.value.password.length>0">
+                <ion-label color="success">
+                  <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-fig1</span>
+                </ion-label>
+              </div>
+              <div *ngIf="editForm.controls['password'].hasError('minlength') || (editForm.value.password==null || editForm.value.password.length<1)">
+                <ion-label color="danger">
+                  <ion-icon name="close-circle-outline"></ion-icon> <span translate="">reg-char8</span>
+                </ion-label>
+              </div>
+              <div *ngIf="!editForm.controls['password'].hasError('minlength') && editForm.value.password!=null && editForm.value.password.length>0">
+                <ion-label color="success">
+                  <ion-icon name="checkbox-outline"></ion-icon> <span translate="">reg-char8</span>
+                </ion-label>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+        <ion-item *ngIf="!editPassword">
+          <ion-icon color="secondary" slot="start" name="lock-closed"></ion-icon>
+          <ion-label>
+            <span translate>login-password</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('password')"></ion-icon>
+            <p>********</p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="!editAuthorities">
+          <ion-icon color="secondary" slot="start" name="hand-left"></ion-icon>
+          <ion-label>
+            <span translate>prof-auths</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('authorities')"></ion-icon>
+            <p *ngFor="let authority of employee.authorities">{{translateAuthority(authority)}}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="editAuthorities">
+          <ion-icon name="hand-left" color="secondary" slot="start"></ion-icon>
+          <div style="width: 100%; text-align: center; margin-top: 16px">
+            <ion-label translate class="bold-600">prof-auths</ion-label>
+            <ion-list class="ion-no-padding ion-no-margin" style="width: 100%">
+              <div>
+                <ion-item class="authority-item">
+                  <ion-label translate>prof-norestrictions</ion-label>
+                  <ion-checkbox slot="start" value="SUBPROVIDER_FULL" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_FULL', pickedAuthorities)"></ion-checkbox>
+                </ion-item>
+                <ion-item class="authority-item">
+                  <ion-label translate>specialist</ion-label>
+                  <ion-checkbox slot="start" value="SUBPROVIDER_SCHED" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_SCHED', pickedAuthorities)"></ion-checkbox>
+                </ion-item>
+                <ion-item class="authority-item">
+                  <ion-label translate>prof-schedule-view</ion-label>
+                  <ion-checkbox slot="start" value="SUBPROVIDER_SCHED_VIEW" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_SCHED_VIEW', pickedAuthorities)"></ion-checkbox>
+                </ion-item>
+                <ion-item class="authority-item">
+                  <ion-label translate>roster</ion-label>
+                  <ion-checkbox slot="start" value="SUBPROVIDER_ROSTER" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_ROSTER', pickedAuthorities)"></ion-checkbox>
+                </ion-item>
+                <ion-item class="authority-item">
+                  <ion-label translate>prof-admin</ion-label>
+                  <ion-checkbox slot="start" value="SUBPROVIDER_ADMIN" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_ADMIN', pickedAuthorities)"></ion-checkbox>
+                </ion-item>
+                <ion-item lines="none" class="authority-item">
+                  <ion-label translate>prof-payments</ion-label>
+                  <ion-checkbox slot="start" value="SUBPROVIDER_PAY" (ionChange)="addControlToArray($event, 'authorizations', pickedAuthorities)" [checked]="checkIfChecked('SUBPROVIDER_PAY', pickedAuthorities)"></ion-checkbox>
+                </ion-item>
+              </div>
+            </ion-list>
+          </div>
+        </ion-item>
+        <ion-item *ngIf="!editTimeOff">
+          <ion-icon color="secondary" slot="start" name="calendar"></ion-icon>
+          <ion-label>
+            <span translate>time-off</span>
+            <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('timeOff')"></ion-icon>
+            <p><span translate="">vacation-days</span>{{': ' + employee.timeOffBalance.vacationDays}}</p>
+            <p><span translate="">vacation-days-rollover</span>{{': ' + employee.timeOffBalance.vacationRolloverDays}}</p>
+            <p><span translate="">bank-holiday-days</span>{{': ' + employee.timeOffBalance.complimentaryBankHolidayDays}}</p>
+            <p><span translate="">bank-holiday-rollover</span>{{': ' + employee.timeOffBalance.complimentaryBankHolidayRolloverDays}}</p>
+            <p><span translate="">comp-days</span>{{': ' + employee.timeOffBalance.compensationDays}}</p>
+            <p><span translate="">comp-days-rollover</span>{{': ' + employee.timeOffBalance.compensationRolloverDays}}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="editTimeOff">
+          <ion-icon color="secondary" slot="start" name="calendar"></ion-icon>
+          <ion-row>
+            <ion-col size="12">
+              <span translate >vacation-days</span>
+              <div [style.max-width]="mobile && !tablet ? '50%' : '30%'">
+                <ng-number-picker min="0" max="99" step="0.5" [value]="editForm.get('timeOffBalance.vacationDays').value" (valueChange)="updateTimeOffInput(editForm.get('timeOffBalance.vacationDays'), $event)"></ng-number-picker>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <span translate >vacation-days-rollover</span>
+              <div [style.max-width]="mobile && !tablet ? '50%' : '30%'">
+                <ng-number-picker min="0" max="99" step="0.5" [value]="editForm.get('timeOffBalance.vacationRolloverDays').value" (valueChange)="updateTimeOffInput(editForm.get('timeOffBalance.vacationRolloverDays'), $event)"></ng-number-picker>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <span translate >bank-holiday-days</span>
+              <div [style.max-width]="mobile && !tablet ? '50%' : '30%'">
+                <ng-number-picker min="0" max="99" step="0.5" [value]="editForm.get('timeOffBalance.complimentaryBankHolidayDays').value" (valueChange)="updateTimeOffInput(editForm.get('timeOffBalance.complimentaryBankHolidayDays'), $event)"></ng-number-picker>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <span translate >bank-holiday-rollover</span>
+              <div [style.max-width]="mobile && !tablet ? '50%' : '30%'">
+                <ng-number-picker min="0" max="99" step="0.5" [value]="editForm.get('timeOffBalance.complimentaryBankHolidayRolloverDays').value" (valueChange)="updateTimeOffInput(editForm.get('timeOffBalance.complimentaryBankHolidayRolloverDays'), $event)"></ng-number-picker>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <span translate >comp-days</span>
+              <div [style.max-width]="mobile && !tablet ? '50%' : '30%'">
+                <ng-number-picker min="0" max="99" step="0.5" [value]="editForm.get('timeOffBalance.compensationDays').value" (valueChange)="updateTimeOffInput(editForm.get('timeOffBalance.compensationDays'), $event)"></ng-number-picker>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <span translate >comp-days-rollover</span>
+              <div [style.max-width]="mobile && !tablet ? '50%' : '30%'">
+                <ng-number-picker min="0" max="99" step="0.5" [value]="editForm.get('timeOffBalance.compensationRolloverDays').value" (valueChange)="updateTimeOffInput(editForm.get('timeOffBalance.compensationRolloverDays'), $event)"></ng-number-picker>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-item>
+        <ng-container *ngIf="schedules$ | async as schedules">
+          <ion-item *ngIf="!editSchedules && (employee.authorities.includes('SUBPROVIDER_SCHED')
+          || employee.authorities.includes('SUBPROVIDER_SCHED_VIEW') || employee.authorities.includes('SUBPROVIDER_FULL'))">
+            <ion-icon name="calendar" color="secondary" slot="start"></ion-icon>
+            <ion-label>
+              <span translate>prof-schedules</span>
+              <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('schedules')"></ion-icon>
+              <p *ngIf="employee.authorizedScheduleNames.length===0" translate>prof-norestrictions</p>
+              <p class="personaType">{{employee.authorizedScheduleNames.join(', ')}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="schedules.length>0 && editSchedules && (employee.authorities.includes('SUBPROVIDER_SCHED')
+          || employee.authorities.includes('SUBPROVIDER_SCHED_VIEW') || employee.authorities.includes('SUBPROVIDER_FULL'))">
+            <ion-icon name="calendar" color="secondary" slot="start"></ion-icon>
+            <div style="width: 100%; text-align: center; margin-top: 16px">
+              <ion-label translate class="bold-600">prof-schedules</ion-label>
+              <ion-list class="ion-no-padding ion-no-margin" style="width: 100%">
+                <ion-item class="authority-item">
+                  <ion-label translate>prof-norestrictions</ion-label>
+                  <ion-checkbox slot="start" formControlName="allSchedules" (ionChange)="allSchedules($event, 'availabilityIds')"></ion-checkbox>
+                </ion-item>
+                <ion-item class="authority-item" *ngFor="let schedule of schedules; index as index">
+                  <ion-label>{{schedule.scheduleName}}</ion-label>
+                  <ion-checkbox slot="start" [value]="schedule.scheduleId" (ionChange)="addControlToArray($event, 'availabilityIds', pickedSchedules)"></ion-checkbox>
+                </ion-item>
+              </ion-list>
+            </div>
+          </ion-item>
+        </ng-container>
+        <ng-container *ngIf="allSubdivisions$ | async as subdivisions">
+          <ion-item *ngIf="!editRosters && (employee.authorities.includes('SUBPROVIDER_ROSTER') || employee.authorities.includes('SUBPROVIDER_ROSTER_VIEW'))">
+            <ion-icon name="calendar" color="secondary" slot="start"></ion-icon>
+            <ion-label>
+              <span translate>authorized-rosters</span>
+              <ion-icon class="edit-icon" color="secondary" name="create" (click)="editField('rosters')"></ion-icon>
+              <p *ngIf="employee.authorizedRosters.length===0" translate>prof-norestrictions</p>
+              <p class="personaType">{{getAuthorizedRosters()}}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="subdivisions.length>0 && editRosters && (employee.authorities.includes('SUBPROVIDER_ROSTER') || employee.authorities.includes('SUBPROVIDER_ROSTER_VIEW'))">
+            <ion-icon name="calendar" color="secondary" slot="start"></ion-icon>
+            <div style="width: 100%; text-align: center; margin-top: 16px">
+              <ion-label translate class="bold-600">authorized-rosters</ion-label>
+              <ion-list class="ion-no-padding ion-no-margin" style="width: 100%">
+                <ion-item class="authority-item"  *ngFor="let subdivision of subdivisions">
+                  <ion-label>{{subdivision.subdivision + ' (' + subdivision.division + ')'}}</ion-label>
+                  <ion-checkbox slot="start" [value]="subdivision.subdivisionId" [checked]="checkIfChecked(subdivision.subdivisionId, pickedSubdivisions)" (ionChange)="addControlToArray($event, 'subdivisionIds', pickedSchedules)"></ion-checkbox>
+                </ion-item>
+              </ion-list>
+            </div>
+          </ion-item>
+        </ng-container>
+      </form>
+    </div>
+    <ng-container *ngIf="timeRequests$ | async as timeRequests">
+      <div [ngClass]="{'modal-container' : !mobile}" [@enterAnimation] [hidden]="!timeManagement" *ngIf="timeRequests.length > 0">
+        <ion-row>
+          <ion-col size="12" class="ion-no-padding">
+            <ion-button fill="clear" (click)="openTimeRequests(false)">
+              <ion-icon name="arrow-back"></ion-icon>
+              <span class="ion-text-capitalize" translate>navbar-profile</span>
+            </ion-button>
+          </ion-col>
+          <ion-col class="ion-no-padding" size="12">
+            <ion-segment style="margin-bottom: 16px; margin-top: 0" [mode]="!mobile ? 'ios' : undefined" (ionChange)="timeRequestSegmentChanged($event)" value="absences">
+              <ion-segment-button value="absences">
+                <ion-label style="padding: 0 10px"><span translate>absences</span>
+                </ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="overtime">
+                <ion-label style="padding: 0 10px"><span translate>overtime</span>
+                </ion-label>
+              </ion-segment-button>
+            </ion-segment>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="absences" [@listAnimation]="timeRequests.length">
+          <ng-container *ngFor="let timeRequest of timeRequests">
+            <ion-col class="ion-no-padding ion-no-margin" *ngIf="!timeRequest.overtime" size="12">
+              <mat-card class="appointment-card" style="padding: 6px; margin: 3px">
+                <ion-item [lines]="mobile ? undefined : 'none'" class="desktop-item">
+                  <ion-label>
+                    <ion-icon name="calendar-number" color="primary"></ion-icon>
+                    <span>
+                      {{timeUtil.showLocalDateFromDateString(translate.getLocale(), timeRequest.start)}},
+                      {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.start)}} -
+                      {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.end)}}</span>
+                    <p class="attachment-holder" *ngIf="timeRequest.comments">
+                      <ion-icon name="chatbubble" class="item-icon" color="tertiary"></ion-icon>
+                      <span>{{timeRequest.comments}}</span>
+                    </p>
+                    <p class="attachment-holder" *ngFor="let attachment of timeRequest.attachments; index as index">
+                      <a [title]="'download' | translate"  (click)="downloadAttachment(timeRequest.id, attachment)" class="attachment-holder">
+                        <span>{{employeeProfileService.buildAttachment(attachment)}}</span><ion-icon name="cloud-download"></ion-icon>
+                      </a>
+                    </p>
+                    <p class="attachment-holder">
+                      <ion-button class="attachment-button" (click)="approveTimeRequest(timeRequest)" [color]="timeRequest.toBeApproved ? 'primary' : timeRequest.approved ? 'danger' : 'primary'"><ion-icon
+                              [name]="timeRequest.toBeApproved ? 'checkmark' : timeRequest.approved ? 'close' : 'checkmark'"></ion-icon>
+                        <ion-label translate>{{timeRequest.toBeApproved ? 'approve' : timeRequest.approved ? 'deny' : 'approve'}}</ion-label>
+                      </ion-button>
+                    </p>
+                  </ion-label>
+                  <div class="approve-label align-content">
+                    <ion-icon [name]="timeRequest.toBeApproved ? 'alert-circle' : timeRequest.approved ? 'checkmark' : 'close'" [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'"></ion-icon>
+                    <ion-label [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'" translate>{{timeRequest.toBeApproved ? 'to-approve' : timeRequest.approved ? 'approved' : 'denied'}}</ion-label>
+                  </div>
+                </ion-item>
+              </mat-card>
+            </ion-col>
+          </ng-container>
+        </ion-row>
+        <ion-row *ngIf="overtime" [@listAnimation]="timeRequests.length">
+          <ng-container *ngFor="let timeRequest of timeRequests">
+            <ion-col class="ion-no-padding ion-no-margin" *ngIf="timeRequest.overtime" size="12">
+              <mat-card class="appointment-card" style="padding: 6px; margin: 3px">
+                <ion-item [lines]="mobile ? undefined : 'none'" class="desktop-item">
+                  <ion-label>
+                    <ion-icon name="calendar-number" color="primary"></ion-icon>
+                    <span>
+                      {{timeUtil.showLocalDateFromDateString(translate.getLocale(), timeRequest.start)}},
+                      {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.start)}} -
+                      {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.end)}}</span>
+                    <p class="attachment-holder" *ngIf="timeRequest.comments">
+                      <ion-icon name="chatbubble" class="item-icon" color="tertiary"></ion-icon>
+                      <span>{{timeRequest.comments}}</span>
+                    </p>
+                    <p class="attachment-holder" *ngFor="let attachment of timeRequest.attachments; index as index">
+                      <a [title]="'download' | translate"  (click)="downloadAttachment(timeRequest.id, attachment)" class="attachment-holder">
+                        <span>{{employeeProfileService.buildAttachment(attachment)}}</span><ion-icon name="cloud-download"></ion-icon>
+                      </a>
+                    </p>
+                    <p class="attachment-holder">
+                      <ion-button class="attachment-button" (click)="approveTimeRequest(timeRequest)" [color]="timeRequest.toBeApproved ? 'primary' : timeRequest.approved ? 'danger' : 'primary'"><ion-icon
+                              [name]="timeRequest.toBeApproved ? 'checkmark' : timeRequest.approved ? 'close' : 'checkmark'"></ion-icon>
+                        <ion-label translate>{{timeRequest.toBeApproved ? 'approve' : timeRequest.approved ? 'deny' : 'approve'}}</ion-label>
+                      </ion-button>
+                    </p>
+                  </ion-label>
+                  <div class="approve-label align-content">
+                    <ion-icon [name]="timeRequest.toBeApproved ? 'alert-circle' : timeRequest.approved ? 'checkmark' : 'close'" [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'"></ion-icon>
+                    <ion-label [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'" translate>{{timeRequest.toBeApproved ? 'to-approve' : timeRequest.approved ? 'approved' : 'denied'}}</ion-label>
+                  </div>
+                </ion-item>
+              </mat-card>
+            </ion-col>
+          </ng-container>
+        </ion-row>
+      </div>
+      <ng-container *ngIf="timeRequests.length > 0">
+      </ng-container>
+    </ng-container>
+  </ng-container>
+</ion-content>
+<ion-footer *ngIf="!mobile && id && profile" style="display: flex; justify-content: flex-end;" class="ion-padding">
+  <ion-button *ngIf="!isLoading"  (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+  <ion-spinner color="primary" *ngIf="isLoading" class="ion-align-self-center"></ion-spinner>
+</ion-footer>
+

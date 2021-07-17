@@ -1,0 +1,54 @@
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.datetime-padding {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0;
+  padding-left: 0;
+}
+
+.time-label{
+  margin-bottom: 0;
+  display: flex;
+}
+
+.timepicker-col{
+  display: flex;
+  justify-content: center;
+  align-items: baseline
+}
+
+.time-picker{
+  text-align: center;
+  font-size: 2em;
+  padding-bottom: 0;
+  padding-left: 0;
+}
+
+.color-picker:hover{
+  cursor: pointer;
+}
+
+.color-picker{
+  position: relative;
+  max-width: 100px;
+  max-height: 50px;
+  align-self: flex-end;
+  margin-bottom: 10px;
+}
+
+.color-picker-container {
+  display: flex;
+}
+
+ion-list {
+  background: var(--ion-color-white);
+}
+
+.separator-holder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

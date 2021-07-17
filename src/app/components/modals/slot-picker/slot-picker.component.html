@@ -1,0 +1,62 @@
+<ion-header *ngIf="mobile">
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!tablet" (click)="dismiss()" fill="clear">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark" translate>additional-slots</ion-label>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+    <div style="position: absolute; top: 50%; left: calc(50% - 37px);z-index: 10000;"><ion-spinner color="secondary" style="height: 75px; width: 75px"></ion-spinner></div>
+  </div>
+  <h4 class="modal-title ion-padding" *ngIf="!mobile">
+    <ion-label class="desktop-title" translate>additional-slots</ion-label>
+  </h4>
+  <div *ngIf="!selectedDate" [ngClass]="{'calendar-desktop' : !mobile, 'calendar-tablet' : tablet}">
+    <mat-calendar [selected]="selectedDate" [dateClass]="dateClass()"
+                  (selectedChange)="selectedDateChange($event)">
+    </mat-calendar>
+  </div>
+  <div *ngIf="selectedDate" class="ion-text-center">
+    <ion-button fill="clear" *ngIf="selectedDate" [ngClass]="{'back-desktop' : !mobile, 'back-mobile' : mobile}" (click)="back()">
+      <ion-icon name="arrow-back"></ion-icon>
+      <span class="ion-text-capitalize" translate>back</span>
+    </ion-button>
+    <div style="margin-top: 16px">
+    <ion-label size="large" color="dark" style="font-weight: bold; font-size: 20px">{{showDate()}}</ion-label>
+    </div>
+  </div>
+  <ng-container *ngIf="slot$ | async as slots">
+    <ion-grid *ngIf="slots.length>0">
+      <ion-row>
+        <ng-container *ngFor="let slot of slots">
+        <ion-col *ngIf="slot.title==='true'" size-xs="6" size-md="4" class="slot" (click)="addSlot(slot)">
+          <div class="slot-content">
+            <div>
+              <span [innerHTML]="showAppointmentDetails(slot, true)"></span>
+            </div>
+          </div>
+        </ion-col>
+        </ng-container>
+      </ion-row>
+    </ion-grid>
+    <div *ngIf="slots.length===0" class="ion-text-center" style="
+    height: 75%;
+    display: flex;
+    align-items: center;">
+      <ion-label translate style="font-size: 64px">sched-no-vacancies</ion-label>
+    </div>
+  </ng-container>
+</ion-content>
+<ion-footer *ngIf="!mobile" style="text-align: right" class="ion-padding">
+  <ion-button (click)="dismiss()" fill="clear" color="secondary" class="bold-600" translate>close</ion-button>
+</ion-footer>
+

@@ -1,0 +1,46 @@
+<ion-grid class="container-holder">
+    <!--    <ion-row >-->
+    <!--        <ion-col #external id="external">-->
+    <!--            <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event" *ngIf="index === 0 && fullcalendarService.selectedSlots[0]">-->
+    <!--                <div class="fc-event-main">{{fullcalendarService.selectedSlots[0].event['extendedProps'].name}}</div>-->
+    <!--            </div>-->
+    <!--        </ion-col>-->
+    <!--    </ion-row>-->
+    <div class="loading-cover-desktop-modal" style="height: 100%; position: absolute; top: 1px" *ngIf="isLoading && index !== 0">
+        <div style="position: absolute; top: calc(50% - 25px); left: calc(50% - 37px);z-index: 10000;"><ion-spinner color="secondary" style="height: 50px; width: 50px"></ion-spinner></div>
+    </div>
+    <ion-row *ngIf="index === 0">
+        <ion-col size="12">
+            <div>
+                <full-calendar [className]="!sharedView ? 'main' : 'secondary'" #fullCalendar id="fullcalendar" [options]="fullCalendarOptions"></full-calendar>
+            </div>
+        </ion-col>
+    </ion-row>
+    <ng-container *ngIf="fullcalendarService.rosterView$ | async as view">
+        <div *ngIf="index !== 0" [className]="view === 'dayGrid31Day' ? 'wide' : ''">
+            <ion-row *ngIf="index !== 0">
+                <ion-col *ngIf="subdivisionName" size="12" [className]="index === 0 ?'ion-no-padding main-name subdivision-name-holder' : 'ion-no-padding subdivision-name-holder' ">
+                    <div class="option-holder">
+                        <ion-label class="ion-align-self-center subdivision-title" color="dark">{{subdivisionName}}</ion-label>
+                        <div class="name-holder" *ngIf="subdivision && subdivision[0] && !anonymous && !sharedView">
+                            <ion-icon name="calendar" color="primary" [title]="('edit' | translate) + ' ' + ('roster' | translate | lowercase)" (click)="rosterService.editRoster(subdivision[0], true)"></ion-icon>
+                            <ion-icon name="share-social-outline" [title]="('share' | translate) + ' ' + ('roster' | translate | lowercase)"  color="tertiary" (click)="shareRoster(name)"></ion-icon>
+                        </div>
+                    </div>
+                </ion-col>
+                <ion-col *ngIf="name || employee" size="12" [className]="index === 0 ?'ion-text-center ion-no-padding name-holder main-name' : 'ion-text-center ion-no-padding name-holder'">
+                    <div class="option-holder">
+                        <ion-label class="ion-align-self-center icon-container name-title" color="dark">{{name || employee.name}}</ion-label>
+                        <div class="name-holder" *ngIf="employee  && !anonymous && !sharedView">
+                            <ion-icon name="calendar" color="primary" [title]="('edit' | translate) + ' ' + ('roster' | translate | lowercase)" (click)="rosterService.editRoster(employee)"></ion-icon>
+                            <ion-icon name="share-social-outline" [title]="('share' | translate) + ' ' + ('roster' | translate | lowercase)"  color="tertiary" (click)="shareRoster(name)"></ion-icon>
+                        </div>
+                    </div>
+                </ion-col>
+            </ion-row>
+            <div size="12" class="ion-text-center">
+                <full-calendar [className]="index === 0 && subdivisionName ? 'main' : 'secondary'" #fullCalendar id="fullcalendar" [options]="fullCalendarOptions"></full-calendar>
+            </div>
+        </div>
+    </ng-container>
+</ion-grid>

@@ -1,0 +1,96 @@
+@media (min-width: 801px) {
+  .roster-item{
+    border: 1px solid var(--ion-color-card);
+  }
+
+}
+
+.roster-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px;
+  margin-bottom: 10px;
+}
+
+ion-item{
+  --inner-padding-end: 0px;
+  --padding-start:0px
+}
+
+.phone-label{
+  //width: 20%;
+  //margin-right: 16px;
+}
+
+ngx-intl-tel-input {
+  margin-bottom: 16px;
+}
+
+.bottom {
+  margin-bottom: 16px;
+}
+
+:host ::ng-deep .mat-form-field-flex {
+  border-bottom: 1px solid var(--ion-color-gray)!important;
+}
+
+p {
+  margin: 0;
+}
+
+a:hover {
+  cursor: pointer;
+  color: var(--ion-color-primary);
+  opacity: 0.6;
+}
+
+a {
+  color: var(--ion-color-primary);
+}
+
+a ion-icon {
+  margin-left: 3px;
+}
+
+.attachment-holder {
+  margin: 3px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.time-request-icon {
+  height: 50px;
+  width: 50px;
+}
+
+.approve-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+}
+
+.desktop-item ion-label {
+  margin-top: 0;
+}
+
+.attachment-button{
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.item-icon {
+  height: 20px;
+  width: 20px;
+  margin-right: 6px;
+}
+
+:host ::ng-deep .mat-form-field-infix {
+  border: 0!important;
+}
+
+.year-arrow{
+  height: 25px;
+  width: 25px;
+  margin: 2px;
+}

@@ -1,0 +1,126 @@
+<ion-header>
+  <ion-toolbar color="toolbar" mode="ios" *ngIf="mobile">
+    <ion-buttons slot="start">
+      <ion-button size="small" *ngIf="!tablet" (click)="dismiss()" fill="clear">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark" translate>customer-add</ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="warning" style="font-weight: 600" *ngIf="formChanged" translate (click)="submitForm()" fill="clear">submit</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="toolbar" *ngIf="!mobile">
+    <ion-buttons slot="start" style="position: absolute">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="arrow-back"></ion-icon>
+        <span class="ion-text-capitalize" translate>back</span>
+      </ion-button>
+    </ion-buttons>
+    <ion-title *ngIf="!customerService.editName" class="ion-text-center" style="margin: 16px 0">
+      <ion-label color="dark" translate>customer-add</ion-label>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <ion-grid class="ion-no-padding ion-no-margin full-height" *ngIf="isLoading">
+    <ion-row class="full-height">
+      <ion-col size="12" class="ion-text-center full-height ion-align-items-center">
+        <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-toolbar style="min-height: 200px" mode="ios" color="toolbar">
+    <ion-grid class="ion-no-padding" style="width: 100%; padding-bottom: 0">
+      <ion-row>
+        <ion-col size="12" class="ion-no-padding">
+          <div style="display: flex" class="ion-justify-content-center ion-align-items-center" [ngClass]="{'ion-margin' : mobile}">
+            <div class="avatar-holder">
+              <ion-avatar>
+                <input type="file" accept="image/x-png,image/jpeg" style="display: none" #imagePicker (change)="onImagePicked($event)">
+                <img (click)="showAvatar(customerService.imageSrc)" [src]="customerService.imageSrc || '/assets/img/avatar.svg'" class="avatar">
+              </ion-avatar>
+              <ion-fab class="delete-button">
+                <ion-fab-button (click)="editPickedPic()" class="ion-no-margin small-fab" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+              </ion-fab>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+  <div class="modal-container">
+    <form class="ion-padding" [formGroup]="createForm" (ngSubmit)="onSubmitForm()" *ngIf="!isLoading">
+      <button style="display: none" #submitBtn></button>
+      <ion-item>
+        <ion-icon color="secondary" slot="start" name="person"></ion-icon>
+        <ion-input type="text" style="margin: 10px 0; " formControlName="name" [placeholder]="'reg-name' | translate"></ion-input>
+      </ion-item>
+      <div *ngIf="formSubmitted || (createForm.get('name').value && createForm.get('name').value.length>0)">
+        <ion-label class="alert-margin" *ngIf="createForm.get('name').hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+        <ion-label class="alert-margin" *ngIf="createForm.get('name').hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+        <ion-label class="alert-margin" *ngIf="createForm.get('name').hasError('required')"  color="danger" translate>sched-name-error</ion-label>
+      </div>
+      <ion-grid class="edit-phone-div ion-align-items-center ion-no-padding">
+        <ion-row>
+          <ion-col style="display: flex" size="1" class="ion-align-items-center ion-no-padding">
+            <ion-icon name="phone-portrait" class="edit-phone-icon" color="primary"></ion-icon>
+          </ion-col>
+          <ion-col style="padding-left: 16px" size="11" class="ion-no-padding">
+            <ngx-intl-tel-input style="max-width: 90%"
+                                [cssClass]="'intl-code-input'"
+                                [enableAutoCountrySelect]="true"
+                                [enablePlaceholder]="true"
+                                [searchCountryFlag]="true"
+                                [selectFirstCountry]="true"
+                                [preferredCountries]="preferredCountries"
+                                [maxLength]="15"
+                                [separateDialCode]="true"
+                                [phoneValidation]="true"
+                                [searchCountryPlaceholder]="translate.getFromKey('search')"
+                                formControlName="internationalPhone"></ngx-intl-tel-input>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <div class="alert-margin" *ngIf="!createForm.controls['internationalPhone'].valid">
+        <ion-label translate color="danger">phone-error</ion-label>
+      </div>
+      <ion-item>
+        <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+        <ion-input type="email" style="margin: 10px 0;"
+                   formControlName="email"
+                   email
+                   placeholder="example@example.com"
+        ></ion-input>
+      </ion-item>
+      <ion-label class="alert-margin" *ngIf="createForm.get('email').hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+      <ion-item>
+        <fa-icon [ngClass]="{'fa-margin' : !mobile, 'fa-margin-mobile' : mobile}" [icon]="birthdayIcon"></fa-icon>
+        <ion-label>
+          <mat-form-field >
+            <input class="calendar-input" formControlName="dob" matInput [matDatepicker]="endDate" [placeholder]="'customer-dob' | translate">
+            <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+            <mat-datepicker #endDate startView="multi-year"></mat-datepicker>
+          </mat-form-field>
+        </ion-label>
+      </ion-item>
+<!--      <ion-item>-->
+<!--        <ion-icon name="information-circle-outline" color="secondary" slot="start"></ion-icon>-->
+<!--        <ion-textarea auto-grow="true" rows="1" style=" margin: 10px 0" formControlName="remark" [placeholder]="translate.getFromKey('sched-remark')"></ion-textarea>-->
+<!--      </ion-item>-->
+      <ion-item>
+        <fa-icon [ngClass]="{'fa-margin' : !mobile, 'fa-margin-mobile' : mobile}" [icon]="smsIcon"></fa-icon>
+        <ion-label translate>pricing-sms</ion-label>
+        <ion-toggle color="warning" slot="end" formControlName="sendSms"></ion-toggle>
+      </ion-item>
+    </form>
+    <div class="modal-submit-button-holder">
+      <ion-button  (click)="submitForm()" color="primary" translate>save</ion-button>
+    </div>
+  </div>
+</ion-content>

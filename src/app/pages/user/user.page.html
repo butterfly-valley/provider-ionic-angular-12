@@ -1,0 +1,71 @@
+<ion-split-pane contentId="user" *ngIf="!mobile" style="--side-max-width: 200px" when="sm">
+  <app-desktop-menu currentRoute="/user/management/schedule"></app-desktop-menu>
+  <ion-router-outlet id="user"></ion-router-outlet>
+</ion-split-pane>
+<ng-container *ngIf="mobile">
+  <ng-container *ngIf="user$ | async as user">
+    <ng-container *ngIf="authority$ | async as authority">
+      <app-mainmenu class="menu" [menuId]="'management'" [isAuthenticated]="true" [authority]="authority" [management]="true"></app-mainmenu>
+      <ion-content *ngIf="authority === 'schedule' || authority === 'provider'">
+      </ion-content>
+      <ion-tabs>
+        <ion-tab-bar *ngIf="!mobile" slot="top" color="toolbar">
+          <div style="position: absolute; left: 0; display: flex">
+            <a routerLink="/user/management/schedule" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+          </div>
+          <ion-tab-button tab="schedule" class="schedule" (click)="showMenuToggle('schedule')">
+            <fa-icon [icon]="scheduleIcon"></fa-icon>
+            <ion-label class="desktop-label" translate matBadge="11" matBadgeOverlap="false">specialist</ion-label>
+          </ion-tab-button>
+          <ion-tab-button tab="appointments" class="appointments" (click)="showMenuToggle('appointments')">
+            <ng-container *ngIf="auth.userStats$ | async as userStats">
+              <div *ngIf="userStats.appointments>0" class="badge">{{userStats.appointments}}</div>
+            </ng-container>
+            <fa-icon [icon]="appointmentIcon"></fa-icon>
+            <ion-label class="desktop-label" translate matBadge="11" matBadgeOverlap="false">navbar-apps</ion-label>
+          </ion-tab-button>
+          <ion-tab-button class="customers" *ngIf="authority.includes('customers') || authority === 'provider'" tab="customers" (click)="showMenuToggle('')">
+            <fa-icon [icon]="customersIcon"></fa-icon>
+            <ion-label class="desktop-label" translate>customers</ion-label>
+          </ion-tab-button>
+          <ion-tab-button class="messages" tab="messages" (click)="showMenuToggle('')">
+            <ng-container *ngIf="auth.userStats$ | async as userStats">
+              <div *ngIf="userStats.messages>0" class="badge">{{userStats.messages}}</div>
+            </ng-container>
+            <fa-icon [icon]="messageIcon"></fa-icon>
+            <ion-label class="desktop-label" translate>navbar-messages</ion-label>
+          </ion-tab-button>
+          <div style="position: absolute; right: 0">
+            <ion-tab-button>
+              <ion-menu-button autoHide="false" color="secondary"></ion-menu-button>
+            </ion-tab-button>
+          </div>
+        </ion-tab-bar>
+        <ion-tab-bar slot="bottom" *ngIf="mobile" color="toolbar">
+          <ion-tab-button tab="schedule" class="schedule">
+            <fa-icon [icon]="scheduleIcon"></fa-icon>
+            <ion-label translate matBadge="11" matBadgeOverlap="false">specialist</ion-label>
+          </ion-tab-button>
+          <ion-tab-button tab="appointments" class="appointments">
+            <ng-container *ngIf="auth.userStats$ | async as userStats">
+              <div *ngIf="userStats.appointments>0" class="badge">{{userStats.appointments}}</div>
+            </ng-container>
+            <fa-icon [icon]="appointmentIcon"></fa-icon>
+            <ion-label translate matBadge="11" matBadgeOverlap="false">navbar-apps</ion-label>
+          </ion-tab-button>
+          <ion-tab-button class="customers" *ngIf="authority.includes('customers') || authority === 'provider'" tab="customers" (click)="showMenuToggle('')">
+            <fa-icon [icon]="customersIcon"></fa-icon>
+            <ion-label translate>customers</ion-label>
+          </ion-tab-button>
+          <ion-tab-button tab="messages" class="messages">
+            <ng-container *ngIf="auth.userStats$ | async as userStats">
+              <div *ngIf="userStats.messages>0" class="badge">{{userStats.messages}}</div>
+            </ng-container>
+            <fa-icon [icon]="messageIcon"></fa-icon>
+            <ion-label translate>navbar-messages</ion-label>
+          </ion-tab-button>
+        </ion-tab-bar>
+      </ion-tabs>
+    </ng-container>
+  </ng-container>
+</ng-container>

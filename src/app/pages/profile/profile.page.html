@@ -1,0 +1,35 @@
+<ion-split-pane contentId="profile" *ngIf="!mobile" style="--side-max-width: 200px" when="sm">
+  <app-desktop-menu currentRoute="/user/profile/account"></app-desktop-menu>
+  <ion-router-outlet id="profile"></ion-router-outlet>
+</ion-split-pane>
+<ng-container *ngIf="mobile">
+  <ng-container *ngIf="authority$ | async as authority">
+    <app-mainmenu [menuId]="'profile'" [isAuthenticated]="true" [profile]="true" [management]="showManagement(authority)"></app-mainmenu>
+    <ion-content>
+    </ion-content>
+    <ion-tabs>
+      <ion-tab-bar slot="bottom" *ngIf="mobile" color="toolbar">
+        <ion-tab-button tab="account" class="account" *ngIf="authority === 'full' || authority === 'admin' || authority === 'provider'">
+          <fa-icon [icon]="accountIcon"></fa-icon>
+          <ion-label translate matBadge="11" matBadgeOverlap="false">account</ion-label>
+        </ion-tab-button>
+        <ion-tab-button class="page" tab="page" *ngIf="authority === 'full' || authority === 'admin' || authority === 'provider'">
+          <fa-icon [icon]="pageIcon"></fa-icon>
+          <ion-label translate matBadge="11" matBadgeOverlap="false">navbar-page</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="employees" class="employees" (click)="showMenuToggle('')" *ngIf="authority === 'full' || authority === 'admin' || authority === 'provider'">
+          <fa-icon [icon]="employeesIcon"></fa-icon>
+          <ion-label translate>employees</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="payments" class="payments" (click)="showMenuToggle('')" *ngIf="authority === 'full' || authority === 'payments' || authority === 'provider'">
+          <fa-icon [icon]="paymentIcon"></fa-icon>
+          <ion-label translate>navbar-payments</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="employee-profile" class="payments" (click)="showMenuToggle('')" *ngIf="authority !== 'provider'">
+          <ion-icon name="person"></ion-icon>
+          <ion-label translate style="font-size: 14px">navbar-profile</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ng-container>
+</ng-container>

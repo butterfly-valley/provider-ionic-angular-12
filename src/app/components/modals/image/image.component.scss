@@ -1,0 +1,33 @@
+img {
+  display: block;
+  max-height: 500px;
+  object-fit: cover;
+  width: auto;
+  height: auto;
+}
+
+.top{
+  top: 32px;
+}
+
+.min-height {
+  min-height: 100vh;
+}
+
+.min-height-desktop {
+  min-height: 556px;
+}
+
+@media (min-width: 767px) {
+  .min-height {
+    min-height: 600px;
+  }
+
+  .top{
+    top: 0;
+  }
+}
+
+ion-toolbar:last-of-type{
+  --border-width: 0;
+}

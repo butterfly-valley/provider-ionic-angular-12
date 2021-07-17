@@ -1,0 +1,663 @@
+<ion-header>
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button text=""></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<app-mainmenu [menuId]="'pricing'"></app-mainmenu>
+<ion-content [ngClass]="{'white' : mobile && !tablet}">
+  <ng-container *ngIf="!mobile || tablet">
+    <ion-row>
+      <ion-row class="container row-padding">
+        <ion-col size="12" class="ion-text-center vertical-margin">
+          <ion-label color="dark" class="plan-name">BASIC</ion-label>
+        </ion-col>
+        <ion-col size="6" class="align-content">
+          <img src="/assets/img/pricing/basic.svg" height="200px" alt="">
+        </ion-col>
+        <ion-col size="6" class="ion-text-center pricing-description align-content">
+          <ion-label translate color="lighter-dark">pricing-basic</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-row>
+    <ion-row class="white-background">
+      <ion-row class="container row-padding">
+        <ion-col size="12" class="ion-text-center vertical-margin">
+          <ion-label color="primary" class="plan-name">PLUS</ion-label>
+        </ion-col>
+        <ion-col size="6" class="align-content">
+          <img src="/assets/img/pricing/plus.svg" height="250px" alt="">
+        </ion-col>
+        <ion-col size="6" class="ion-text-center pricing-description align-content">
+          <ion-label translate color="lighter-dark">pricing-plus</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-row>
+    <ion-row>
+      <ion-row class="container row-padding">
+        <ion-col size="12" class="ion-text-center vertical-margin">
+          <ion-label color="tertiary" class="plan-name">PRO</ion-label>
+        </ion-col>
+        <ion-col size="6" class="align-content">
+          <img src="/assets/img/pricing/pro.svg" height="250px" alt="">
+        </ion-col>
+        <ion-col size="6" class="ion-text-center pricing-description align-content">
+          <ion-label translate color="lighter-dark">pricing-pro</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-row>
+    <ion-row class="white-background">
+      <ion-row class="container row-padding">
+        <ion-col size="12" class="ion-text-center vertical-margin">
+          <ion-label color="warning" class="plan-name">BUSINESS</ion-label>
+        </ion-col>
+        <ion-col size="6" class="align-content">
+          <img src="/assets/img/pricing/business.svg" height="250px" alt="">
+        </ion-col>
+        <ion-col size="6" class="ion-text-center pricing-description align-content">
+          <ion-label translate color="lighter-dark">pricing-business</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-row>
+    <ion-row>
+      <ion-row class="container row-padding">
+        <ion-col size="12" class="ion-text-center vertical-margin">
+          <ion-label color="danger" class="plan-name">ENTERPRISE</ion-label>
+        </ion-col>
+        <ion-col size="6" class="align-content">
+          <img src="/assets/img/pricing/enterprise.svg" height="250px" alt="">
+        </ion-col>
+        <ion-col size="6" class="ion-text-center pricing-description align-content">
+          <ion-label translate color="lighter-dark">pricing-enterprise</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-row>
+  </ng-container>
+  <ion-grid class="pricing-container ion-no-padding">
+    <ion-row [ngClass]="{'desktop-margin' : !mobile}" style="padding: 0">
+      <ion-col size="12" class="ion-padding ion-text-center" *ngIf="mobile && !tablet">
+        <ion-card class="ion-padding ion-justify-content-center ion-align-items-center pricing-card">
+          <h1 class="pricing-h1" ><ion-label color="dark">BASIC</ion-label></h1>
+            <ion-label translate color="lighter-dark">pricing-basic</ion-label>
+          <ion-label style="font-size: 1.5em; margin: 44px 0 56px 0" translate>pricing-free</ion-label>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="ios" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">1 <span translate class="ion-text-lowercase">specialist</span></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label" translate>pricing-unlimited-apps</ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="browsers" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-3</span>
+              <ion-icon style="position: absolute; right: 0;" name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-3-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications-outline" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-4</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-4-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="image" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">1 <span translate>pricing-5-1</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-5-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <div class="button-holder ion-margin">
+            <ion-button class="try-btn" routerLink="/register" translate>pricing-join</ion-button>
+          </div>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" class="ion-padding ion-text-center" *ngIf="mobile && !tablet">
+        <ion-card class="ion-padding ion-justify-content-center ion-align-items-center pricing-card">
+          <h1 class="pricing-h1"><ion-label color="secondary">PLUS</ion-label></h1>
+          <ion-label translate color="lighter-dark">pricing-plus</ion-label>
+          <ion-grid class="ion-no-padding">
+            <ion-row>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label><span style="font-size: 1.5em">€9.99*</span>/<span translate>month</span></ion-label>
+              </ion-col>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label translate style="font-size: 0.5em">or</ion-label>
+              </ion-col>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label><span style="font-size: 1.5em">€99.99*</span>/<span translate>year</span></ion-label>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="ios" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">5 <span translate class="ion-text-lowercase">schedules</span></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label" translate>pricing-unlimited-apps</ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="browsers" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-3</span>
+              <ion-icon style="position: absolute; right: 0;" name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-3-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications-outline" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-4</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-4-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="image" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">6 <span class="ion-text-lowercase" translate>pricing-5</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-5-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-sms</span>**
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-6-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <div class="button-holder ion-margin" style="margin-bottom: 0">
+            <ion-button class="try-btn" routerLink="/register" translate>trial</ion-button>
+          </div>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" class="ion-padding ion-text-center" *ngIf="mobile && !tablet">
+        <ion-card class="ion-padding ion-justify-content-center ion-align-items-center pricing-card">
+          <h1 class="pricing-h1"><ion-label color="warning">PRO</ion-label></h1>
+          <ion-label translate color="lighter-dark">pricing-pro</ion-label>
+          <ion-grid class="ion-no-padding">
+            <ion-row>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label><span style="font-size: 1.5em">€14.99*</span>/<span translate>month</span></ion-label>
+              </ion-col>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label translate style="font-size: 0.5em">or</ion-label>
+              </ion-col>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label><span style="font-size: 1.5em">€149.99*</span>/<span translate>year</span></ion-label>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="ios" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">10 <span translate class="ion-text-lowercase">schedules</span></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label" translate>pricing-unlimited-apps</ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="browsers" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-3</span>
+              <ion-icon style="position: absolute; right: 0;" name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-3-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications-outline" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-4</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-4-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="image" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">12 <span class="ion-text-lowercase" translate>pricing-5</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-5-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-sms</span>**
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-6-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="people" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-8</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-8-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="send" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-9</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-9-info', $event)"></ion-icon></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>sched-service-btn</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-12-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="people-circle" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">10 <span translate>employees-pricing</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-10-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>employee-roster</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-roster-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar-number" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>emp-time-management</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-time-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <div class="button-holder ion-margin" style="margin-bottom: 0">
+            <ion-button class="try-btn" routerLink="/register" translate>trial</ion-button>
+          </div>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" class="ion-padding ion-text-center" *ngIf="mobile && !tablet">
+        <ion-card class="ion-padding ion-justify-content-center ion-align-items-center pricing-card">
+          <h1 class="pricing-h1"><ion-label color="warning">BUSINESS</ion-label></h1>
+          <ion-label translate color="lighter-dark">pricing-business</ion-label>
+          <ion-grid class="ion-no-padding">
+            <ion-row>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label><span style="font-size: 1.5em">€19.99*</span>/<span translate>month</span></ion-label>
+              </ion-col>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label translate style="font-size: 0.5em">or</ion-label>
+              </ion-col>
+              <ion-col size="12" class="ion-no-padding">
+                <ion-label><span style="font-size: 1.5em">€199.99*</span>/<span translate>year</span></ion-label>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="ios" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">20 <span translate class="ion-text-lowercase">schedules</span></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label" translate>pricing-unlimited-apps</ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="browsers" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-3</span>
+              <ion-icon style="position: absolute; right: 0;" name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-3-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications-outline" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-4</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-4-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="image" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">24 <span class="ion-text-lowercase" translate>pricing-5</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-5-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-sms</span>**
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-6-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="people" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-8</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-8-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="send" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-9</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-9-info', $event)"></ion-icon></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>sched-service-btn</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-12-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="people-circle" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">20 <span translate>employees-pricing</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-10-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>employee-roster</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-roster-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar-number" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>emp-time-management</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-time-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <div class="button-holder ion-margin" style="margin-bottom: 0">
+            <ion-button class="try-btn" routerLink="/register" translate>trial</ion-button>
+          </div>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" class="ion-padding ion-text-center" *ngIf="mobile && !tablet">
+        <ion-card class="ion-padding ion-justify-content-center ion-align-items-center pricing-card">
+          <h1 class="pricing-h1"><ion-label color="warning">ENTERPRISE</ion-label></h1>
+          <ion-label translate color="lighter-dark">pricing-enterprise</ion-label>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="ios" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">20+ <span translate class="ion-text-lowercase">schedules</span></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label" translate>pricing-unlimited-apps</ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="browsers" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-3</span>
+              <ion-icon style="position: absolute; right: 0;" name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-3-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications-outline" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-4</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-4-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="image" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">24+ <span class="ion-text-lowercase" translate>pricing-5</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-5-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="notifications" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-sms</span>**
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-6-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="people" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-8</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-8-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="send" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>pricing-9</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-9-info', $event)"></ion-icon></ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" mode="md" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>sched-service-btn</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-12-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="people-circle" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label">20+ <span translate>employees-pricing</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-10-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>employee-roster</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-roster-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <ion-item class="pricing-item">
+            <ion-icon name="calendar-number" slot="start" color="primary"></ion-icon>
+            <ion-label class="pricing-label"><span translate>emp-time-management</span>
+              <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-time-info', $event)"></ion-icon>
+            </ion-label>
+          </ion-item>
+          <div class="button-holder ion-margin" style="margin-bottom: 0">
+            <ion-button class="try-btn" (click)="contact(true)" translate>contact-contact</ion-button>
+          </div>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" class="ion-no-padding ion-text-center" *ngIf="!mobile || tablet">
+        <ion-card class="ion-padding ion-justify-content-center ion-align-items-center table-wrapper">
+          <div class="table-wrapper">
+            <table>
+              <tbody>
+              <tr>
+                <th></th>
+                <th><ion-label>BASIC</ion-label></th>
+                <th><ion-label color="secondary">PLUS</ion-label></th>
+                <th><ion-label color="tertiary">PRO</ion-label></th>
+                <th><ion-label color="warning">BUSINESS</ion-label></th>
+                <th id="pricing"><ion-label color="danger">ENTERPRISE</ion-label></th>
+              </tr>
+              <tr>
+                <td class="description-pricing"><ion-label translate>pricing-1</ion-label></td>
+                <td>1</td>
+                <td>5</td>
+                <td>10</td>
+                <td>20</td>
+                <td>20+</td>
+              </tr>
+              <tr>
+                <td class="description-pricing"><ion-label translate>pricing-2</ion-label></td>
+                <td><ion-label translate>no-limit</ion-label></td>
+                <td><ion-label translate>no-limit</ion-label></td>
+                <td><ion-label translate>no-limit</ion-label></td>
+                <td><ion-label translate>no-limit</ion-label></td>
+                <td><ion-label translate>no-limit</ion-label></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label class="pricing-label"><span translate>pricing-3</span>
+                    <ion-icon  name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-3-info', $event)"></ion-icon>
+                  </ion-label>
+                </td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label class="pricing-label"><span translate>pricing-4</span>
+                    <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-4-info', $event)"></ion-icon>
+                  </ion-label>
+                </td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label class="pricing-label"><span translate>pricing-5</span>
+                    <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-5-info', $event)"></ion-icon>
+                  </ion-label>
+                </td>
+                <td>1</td>
+                <td>6</td>
+                <td>12</td>
+                <td>24</td>
+                <td>24+</td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label class="pricing-label"><span translate>pricing-sms</span>**
+                    <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-6-info', $event)"></ion-icon>
+                  </ion-label>
+                </td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing"><ion-label class="pricing-label"><span translate>pricing-8</span>
+                  <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-8-info', $event)"></ion-icon>
+                </ion-label></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">  <ion-label class="pricing-label"><span translate>pricing-9</span>
+                  <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-9-info', $event)"></ion-icon></ion-label></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label class="pricing-label"><span translate>sched-service-btn</span>
+                    <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-12-info', $event)"></ion-icon>
+                  </ion-label>
+                </td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">      <ion-label class="pricing-label"><span translate>pricing-10</span>
+                  <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('pricing-10-info', $event)"></ion-icon>
+                </ion-label></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td>10</td>
+                <td>20</td>
+                <td>20+</td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label class="pricing-label"><span translate>employee-roster</span>
+                    <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-roster-info', $event)"></ion-icon>
+                  </ion-label>
+                </td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label class="pricing-label"><span translate>emp-time-management</span>
+                    <ion-icon name="information-circle" color="dark" class="hover" (click)="infoPopover('employee-time-info', $event)"></ion-icon>
+                  </ion-label>
+                </td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="close-outline" color="danger"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+                <td><ion-icon name="checkmark-outline" color="primary"></ion-icon></td>
+              </tr>
+              <tr>
+                <td class="description-pricing">
+                  <ion-label translate style="font-weight: bold; text-transform: uppercase">pay-price</ion-label>
+                </td>
+                <td><ion-label translate>pricing-free</ion-label></td>
+                <td>
+                  <ion-grid class="ion-no-padding">
+                    <ion-row>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label><span>€9.99*</span>/<span translate>month</span></ion-label>
+                      </ion-col>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label translate style="font-size: 0.5em">or</ion-label>
+                      </ion-col>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label><span>€99.99*</span>/<span translate>year</span></ion-label>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </td>
+                <td>
+                  <ion-grid class="ion-no-padding">
+                    <ion-row>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label><span>€14.99*</span>/<span translate>month</span></ion-label>
+                      </ion-col>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label translate style="font-size: 0.5em">or</ion-label>
+                      </ion-col>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label><span>€149.99*</span>/<span translate>year</span></ion-label>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </td>
+                <td>
+                  <ion-grid class="ion-no-padding">
+                    <ion-row>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label><span>€19.99*</span>/<span translate>month</span></ion-label>
+                      </ion-col>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label translate style="font-size: 0.5em">or</ion-label>
+                      </ion-col>
+                      <ion-col size="12" class="ion-no-padding">
+                        <ion-label><span>€199.99*</span>/<span translate>year</span></ion-label>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </td>
+                <td><ion-button class="try-btn" (click)="contact(true)" translate>contact-contact</ion-button></td>
+              <tr>
+                <td></td>
+                <td><ion-button class="try-btn" routerLink="/register" translate>pricing-join</ion-button></td>
+                <td><ion-button class="try-btn" routerLink="/register" translate>trial</ion-button></td>
+                <td><ion-button class="try-btn" routerLink="/register" translate>trial</ion-button></td>
+                <td><ion-button class="try-btn" routerLink="/register" translate>trial</ion-button></td>
+                <td></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" class="ion-padding">
+        <ion-label><i translate>pay-vat-restriction</i></ion-label>
+        <p><ion-label><i>** - </i><i translate>pricing-sms-clause</i></ion-label></p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid class="ion-no-padding white-background" style="height: 120px" *ngIf="!mobile">
+    <ion-row class="container" style="height: 100%; display: flex; align-items: center">
+      <ion-col size="12" class="ion-text-center ion-no-padding">
+        <div style="display: flex; justify-content: center" translate>footer-follow
+          <div style="margin-top: 3px">
+            <a class="follow" href="https://www.facebook.com/bookanapp">
+              <ion-icon name="logo-facebook"></ion-icon></a>
+            <a class="follow" href="https://twitter.com/AppBookan"><ion-icon name="logo-twitter"></ion-icon></a>
+            <a class="follow"  href="https://www.instagram.com/bookanapp/"><ion-icon name="logo-instagram"></ion-icon></a>
+          </div>
+        </div>
+      </ion-col>
+      <ion-col size="12" class="ion-text-center ion-no-padding">
+        <ion-button mode="ios" class="ion-no-padding ion-no-margin" (click)="contact()" fill="clear"><ion-icon name="mail"></ion-icon><span style="margin-left: 6px" translate>footer-contact</span></ion-button>
+      </ion-col>
+      <ion-col size="12" class="ion-text-center ion-no-padding">
+        <small><span [innerHTML]="showYear()"></span> <fa-icon style="font-size: 12px; margin-left: 6px" [icon]="copyRightIcon"></fa-icon> Butterfly Valley, Lda</small>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <app-terms *ngIf="showTermsContainer"></app-terms>
+</ion-content>
+

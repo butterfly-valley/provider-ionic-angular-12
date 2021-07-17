@@ -1,0 +1,59 @@
+<ion-list class="ion-no-padding ion-no-margin" style="padding: 16px 0; background: var(--ion-color-background)" >
+  <ion-item lines="none" class="ion-no-padding ion-activatable">
+    <ion-ripple-effect></ion-ripple-effect>
+    <mat-form-field *ngIf="!mobile">
+      <mat-select style="color: var(--ion-color-warning)" [placeholder]="'provider-view-start' | translate" (selectionChange)="selectStart($event)" #schedule_Select>
+        <mat-option [value]="hour" *ngFor="let hour of start; let i = index">
+          {{convert24to12(hour)}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="select-holder" *ngIf="mobile">
+      <select *ngIf="mobile" style="width: 100%; color: var(--ion-color-secondary)" (change)="selectStart($event)">
+        <option [ngValue]="null">{{ 'provider-view-start' | translate }}</option>
+        <option [value]="hour" *ngFor="let hour of start; let i = index">
+          {{convert24to12(hour)}}
+        </option>
+      </select>
+      <ion-icon class="select-dropdown-icon" name="chevron-down-outline"></ion-icon>
+    </div>
+  </ion-item>
+  <ion-item lines="none" class="ion-no-padding ion-activatable">
+    <ion-ripple-effect></ion-ripple-effect>
+    <mat-form-field *ngIf="!mobile">
+      <mat-select style="color: var(--ion-color-warning)" [placeholder]="'provider-view-end' | translate" (selectionChange)="selectEnd($event)" #schedule_Select>
+        <mat-option [value]="hour" *ngFor="let hour of end; let i = index">
+          {{convert24to12(hour)}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="select-holder" *ngIf="mobile">
+      <select *ngIf="mobile" style="width: 100%; color: var(--ion-color-secondary)" (change)="selectEnd($event)">
+        <option [ngValue]="null">{{ 'provider-view-end' | translate }}</option>
+        <option [value]="hour" *ngFor="let hour of end; let i = index">
+          {{convert24to12(hour)}}
+        </option>
+      </select>
+      <ion-icon class="select-dropdown-icon" name="chevron-down-outline"></ion-icon>
+    </div>
+  </ion-item>
+  <ion-item lines="none"class="ion-no-padding ion-activatable">
+    <ion-ripple-effect></ion-ripple-effect>
+    <mat-form-field *ngIf="!mobile">
+      <mat-select style="color: var(--ion-color-warning)" [placeholder]="'sched-slot-duration' | translate" (selectionChange)="selectMinutes($event)" #schedule_Select>
+        <mat-option [value]="minutes" *ngFor="let minutes of minutesPerVacancyDesktop; let i = index">
+          {{minutes}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="select-holder" *ngIf="mobile">
+      <select *ngIf="mobile" style="width: 100%; color: var(--ion-color-secondary)" (change)="selectMinutes($event)">
+        <option [ngValue]="null">{{ 'sched-slot-duration' | translate }}</option>
+        <option [value]="minutes" *ngFor="let minutes of minutesPerVacancyDesktop; let i = index">
+          {{minutes}}
+        </option>
+      </select>
+      <ion-icon class="select-dropdown-icon" name="chevron-down-outline"></ion-icon>
+    </div>
+  </ion-item>
+</ion-list>

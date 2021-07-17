@@ -1,0 +1,56 @@
+<ion-header *ngIf="mobile">
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button size="small" *ngIf="!tablet" (click)="dismiss()" fill="clear" >
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear" >
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark" style="white-space: inherit!important;">
+        <span translate *ngIf="!bookanapp">customer-sms-campaign</span>
+        <span translate *ngIf="bookanapp">customer-promo</span>
+      </ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="warning" style="font-weight: 600" *ngIf="formChanged" translate (click)="submitForm()" fill="clear" >submit</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <ion-grid class="ion-no-padding ion-no-margin full-height" *ngIf="isLoading">
+    <ion-row class="full-height">
+      <ion-col size="12" class="ion-text-center full-height ion-align-items-center">
+        <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <h3 *ngIf="!mobile" class="ion-text-center" translate>
+    <span translate *ngIf="!bookanapp">customer-sms-campaign</span>
+    <span translate *ngIf="bookanapp">customer-promo</span>
+  </h3>
+  <form class="ion-padding" [formGroup]="campaignForm" (ngSubmit)="onSubmitForm()" *ngIf="!isLoading && !bookanapp">
+    <button style="display: none" #submitBtn></button>
+    <ion-item lines="none">
+      <ion-label class="normal-white-space" position="floating">{{messageLength}} <span translate>customer-sms-character</span>/{{messagesRequired}} <span translate>customer-sms-message</span></ion-label>
+      <ion-textarea rows="1" auto-grow="true" style="margin: 10px 0" formControlName="message" [placeholder]="'contact-message' | translate"></ion-textarea>
+    </ion-item>
+    <ion-item *ngIf="all" lines="none">
+      <ion-label translate>customer-sms-gdpr</ion-label>
+      <ion-toggle color="warning" slot="end" formControlName="gdpr"></ion-toggle>
+    </ion-item>
+  </form>
+  <form class="ion-padding" [formGroup]="campaignFormBookanapp" (ngSubmit)="onSubmitFormBookanapp()" *ngIf="!isLoading && bookanapp">
+    <button style="display: none" #submitBtn></button>
+    <ion-item lines="none">
+      <ion-textarea auto-grow="true" rows="1" style="margin: 10px 0" formControlName="message" [placeholder]="'contact-message' | translate"></ion-textarea>
+    </ion-item>
+  </form>
+</ion-content>
+<ion-footer *ngIf="!mobile" style="text-align: right" class="ion-padding">
+  <ion-button *ngIf="!formChanged" class="bold-600" (click)="dismiss()" fill="clear" color="primary" translate>close</ion-button>
+  <ion-button *ngIf="formChanged" class="bold-600" (click)="dismiss()" fill="clear" color="dark" translate>close</ion-button>
+  <ion-button *ngIf="formChanged" translate (click)="submitForm()">submit</ion-button>
+</ion-footer>

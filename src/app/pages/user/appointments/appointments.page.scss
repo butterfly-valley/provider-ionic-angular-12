@@ -1,0 +1,218 @@
+p{margin: 0}
+
+.sc-ion-card-ios-h, .sc-ion-card-md-h{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+
+.item-options-ios {
+  border: none;
+}
+
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50%!important;
+}
+
+.desktop-item {
+/*  --inner-padding-end: 0px;*/
+  --padding-start:0px;
+  min-width: 90%;
+}
+
+.desktop-image {
+  height: 120px;
+  width: 120px;
+  object-fit: cover
+}
+
+.bookanapp-image {
+  height: 20px;
+  width: 20px;
+  object-fit: cover;
+}
+
+.no-padding{
+  padding: 0;
+}
+.app-icon-container{
+  min-height: calc(100vh - 156px);
+}
+
+.segment-desktop > ion-segment-button > ion-label{
+  font-weight: 600;
+  font-size: 1.2em;
+}
+
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+fa-icon {
+  color: var(--ion-color-secondary);
+}
+
+
+.p-flex{
+  display: flex;
+}
+
+
+.icon-aligned{
+  align-self: center;
+  height: 20px;
+  width: 20px;
+}
+
+/*
+mat-calendar {
+  background: #D6E7F1;
+  border: 1px solid var(--ion-color-secondary);
+  margin: 5px;
+}
+*/
+
+::ng-deep .mat-calendar-spacer {
+  flex: none!important;
+}
+
+
+::ng-deep .mat-calendar-controls {
+  margin-top: 0!important;
+}
+
+::ng-deep .mat-calendar-table-header-divider{
+  padding: 0!important;
+}
+
+.openSideNav{
+  margin-left: -8px;
+}
+
+.openSideNav,.closeSideNav {
+  height: 30px;
+  width: 30px;
+}
+
+.openSideNav:hover, .closeSideNav:hover {
+  cursor: pointer;
+}
+
+.appointment-card p{
+  margin: 2px;
+}
+
+.appointment-card{
+  margin-bottom: 3px;
+}
+
+.reverseButton {
+  position: absolute;
+  right: 0;
+  z-index: 2;
+}
+
+.reverseButton:hover{
+  cursor: pointer;
+}
+
+mat-sidenav-container {
+  background: var(--ion-color-background)!important;
+}
+
+mat-paginator{
+  background: var(--ion-color-background);
+}
+
+
+.appointment-col {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 16px;
+}
+
+.checkbox-container {
+  margin-left: 10px;
+  width: 50px;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.checkbox-container-mobile {
+  width: 80px;
+  display: flex;
+  position: absolute;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.appointment-info-label{
+  margin-left: 80px;
+}
+
+.sc-ion-segment-ios-h {
+  margin-top: 16px;
+}
+
+.time-container {
+  margin: 16px 32px 16px 66px
+}
+
+.schedule-checkbox-container{
+  position: absolute;
+  width: 300px;
+}
+
+.margin-left{
+  margin-left: 32px;
+}
+
+.schedule-category-view{
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-icon{
+  margin-top: 5px;
+}
+
+ion-label{
+  color: var(--ion-color-dark);
+}
+
+@media (min-width: 1201px) {
+  .scheduleContainer {
+    //width: calc(100vw - 150px);
+    max-width: 1200px;
+  }
+}
+
+//highlight weekends
+::ng-deep .mat-calendar-table-header > tr > th:nth-child(6),
+::ng-deep .mat-calendar-table-header > tr > th:nth-child(7) {background: var(--ion-color-light-yellow); height: 45px!important; padding: 0 !important; font-weight: bold !important; border-radius: 25px;}
+
+::ng-deep .weekend > .mat-calendar-body-cell-content{
+  background: var(--ion-color-light-yellow);
+  border-radius: 25px;
+}
+
+:host ::ng-deep .mat-form-field-flex {
+  border-bottom: 1px solid var(--ion-color-gray)!important;
+}

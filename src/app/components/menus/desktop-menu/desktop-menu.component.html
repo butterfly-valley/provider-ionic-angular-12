@@ -1,0 +1,63 @@
+<ion-content>
+  <ion-grid class="ion-no-padding white" style="background: var(--ion-color-white)">
+    <ion-row>
+      <ion-header mode="ios">
+        <ion-toolbar color="toolbar" mode="ios">
+          <ion-buttons slot="start">
+            <a routerLink="/user/management/schedule" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+          </ion-buttons>
+        </ion-toolbar>
+<!--        <ion-toolbar color="toolbar" mode="ios" style="height: 30px">-->
+<!--&lt;!&ndash;          <ion-buttons slot="start">&ndash;&gt;-->
+<!--&lt;!&ndash;            <a routerLink="/user/management/schedule" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>&ndash;&gt;-->
+<!--&lt;!&ndash;          </ion-buttons>&ndash;&gt;-->
+<!--        <p *ngIf="auth.getLoggedUser() | async as loggedUser" style="text-align: end">-->
+<!--          <ion-label color="dark">{{loggedUser.name}}</ion-label>-->
+<!--        </p>-->
+<!--        </ion-toolbar>-->
+      </ion-header>
+    </ion-row>
+    <ion-row *ngIf="authorities$ | async as authorities">
+      <ion-col>
+        <ion-list class="ion-no-padding ion-no-margin">
+          <ion-item *ngIf="scheduleView" detail-icon="arrow-forward-outline" class="schedule" (click)="route('/user/management/schedule')" [detail]="menuService.currentRoute.includes('/user/management/schedule')"><ion-button mode="md" [color]="menuService.currentRoute.includes('/user/management/schedule') ? 'primary' : 'dark'" expand="full" fill="clear" ><ion-icon name="calendar" mode="ios"></ion-icon><a class="menuLink" translate>specialist</a></ion-button></ion-item>
+          <ion-item *ngIf="appView" detail-icon="arrow-forward-outline" class="appointments" (click)="route('/user/management/appointments')" [detail]="menuService.currentRoute.includes('/user/management/appointments')"><ion-button mode="md" [color]="menuService.currentRoute.includes('/user/management/appointments') ? 'primary' : 'dark'" expand="full" fill="clear"><fa-icon [icon]="appointmentIcon"></fa-icon><a class="menuLink" translate>navbar-apps</a></ion-button>
+            <ng-container *ngIf="auth.userStats$ | async as userStats">
+              <ion-badge class="badge" *ngIf="userStats.appointments>0" slot="end" [style.margin-right]="menuService.currentRoute !== '/user/management/appointments' ? '16px' : '0'" style="padding: 5px" color="warning">{{userStats.appointments}}</ion-badge>
+            </ng-container>
+          </ion-item>
+          <ion-item *ngIf="customersView" detail-icon="arrow-forward-outline" class="customers" (click)="route('/user/management/customers')" [detail]="menuService.currentRoute === '/user/management/customers'"><ion-button mode="md" [color]="menuService.currentRoute === '/user/management/customers' ? 'primary' : 'dark'" expand="full" fill="clear"><fa-icon [icon]="customersIcon"></fa-icon><a class="menuLink" translate>customers</a></ion-button>
+          </ion-item>
+          <ion-item *ngIf="messageView" detail-icon="arrow-forward-outline" class="messages" (click)="route('/user/management/messages')" [detail]="menuService.currentRoute === '/user/management/messages'"><ion-button mode="md" [color]="menuService.currentRoute === '/user/management/messages' ? 'primary' : 'dark'" expand="full" fill="clear" ><fa-icon [icon]="messageIcon"></fa-icon><a class="menuLink" translate>navbar-messages</a></ion-button>
+            <ng-container *ngIf="auth.userStats$ | async as userStats">
+              <ion-badge class="badge" *ngIf="userStats.messages>0" slot="end" [style.margin-right]="menuService.currentRoute !== '/user/management/messages' ? '16px' : '0'" style="padding: 5px" color="warning">{{userStats.messages}}</ion-badge>
+            </ng-container>
+          </ion-item>
+          <ion-item *ngIf="profileView" detail-icon="arrow-forward-outline" class="account" (click)="route('/user/profile/account')" [detail]="menuService.currentRoute === '/user/profile/account'"><ion-button mode="md" [color]="menuService.currentRoute === '/user/profile/account' ? 'primary' : 'dark'"  expand="full" fill="clear" > <fa-icon [icon]="accountIcon"></fa-icon><a class="menuLink" translate>account</a></ion-button></ion-item>
+          <ion-item *ngIf="pageView" detail-icon="arrow-forward-outline" class="page" (click)="route('/user/profile/page')" [detail]="menuService.currentRoute === '/user/profile/page'"><ion-button mode="md" [color]="menuService.currentRoute === '/user/profile/page' ? 'primary' : 'dark'" expand="full" fill="clear" > <fa-icon [icon]="pageIcon"></fa-icon><a class="menuLink" translate>navbar-page</a></ion-button></ion-item>
+          <ion-item *ngIf="employeeView" detail-icon="arrow-forward-outline" class="employees" (click)="route('/user/profile/employees')" [detail]="menuService.currentRoute === '/user/profile/employees'"><ion-button mode="md" [color]="menuService.currentRoute === '/user/profile/employees' ? 'primary' : 'dark'" expand="full" fill="clear" > <fa-icon [icon]="employeesIcon"></fa-icon><a class="menuLink" translate>employees</a></ion-button></ion-item>
+          <ion-item *ngIf="paymentsView" detail-icon="arrow-forward-outline" class="payments" (click)="route('/user/profile/payments')" [detail]="menuService.currentRoute === '/user/profile/payments'"><ion-button mode="md" [color]="menuService.currentRoute === '/user/profile/payments' ? 'primary' : 'dark'" expand="full" fill="clear" > <fa-icon [icon]="paymentIcon"></fa-icon><a class="menuLink" translate>navbar-payments</a></ion-button></ion-item>
+          <ion-item *ngIf="!providerView" detail-icon="arrow-forward-outline" class="payments" (click)="route('/user/profile/employee-profile')" [detail]="menuService.currentRoute === '/user/profile/employee-profile'"><ion-button mode="md" [color]="menuService.currentRoute === '/user/profile/employee-profile' ? 'primary' : 'dark'" expand="full" fill="clear" > <ion-icon name="person"></ion-icon><a class="menuLink" translate>employee-profile</a></ion-button></ion-item>
+          <ion-item *ngIf="providerView" (click)="featureTour()"><ion-button mode="md" expand="full" color="dark" fill="clear"><ion-icon name="hammer"></ion-icon><a class="menuLink" translate>tour-10</a></ion-button></ion-item>
+          <ion-item routerLink="/user/help" *ngIf="help"><ion-button mode="md" color="dark" expand="full" fill="clear"><ion-icon name="help-circle"></ion-icon><a class="menuLink" translate>footer-help</a></ion-button></ion-item>
+          <ion-item routerLink="/info/terms"><ion-button mode="md" expand="full" fill="clear" color="dark"><ion-icon name="clipboard"></ion-icon><a class="menuLink" translate>footer-terms</a></ion-button></ion-item>
+          <ion-item (click)="contact()" ><ion-button mode="md" expand="full" color="dark" fill="clear"><ion-icon name="mail"></ion-icon><a class="menuLink" translate>feedback</a></ion-button></ion-item>
+          <ion-item><ion-button mode="md" expand="full" color="dark" fill="clear"><app-languagepicker style="width: 100%"></app-languagepicker></ion-button></ion-item>
+          <ion-item>
+            <ion-toggle [checked]="darkMode" style="margin-left: 10px" (ionChange)="toggleDarkMode($event)"></ion-toggle>
+            <ion-label translate color="dark" class="ion-text-uppercase" style="font-weight: 200; font-size: 12.5px">dark-mode</ion-label>
+          </ion-item>
+          <ion-item> <span style="padding-left: 10px; color: var(--ion-color-dark)" translate>footer-follow</span>
+            <a class="follow" href="https://www.facebook.com/bookanapp"><ion-icon slot="start" color="secondary" name="logo-facebook"></ion-icon></a>
+            <a class="follow" href="https://twitter.com/AppBookan"><ion-icon slot="start" name="logo-twitter" color="secondary"></ion-icon></a>
+            <a class="follow" href="https://www.instagram.com/bookanapp/"><ion-icon slot="start" name="logo-instagram" color="secondary"></ion-icon></a></ion-item>
+          <ion-item><ion-label style="padding-left: 10px"><small><span [innerHTML]="showYear()"></span> <fa-icon style="font-size: 12px; margin-left: 6px" [icon]="copyRightIcon"></fa-icon> Butterfly Valley, Lda</small></ion-label></ion-item>
+          <ion-item (click)="signOut()"> <ion-button expand="full" color="danger" fill="clear" mode="md">
+            <ion-icon name="log-out"></ion-icon>
+            <a translate class="menuLink" style="color: #F40000">leave</a>
+          </ion-button></ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,344 @@
+<app-mainmenu [menuId]="'home'" *ngIf="mobile"></app-mainmenu>
+<ion-header *ngIf="mobile && isAndroid">
+    <ion-toolbar>
+        <div style="display: flex; align-items: center">
+            <div style="display: flex; flex-direction: row; align-items: center">
+                <img src="/assets/img/B-512-provider.png" height="50px" alt="" style="margin-right: 10px">
+                <div style="color: var(--ion-color-dark)">BOOKanAPP - <span translate>smart-management</span></div>
+            </div>
+            <a target="_blank" href="https://play.google.com/store/apps/details?id=com.bookanapp.provider"><img style="min-width: 160px; margin: 6px 0" height="60px" src="/assets/img/google-play.png" alt=""></a>
+        </div>
+        <ion-buttons slot="start">
+            <ion-icon name="close" style="font-size: 25px" (click)="closeAppDownload()"></ion-icon>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-header *ngIf="mobile && isIos">
+    <ion-toolbar >
+        <div style="display: flex; align-items: center">
+            <div style="display: flex; flex-direction: row; margin-right: 16px; align-items: center">
+                <img src="/assets/img/B-512-provider.png" height="50px" alt="" style="margin-right: 10px">
+                <div style="color: var(--ion-color-dark)">BOOKanAPP - <span translate>smart-management</span></div>
+            </div>
+            <a target="_blank" href="https://apps.apple.com/app/bookanapp-for-providers/id1514625583?ls=1"><img style="min-width: 150px; margin: 6px 0" height="60px" src="/assets/img/appstore-badge.svg" alt=""></a>
+        </div>
+        <ion-buttons slot="start">
+            <ion-icon name="close" style="font-size: 25px" (click)="closeAppDownload()"></ion-icon>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-header *ngIf="mobile">
+    <ion-toolbar color="toolbar">
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false"></ion-menu-button>
+        </ion-buttons>
+        <ion-buttons slot="start">
+            <img routerLink="/" height="23px" src="/assets/logo/BOOKanAPP_30.png" alt="BOOKanAPP">
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-header *ngIf="!mobile" mode="ios">
+    <ion-toolbar color="background" mode="ios">
+        <ion-grid class="ion-no-padding container">
+            <ion-row *ngIf="!mobile">
+                <span class="logo" style="top: 10px; position: absolute"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></span>
+                <ion-col style="display: flex; align-items: center" class="ion-no-padding ion-text-end ion-justify-content-end">
+                    <ion-chip (click)="navigate('/register')" outline color="warning" style="margin-right: 16px">
+                        <ion-label translate class="ion-text-uppercase ion-margin">welcome-try-btn</ion-label>
+                    </ion-chip>
+                    <a class="home-link-desktop" (click)="navigate('/info/pricing')"  translate >footer-pricing</a>
+                    <a class="home-link-desktop" (click)="show('about')" translate >about-us-title</a>
+                    <a class="home-link-desktop" (click)="navigate('/info/terms')" translate >footer-terms-short</a>
+                    <a class="home-link-desktop" target="_blank" href="https://www.bookanapp.com" translate >welcome-user-site</a>
+                    <ion-chip (click)="navigate('/login')" outline color="dark" style="margin-right: 16px">
+                        <ion-label translate class="ion-text-uppercase ion-margin">login-header</ion-label>
+                    </ion-chip>
+<!--                    <a class="home-link-desktop" (click)="navigate('/login')" translate>login-header</a>-->
+                    <app-languagepicker color="primary"></app-languagepicker>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-toolbar>
+</ion-header>
+<ion-content class="main-container">
+    <ion-row *ngIf="!mobile">
+        <ion-col size="12" class="ion-text-center" style="margin: 32px 0">
+            <ion-label translate class="ion-text-uppercase" style="font-weight: 900; font-size: 40px;" color="dark">
+                <span translate>welcome-h1</span>
+            </ion-label>
+        </ion-col>
+    </ion-row>
+    <ion-grid *ngIf="!mobile" class="ion-no-padding main-container-desktop">
+        <ion-row class="container">
+            <ion-col size="12" sizeMd="6" style="display: flex" class="ion-align-items-center ion-no-padding">
+                <ion-row style="height: 100%">
+                    <ion-col class="ion-align-items-center ion-justify-content-center" style="display: flex; flex-direction: column;">
+                        <ion-grid class="ion-no-padding" style="min-height: 500px; display: flex;    flex-direction: column;    justify-content: center;">
+                            <ion-row>
+                                <ion-col size="12" class="ion-no-padding ion-text-center" style="line-height: 2">
+                                    <!--                                            <ion-label translate color="lighter-dark">welcome-h1-desc</ion-label>-->
+                                    <ion-slides pager="true" [options]="slideOpts" style="max-width: 500px; padding-bottom: 10px">
+                                        <ion-slide>
+                                            <ion-label translate color="lighter-dark">welcome-h1-desc</ion-label>
+                                        </ion-slide>
+                                        <ion-slide>
+                                            <ion-label translate color="lighter-dark">welcome-employees</ion-label>
+                                        </ion-slide>
+                                        <!--                                                <ion-slide>-->
+                                        <!--                                                    <h1>Slide 3</h1>-->
+                                        <!--                                                </ion-slide>-->
+                                    </ion-slides>
+                                </ion-col>
+                                <ion-col size="12" class="ion-no-padding">
+                                    <div style="margin-top: 16px" class="button-holder">
+                                        <ion-button size="large" *ngIf="translate.getLocale() !== 'ru-RU'" routerLink="/register" mode="md" class="try-btn" translate color="warning">welcome-try-btn</ion-button>
+                                        <ion-button *ngIf="translate.getLocale() === 'ru-RU'" style="--height: 40px" routerLink="/register" mode="md" class="try-btn" translate color="warning">welcome-try-btn</ion-button>
+                                    </div>
+                                </ion-col>
+                            </ion-row>
+                            <ion-row *ngIf="!mobile" style="margin-top: 20px">
+                                <ion-col size="6" class="ion-text-end ion-no-padding">
+                                    <a target="_blank" href="https://play.google.com/store/apps/details?id=com.bookanapp.provider"><img height="60px" src="/assets/img/google-play-badge.png" alt=""></a>
+                                </ion-col>
+                                <ion-col size="6" class="ion-text-start ion-no-padding">
+                                    <a target="_blank" href="https://apps.apple.com/app/bookanapp-for-providers/id1514625583?ls=1"><img height="43px" style="margin-top: 8px" src="/assets/img/appstore-badge.svg" alt=""></a>
+                                </ion-col>
+                            </ion-row>
+                        </ion-grid>
+                    </ion-col>
+                </ion-row>
+            </ion-col>
+            <ion-col *ngIf="videoSrc" size="12" sizeMd="6" class="ion-no-padding" style="display: flex;
+        align-items: center; justify-content: center; min-height: 280px">
+                <iframe [width]="videoWidth" [height]="videoHeight"
+                        [src]="videoSrc" allowfullscreen="allowfullscreen"
+                        frameborder="0" [style.margin-left.px]="!mobile ? '32' : ''" [style.margin-bottom.px]="!mobile ? '32' : ''"></iframe>
+                <!--                <img src="/assets/img/landing/4.svg" [style.height]="!mobile ? '700px' : '400px'" alt="">-->
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <ion-grid class="ion-no-padding" *ngIf="mobile">
+        <ion-row *ngIf="tablet">
+            <ion-col size="12" class="ion-no-padding ion-text-center" style="margin: 16px 0" >
+                <ion-label class="ion-text-uppercase" translate style="font-weight: 900; font-size: 40px;" color="dark">
+                    <span translate>welcome-h1</span>
+                </ion-label>
+            </ion-col>
+        </ion-row>
+        <ion-row [className]="tablet ? 'container' : ''">
+            <ion-col size="12" sizeMd="6" style="display: flex" class="ion-align-items-center ion-no-padding">
+                <div>
+                    <ion-grid class="ion-no-padding" style="height: 100%">
+                        <ion-row style="height: 100%">
+                            <ion-col class="ion-align-items-center ion-justify-content-center" style="display: flex; flex-direction: column">
+                                <ion-grid class="ion-no-padding">
+                                    <ion-row>
+                                        <ion-col *ngIf="!tablet" size="12" class="ion-no-padding ion-text-center" style="margin-bottom: 16px" [ngClass]="{'smaller-font' : mobile && !tablet}">
+                                            <ion-label class="ion-text-uppercase" translate style="font-weight: 900; font-size: 40px;" color="dark">
+                                                <span translate>welcome-h1</span>
+                                            </ion-label>
+                                        </ion-col>
+                                        <ion-col size="12" class="ion-no-padding ion-text-center">
+<!--                                            <ion-label translate color="lighter-dark">welcome-h1-desc</ion-label>-->
+                                            <ion-slides pager="true" [options]="slideOpts" style="max-width: 300px; padding-bottom: 10px">
+                                                <ion-slide>
+                                                    <ion-label translate color="lighter-dark">welcome-h1-desc</ion-label>
+                                                </ion-slide>
+                                                <ion-slide>
+                                                    <ion-label translate color="lighter-dark">welcome-employees</ion-label>
+                                                </ion-slide>
+                                                <!--                                                <ion-slide>-->
+                                                <!--                                                    <h1>Slide 3</h1>-->
+                                                <!--                                                </ion-slide>-->
+                                            </ion-slides>
+                                        </ion-col>
+                                        <ion-col size="12" class="ion-no-padding">
+                                            <div style="margin-top: 16px" class="button-holder">
+                                                <ion-button size="large" *ngIf="translate.getLocale() !== 'ru-RU'" routerLink="/register" mode="md" class="try-btn" translate color="warning">welcome-try-btn</ion-button>
+                                                <ion-button *ngIf="translate.getLocale() === 'ru-RU'" style="--height: 40px" routerLink="/register" mode="md" class="try-btn" translate color="warning">welcome-try-btn</ion-button>
+                                            </div>
+                                        </ion-col>
+                                    </ion-row>
+                                    <ion-row *ngIf="!mobile" style="margin-top: 20px">
+                                        <ion-col size="6" class="ion-text-end ion-no-padding">
+                                            <a target="_blank" href="https://play.google.com/store/apps/details?id=com.bookanapp.provider"><img height="60px" src="/assets/img/google-play-badge.png" alt=""></a>
+                                        </ion-col>
+                                        <ion-col size="6" class="ion-text-start ion-no-padding">
+                                            <a target="_blank" href="https://apps.apple.com/app/bookanapp-for-providers/id1514625583?ls=1"><img height="43px" style="margin-top: 8px" src="/assets/img/appstore-badge.svg" alt=""></a>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                </div>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" class="ion-no-padding" style="display: flex;
+    align-items: center; justify-content: center; min-height: 280px">
+                <iframe *ngIf="videoSrc" [width]="videoWidth" [height]="videoHeight"
+                        [src]="videoSrc" allowfullscreen="allowfullscreen"
+                        frameborder="0" [style.margin-left.px]="!mobile ? '32' : ''" [style.margin-bottom.px]="!mobile ? '32' : ''"></iframe>
+                <!--                <img src="/assets/img/landing/4.svg" [style.height]="!mobile ? '700px' : '400px'" alt="">-->
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <ion-grid class="white-background">
+        <ion-row [ngClass]="{'desktop-margin' : !mobile}" class="container">
+            <ion-col size="12" sizeMd="6" class="ion-no-padding" *ngIf="!mobile || tablet">
+                <img src="/assets/img/landing/2.svg" height="400px" alt="">
+            </ion-col>
+            <ion-col size="12" sizeMd="6" class="ion-no-padding ion-align-items-center">
+                <ion-grid style="height: 100%">
+                    <ion-row style="height: 100%">
+                        <ion-col class="ion-no-padding ion-align-items-center ion-justify-content-center" style="display: flex; flex-direction: column">
+                            <h1><ion-label translate color="dark" style="font-weight: 900;">welcome-hire</ion-label></h1>
+                            <ion-label class="ion-text-center" color="lighter-dark" style="width: 80%; margin:0 10%" translate>welcome-hire-1</ion-label>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" class="ion-no-padding" *ngIf="mobile && !tablet">
+                <img src="/assets/img/landing/2.svg" height="400px" alt="">
+            </ion-col>
+        </ion-row>
+        <ion-row class="container">
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="card"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h3-90-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="wallet"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        money-back
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="globe"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-access-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="phone-portrait"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-app
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" mode="ios" name="calendar"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-cal-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="call"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-calls-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="cash"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-cost-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" mode="ios" name="chatbubbles"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-message-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="browsers" mode="md"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-page-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="laptop"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-paper-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" mode="ios" name="notifications"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-reminder-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" size-lg="4" class="ion-padding ion-text-center">
+                <ion-icon color="primary" class="welcome-icon" name="help-circle"></ion-icon>
+                <ion-card class="ion-padding ion-justify-content-center ion-align-items-center welcome-card">
+                    <ion-label translate>
+                        welcome-h2-support-desc
+                    </ion-label>
+                </ion-card>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <ion-grid class="white-background" id="about">
+        <ion-row [ngClass]="{'desktop-margin' : !mobile}" class="container">
+            <ion-col size="12" class="ion-no-padding">
+                <h1><ion-label translate color="dark" style="font-weight: 900;">about-us-title</ion-label></h1>
+            </ion-col>
+            <ion-col size="12" sizeMd="6" class="ion-no-padding ion-align-items-center" style="display: flex">
+                <img src="/assets/img/landing/5.svg" height="500px" alt="">
+            </ion-col>
+            <ion-col size="12" sizeMd="6" style="padding: 16px">
+                <span class="about-us">
+                    <ion-label color="lighter-dark" translate>about-us</ion-label>
+                    <p><ion-label color="lighter-dark" translate>about-us-2</ion-label></p>
+                    <p><ion-label color="lighter-dark" translate>about-us-3</ion-label></p>
+                    <p><ion-label color="lighter-dark" translate>about-us-4</ion-label></p>
+                    <p><ion-label color="lighter-dark" translate>about-us-5</ion-label></p>
+                    <p><ion-label color="lighter-dark" translate>about-us-6</ion-label></p>
+                </span>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <ion-grid class="ion-no-padding" style="background: var(--ion-color-background); height: 120px" *ngIf="!mobile">
+        <ion-row class="container" style="height: 100%; display: flex; align-items: center">
+            <ion-col size="12" class="ion-text-center ion-no-padding">
+                <div style="display: flex; justify-content: center" translate>footer-follow
+                    <div style="margin-top: 3px">
+                        <a class="follow" href="https://www.facebook.com/bookanapp">
+                            <ion-icon name="logo-facebook"></ion-icon></a>
+                        <a class="follow" href="https://twitter.com/AppBookan"><ion-icon name="logo-twitter"></ion-icon></a>
+                        <a class="follow"  href="https://www.instagram.com/bookanapp/"><ion-icon name="logo-instagram"></ion-icon></a>
+                    </div>
+                </div>
+            </ion-col>
+            <ion-col size="12" class="ion-text-center ion-no-padding">
+                <ion-button mode="ios" class="ion-no-padding ion-no-margin" (click)="contact()" fill="clear"><ion-icon name="mail"></ion-icon><span style="margin-left: 6px" translate>footer-contact</span></ion-button>
+            </ion-col>
+            <ion-col size="12" class="ion-text-center ion-no-padding">
+                <small><span [innerHTML]="showYear()"></span> <fa-icon style="font-size: 12px; margin-left: 6px" [icon]="copyRightIcon"></fa-icon> Butterfly Valley, Lda</small>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <app-terms *ngIf="showTermsContainer"></app-terms>
+</ion-content>

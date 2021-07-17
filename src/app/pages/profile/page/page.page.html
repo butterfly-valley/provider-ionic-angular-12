@@ -1,0 +1,254 @@
+<ion-header *ngIf="mobile" mode="ios">
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content id="content" [ngClass]="{'white' : mobile}">
+  <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+    <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+  </div>
+  <ion-fab *ngIf="pageService.provider$ | async as provider" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button size="small">
+      <ion-icon name="share"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button *ngIf="mobile" color="whatsapp" [href]="whatsappLink(provider)">
+        <ion-icon name="logo-whatsapp"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="secondary" [href]="emailLink(provider)">
+        <ion-icon name="mail"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="warning" (click)="copyLink(provider)">
+        <ion-icon name="copy"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+  <ng-container *ngIf="pageService.provider$ | async as provider; else loadingOrError">
+    <input onclick="this.value = null" type="file" accept="image/x-png,image/jpeg" style="display: none" #imagePicker (change)="onImagePicked($event)">
+    <ion-grid class="pane-container app-content ion-no-padding" [@enterAnimation]>
+      <ion-row class="ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+        <ion-col class="ion-no-padding" *ngIf="!mobile || tablet">
+          <mat-card class="ion-no-padding" style="margin: 0 0 32px 0!important; padding: 0; padding-right: 6px">
+            <ion-list class="ion-no-padding">
+              <ion-item>
+                <ion-icon name="camera" color="primary" mode="md" slot="start"></ion-icon>
+                <ion-grid>
+                  <ion-row>
+                    <ion-col offset="3" offset-md="4" offset-lg="5" size="6" size-md="3" size-lg="2" [ngClass]="{'add-image-col add-image-col-main' : !provider.image}">
+                      <div *ngIf="!isLoading" class="avatar-holder">
+                        <ion-avatar style="width: 100px; height: 100px" (click)="showAvatar(provider.image)">
+                          <img [src]="provider.image || '/assets/img/avatar.svg'" class="avatar">
+                        </ion-avatar>
+                        <ion-fab class="delete-button">
+                          <ion-fab-button *ngIf="provider.image" (click)="chooseAvatarAction(true, provider.image)" class="ion-no-margin small-fab-avatar" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+                          <ion-fab-button *ngIf="!provider.image" (click)="choosePic(true)" class="ion-no-margin small-fab-avatar" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+                        </ion-fab>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ng-container *ngIf="auth.userAuthorities$| async as authorities;">
+                    <ion-row *ngIf="!authorities.includes('ROLE_BASIC')">
+                      <ion-col style="max-height: 150px" class="add-image-col" size="6" size-md="3" size-lg="2" *ngFor="let image of providerImages">
+                        <div class="add-holder image-holder" *ngIf="image !== 'not-set'" >
+                          <img (click)="showAvatar(image)" class="image" [img-preloader]="image"/>
+                          <ion-fab class="image-buttons">
+                            <ion-fab-button (click)="choosePic(false, image)" class="ion-no-margin small-fab" color="secondary"><ion-icon name="create"></ion-icon></ion-fab-button>
+                            <ion-fab-button style="margin-left: 6px" (click)="deleteAvatar(image, false)" class="ion-no-margin small-fab" color="danger"><ion-icon name="trash"></ion-icon></ion-fab-button>
+                          </ion-fab>
+                        </div>
+                        <div class="add-holder" *ngIf="image === 'not-set'" >
+                          <ion-icon (click)="choosePic(false)" class="camera" mode="md" name="camera" color="warning"></ion-icon>
+                          <ion-icon name="add" class="add" mode="md"  color="white"></ion-icon>
+                        </div>
+                      </ion-col>
+                    </ion-row>
+                  </ng-container>
+                </ion-grid>
+              </ion-item>
+              <form [formGroup]="pageService.pageForm" (ngSubmit)="onSubmitForm()" style="margin-top: 16px;">
+                <ion-item *ngIf="!pageService.editDescription">
+                  <ion-icon  name="information-circle" color="primary" slot="start"></ion-icon>
+                  <ion-label>
+                    <span translate [ngClass]="{'bold-600' : !mobile || tablet}">pay-description</span>
+                    <p style="white-space: normal">{{provider.description}}</p>
+                  </ion-label>
+                  <ion-button class="no-margin-end" slot="end" fill="clear" translate (click)="edit('description')">edit</ion-button>
+                </ion-item>
+                <ion-item *ngIf="pageService.editDescription">
+                  <ion-icon  name="information-circle" color="primary" slot="start"></ion-icon>
+                  <div style="width: 100%">
+                    <ion-textarea auto-grow="true" rows="1" style="margin-bottom: 16px" formControlName="description" [placeholder]="translate.getFromKey('pay-description')"></ion-textarea>
+                    <p style="margin-left: 16px; color: var(--ion-color-danger)" *ngIf="pageService.pageForm.get('description').hasError('minlength') || pageService.pageForm.get('description').hasError('maxlength')" translate>man-desc-error</p>
+                  </div>
+                </ion-item>
+                <ion-item>
+                  <ion-icon color="secondary" slot="start" name="home"></ion-icon>
+                  <ion-label *ngIf="!pageService.editAddress">
+                    <span translate [ngClass]="{'bold-600' : !mobile || tablet}">address</span>
+                    <ng-container *ngIf="provider.address">
+                      <p><span>{{provider.address.street}} {{provider.address.number}}</span></p>
+                      <p><span>{{provider.address.postalCode}} {{provider.address.city}}</span></p>
+                      <p><span>{{provider.address.country}}</span></p>
+                    </ng-container>
+                  </ion-label>
+                  <ion-button *ngIf="!pageService.editAddress" class="no-margin-end" slot="end" fill="clear" translate (click)="edit('address')">edit</ion-button>
+                  <div *ngIf="pageService.editAddress && addressPicked !== ''" style="display: flex; width: 100%; position: absolute">
+                    <ion-icon name="trash" class="ion-align-self-center hover" color="danger" (click)="resetFacilityAddress()"></ion-icon>
+                    <ion-label style="white-space: normal; margin-left: 10px">{{addressPicked}}</ion-label>
+                  </div>
+                  <div [hidden]="!pageService.editAddress" style="width: 100%">
+                    <input [hidden]="addressPicked !== ''" class="search-location" type="text" #googlePlacesAutocomplete placeholder="{{ 'reg-start-typing' | translate }}"/>
+                  </div>
+                  <div [hidden]="!pageService.editAddress" formGroupName="address">
+                    <input type="hidden" data-minlength="3" id="route" formControlName="route" />
+                    <input type="hidden" formControlName="street_number" id="street_number" />
+                    <input type="hidden"  id="postal_code"  formControlName="postal_code"/>
+                    <input type="hidden" id="locality" formControlName="locality" />
+                    <input type="hidden" id="administrative_area_level_1" tabindex="7" formControlName="administrative_area_level_1"/>
+                    <input type="hidden" id="country" formControlName="country" />
+                  </div>
+                </ion-item>
+                <ion-item>
+                  <ion-icon name="business" color="primary" slot="start"></ion-icon>
+                  <ion-label translate >prof-addressVisible</ion-label>
+                  <ion-toggle class="toggle-margin" slot="end" formControlName="addressVisible"></ion-toggle>
+                </ion-item>
+                <ion-item>
+                  <ion-icon name="eye-off" color="primary" slot="start"></ion-icon>
+                  <ion-label translate>prof-restrict-access-title</ion-label>
+                  <ion-toggle class="toggle-margin" slot="end" formControlName="restricted"></ion-toggle>
+                </ion-item>
+<!--                <ion-item>-->
+<!--                  <ion-icon name="calendar" mode="md" color="primary" slot="start"></ion-icon>-->
+<!--                  <ion-label translate >anonymous-apps</ion-label>-->
+<!--                  <ion-toggle class="toggle-margin" slot="end" formControlName="anonymousApps"></ion-toggle>-->
+<!--                </ion-item>-->
+                <h3 style="margin-bottom: 0" class="ion-text-center"><span translate>reg-business-hours</span><ion-icon *ngIf="!pageService.editOpsHours" class="hover" name="create" color="primary" (click)="edit('opsHours', provider)"></ion-icon></h3>
+                <div class="ion-text-center" *ngIf="!pageService.editOpsHours">
+                  <ion-list style="padding-top: 0">
+                    <ion-item *ngFor="let ops of provider.opsHours">
+                      <ion-label>
+                        <span >{{ ops.dayOfWeek | translate }}</span>
+                      </ion-label>
+                      <ion-label class="ion-text-right">
+                        <p slot="end" *ngFor="let hour of ops.opening"><span>{{ dateTimeUtil.showSchedule(hour, translate.getLocale()) }}</span></p>
+                      </ion-label>
+                    </ion-item>
+                  </ion-list>
+                </div>
+                <div formGroupName="schedule" *ngIf="pageService.editOpsHours">
+                  <ng-container *ngIf="opsHours$ | async as opsHours">
+                    <app-weekday-picker [scheduleForm]="pageService.pageForm" [days]="true" [formSubmitted]="formSubmitted" [opsHours]="opsHours"></app-weekday-picker>
+                  </ng-container>
+                </div>
+                <button style="display: none" #submitBtn></button>
+              </form>
+              <div *ngIf="pageService.formChanged" class="ion-text-end" style="margin: 16px 0">
+                <ion-button class="bold-600" (click)="reset()" fill="clear" color="dark" translate>cancel</ion-button>
+                <ion-button translate (click)="submitForm()">submit</ion-button>
+              </div>
+            </ion-list>
+          </mat-card>
+        </ion-col>
+        <ion-col class="ion-no-padding" *ngIf="mobile && !tablet" style="padding-right: 6px">
+          <ion-list class="ion-no-padding">
+            <ion-item>
+              <ion-icon name="camera" color="primary" mode="md" slot="start"></ion-icon>
+              <ion-grid>
+                <ion-row>
+                  <ion-col offset="3" offset-md="4" offset-lg="5" size="6" size-md="3" size-lg="2" [ngClass]="{'add-image-col add-image-col-main' : !provider.image}">
+                    <div *ngIf="!isLoading" class="avatar-holder">
+                      <ion-avatar style="width: 100px; height: 100px" (click)="showAvatar(provider.image)">
+                        <img [src]="provider.image || '/assets/img/avatar.svg'" class="avatar">
+                      </ion-avatar>
+                      <ion-fab class="delete-button">
+                        <ion-fab-button *ngIf="provider.image" (click)="chooseAvatarAction(true, provider.image)" class="ion-no-margin small-fab-avatar" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+                        <ion-fab-button *ngIf="!provider.image" (click)="choosePic(true)" class="ion-no-margin small-fab-avatar" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+                      </ion-fab>
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ng-container *ngIf="auth.userAuthorities$| async as authorities;">
+                  <ion-row *ngIf="!authorities.includes('ROLE_BASIC')">
+                    <ion-col style="max-height: 150px" class="add-image-col" size="6" size-md="3" size-lg="2" *ngFor="let image of providerImages">
+                      <div class="add-holder image-holder" *ngIf="image !== 'not-set'" >
+                        <img (click)="showAvatar(image)" class="image" [img-preloader]="image"/>
+                        <ion-fab class="image-buttons">
+                          <ion-fab-button (click)="choosePic(false, image)" class="ion-no-margin small-fab" color="secondary"><ion-icon name="create"></ion-icon></ion-fab-button>
+                          <ion-fab-button style="margin-left: 6px" (click)="deleteAvatar(image, false)" class="ion-no-margin small-fab" color="danger"><ion-icon name="trash"></ion-icon></ion-fab-button>
+                        </ion-fab>
+                      </div>
+                      <div class="add-holder" *ngIf="image === 'not-set'" >
+                        <ion-icon (click)="choosePic(false)" class="camera" mode="md" name="camera" color="warning"></ion-icon>
+                        <ion-icon name="add" class="add" mode="md"  color="white"></ion-icon>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ng-container>
+              </ion-grid>
+            </ion-item>
+            <ion-item detail (click)="redirectToMobileEdit('description')">
+              <ion-icon  name="information-circle" color="primary" slot="start"></ion-icon>
+              <ion-label>
+                <span><span translate>pay-description</span></span>
+                <p style="white-space: normal">{{provider.description}}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item detail (click)="redirectToMobileEdit('address')">
+              <ion-icon name="home" color="primary" slot="start"></ion-icon>
+              <ion-label><span translate>address</span>
+                <ng-container *ngIf="provider.address">
+                  <p><span>{{provider.address.street}} {{provider.address.number}}</span></p>
+                  <p><span>{{provider.address.postalCode}} {{provider.address.city}}</span></p>
+                  <p><span>{{provider.address.country}}</span></p>
+                </ng-container>
+              </ion-label>
+            </ion-item>
+            <ion-item detail (click)="redirectToMobileEdit('addressVisible')">
+              <ion-icon name="business" color="primary" slot="start"></ion-icon>
+              <ion-label translate>prof-addressVisible</ion-label>
+            </ion-item>
+            <ion-item detail (click)="redirectToMobileEdit('restricted')">
+              <ion-icon name="eye-off" color="primary" slot="start"></ion-icon>
+              <ion-label translate>prof-restrict-access-title</ion-label>
+            </ion-item>
+            <ion-item detail (click)="redirectToMobileEdit('anonymousApps')">
+              <ion-icon name="calendar" mode="md" color="primary" slot="start"></ion-icon>
+              <ion-label translate style="white-space: normal">anonymous-apps</ion-label>
+            </ion-item>
+            <ion-item detail lines="none" (click)="redirectToMobileEdit('opsHours', provider)">
+              <ion-icon name="time" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>reg-business-hours</span>
+                <ion-item class="item-no-padding" *ngFor="let ops of provider.opsHours">
+                  <ion-label>
+                    <p >{{ ops.dayOfWeek | translate }}</p>
+                  </ion-label>
+                  <ion-label class="ion-text-right">
+                    <p slot="end" *ngFor="let hour of ops.opening"><span>{{ hour }}</span></p>
+                  </ion-label>
+                </ion-item>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-container>
+  <ng-template #loadingOrError>
+    <ion-grid class="ion-no-padding ion-no-margin">
+      <ion-row class="iconContainer ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+        <ion-col size="12" class="ion-text-center">
+          <ng-container *ngIf="loadingError">
+            <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+          </ng-container>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-template>
+</ion-content>

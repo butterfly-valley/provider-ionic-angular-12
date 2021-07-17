@@ -1,0 +1,481 @@
+<ion-header *ngIf="mobile" mode="ios">
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content [@enterAnimation]>
+  <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+    <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+  </div>
+  <ion-row>
+    <ion-col class="ion-no-padding" offset-lg="3" size-lg="6">
+      <ion-segment style="margin-bottom: 16px" [mode]="!mobile ? 'ios' : undefined" (ionChange)="segmentChanged($event)" value="roster">
+        <ion-segment-button value="roster">
+          <ion-label style="padding: 0 10px"><span translate>roster</span>
+          </ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="timeOff">
+          <ion-label style="padding: 0 10px"><span translate>time-management</span>
+          </ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="profile">
+          <ion-label style="padding: 0 10px"><span translate>navbar-profile</span>
+          </ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-col>
+  </ion-row>
+  <ng-container *ngIf="employeeProfileService.employee$ | async as employee">
+    <app-roster-list [rosterView]="true" [hidden]="!roster" [@enterAnimation] [employeeId]="employee.id"></app-roster-list>
+  </ng-container>
+  <ion-grid class="pane-container ion-no-padding" *ngIf="timeOff" [@enterAnimation]>
+    <ion-row *ngIf="allEmployeesMap$ | async as employeesDivisionMap">
+      <ion-col size="12" offset-md="2" offset-lg="6" size-md="8" size-lg="6" class="ion-text-end">
+        <mat-form-field style="width: 90%;" class="no-padding">
+          <mat-select [placeholder]="'employees' | translate" (selectionChange)="pickEmployeeRoster($event)">
+            <div *ngFor="let division of employeesDivisionMap | keyvalue">
+              <mat-option [value]="'divisionId=' + getDivisionId(division.key)">
+                <b>{{division.key}}</b>
+              </mat-option>
+              <div class="margin-6" *ngFor="let subdivision of division.value | keyvalue">
+                <mat-option [value]="'subdivisionId=' + subdivision.value[0].subdivisionId">
+                  <i>{{subdivision.key}}</i>
+                </mat-option>
+              </div>
+            </div>
+            <mat-option [value]="'employeeId=' + employee.id" *ngIf="employeeProfileService.employee$ | async as employee">
+              <b>{{employee.name}}</b>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngIf="employeeProfileService.employee$ | async as employee">
+      <ion-col>
+        <mat-card  style="margin-bottom: 16px">
+          <ion-row>
+            <ion-col class="align-content">
+              <ion-icon name="chevron-back-outline" color="primary" class="hover year-arrow" (click)="changeYear(true)"></ion-icon>
+              <ion-label style="font-size: 30px" color="dark">{{year}}</ion-label>
+              <ion-icon name="chevron-forward-outline" color="primary" class="hover year-arrow" (click)="changeYear(false)"></ion-icon>
+            </ion-col>
+          </ion-row>
+          <ion-row style="margin-bottom: 16px; max-height: 50vh; overflow: auto" *ngIf="renderRosters" [@enterAnimation]>
+            <ion-col *ngFor="let month of months" size="12">
+              <app-time-off [employee]="employee" [all]="all" [month]="month" [year]="this.year" [divisionId]="divisionId" [subdivisionId]="subdivisionId"></app-time-off>
+            </ion-col>
+          </ion-row>
+        </mat-card>
+        <ion-item lines="none" class="roster-item">
+          <ion-label class="ion-padding ion-no-margin">
+            <span translate>time-off</span>
+            <p><span translate="">vacation-days</span>{{': ' + employee.timeOffBalance.vacationDays}}</p>
+            <p><span translate="">vacation-days-rollover</span>{{': ' + employee.timeOffBalance.vacationRolloverDays}}</p>
+            <p><span translate="">bank-holiday-days</span>{{': ' + employee.timeOffBalance.complimentaryBankHolidayDays}}</p>
+            <p><span translate="">bank-holiday-rollover</span>{{': ' + employee.timeOffBalance.complimentaryBankHolidayRolloverDays}}</p>
+            <p><span translate="">comp-days</span>{{': ' + employee.timeOffBalance.compensationDays}}</p>
+            <p><span translate="">comp-days-rollover</span>{{': ' + employee.timeOffBalance.compensationRolloverDays}}</p>
+          </ion-label>
+        </ion-item>
+        <ng-container *ngIf="employeeProfileService.timeRequests$ | async as timeRequests">
+          <ng-container *ngIf="timeRequests.length > 0">
+            <input type="file" accept="image/x-png,image/jpeg,application/pdf" style="display: none" #filePicker (change)="onFilePicked($event)">
+            <ion-row>
+              <ion-col class="ion-no-padding" offset-lg="3" size-lg="6">
+                <ion-segment style="margin-bottom: 16px" [mode]="!mobile ? 'ios' : undefined" (ionChange)="timeRequestSegmentChanged($event)" value="absences">
+                  <ion-segment-button value="absences">
+                    <ion-label style="padding: 0 10px"><span translate>absences</span>
+                    </ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="overtime">
+                    <ion-label style="padding: 0 10px"><span translate>overtime</span>
+                    </ion-label>
+                  </ion-segment-button>
+                </ion-segment>
+              </ion-col>
+            </ion-row>
+            <ion-row *ngIf="absences" [@listAnimation]="timeRequests.length">
+              <ng-container *ngFor="let timeRequest of timeRequests">
+                <ion-col class="ion-no-padding ion-no-margin" *ngIf="!timeRequest.overtime" size="12" sizeLg="6">
+                  <mat-card class="appointment-card" style="padding: 6px; margin: 3px">
+                    <ion-item lines="none" class="desktop-item">
+                      <ion-label>
+                        <ion-icon name="calendar-number" color="primary"></ion-icon>
+                        <span>
+                          {{timeUtil.showLocalDateFromDateString(translate.getLocale(), timeRequest.start)}},
+                          {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.start)}} -
+                          {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.end)}}</span>
+                        <p class="attachment-holder" *ngIf="timeRequest.comments">
+                          <ion-icon name="chatbubble" class="item-icon" color="tertiary"></ion-icon>
+                          <span>{{timeRequest.comments}}</span>
+                        </p>
+                        <p class="attachment-holder" *ngFor="let attachment of timeRequest.attachments; index as index">
+                          <ion-icon *ngIf="!timeRequest.approved" name="trash" class="hover item-icon" color="danger" (click)="removeAttachment(timeRequest.id, attachment)"></ion-icon>
+                          <a [title]="'download' | translate"  (click)="downloadAttachment(timeRequest.id, attachment)" class="attachment-holder">
+                            <span>{{employeeProfileService.buildAttachment(attachment)}}</span><ion-icon name="cloud-download"></ion-icon>
+                          </a>
+                        </p>
+                        <p *ngIf="timeRequest.attachments.length<10 && !timeRequest.approved">
+                          <ion-button class="attachment-button" mode="ios" (click)="openFilePicker(timeRequest.id)" fill="clear" size="small"><ion-icon name="attach-outline"></ion-icon><ion-label translate>attachment</ion-label></ion-button>
+                        </p>
+                      </ion-label>
+                      <div class="approve-label align-content">
+                        <ion-icon [name]="timeRequest.toBeApproved ? 'alert-circle' : timeRequest.approved ? 'checkmark' : 'close'" [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'"></ion-icon>
+                        <ion-label [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'" translate>{{timeRequest.toBeApproved ? 'to-approve' : timeRequest.approved ? 'approved' : 'denied'}}</ion-label>
+                      </div>
+                    </ion-item>
+                  </mat-card>
+                </ion-col>
+              </ng-container>
+            </ion-row>
+            <ion-row *ngIf="overtime" [@listAnimation]="timeRequests.length">
+              <ng-container *ngFor="let timeRequest of timeRequests">
+                <ion-col class="ion-no-padding ion-no-margin" *ngIf="timeRequest.overtime" size="12" sizeLg="6">
+                  <mat-card class="appointment-card" style="padding: 6px; margin: 3px">
+                    <ion-item lines="none" class="desktop-item">
+                      <ion-label>
+                        <ion-icon name="calendar-number" color="primary"></ion-icon>
+                        <span>
+                          {{timeUtil.showLocalDateFromDateString(translate.getLocale(), timeRequest.start)}},
+                          {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.start)}} -
+                          {{timeUtil.showLocalTimeFromDateString(translate.getLocale(), timeRequest.end)}}</span>
+                        <p class="attachment-holder" *ngIf="timeRequest.comments">
+                          <ion-icon name="chatbubble" class="item-icon" color="tertiary"></ion-icon>
+                          <span>{{timeRequest.comments}}</span>
+                        </p>
+                        <p class="attachment-holder" *ngFor="let attachment of timeRequest.attachments; index as index">
+                          <ion-icon *ngIf="!timeRequest.approved" name="trash" class="hover item-icon" color="danger" (click)="removeAttachment(timeRequest.id, attachment)"></ion-icon>
+                          <a [title]="'download' | translate"  (click)="downloadAttachment(timeRequest.id, attachment)" class="attachment-holder">
+                            <span>{{employeeProfileService.buildAttachment(attachment)}}</span><ion-icon name="cloud-download"></ion-icon>
+                          </a>
+                        </p>
+                        <p *ngIf="timeRequest.attachments.length<10 && !timeRequest.approved">
+                          <ion-button class="attachment-button" mode="ios" (click)="openFilePicker(timeRequest.id)" fill="clear" size="small"><ion-icon name="attach-outline"></ion-icon><ion-label translate>attachment</ion-label></ion-button>
+                        </p>
+                      </ion-label>
+                      <div class="approve-label align-content">
+                        <ion-icon [name]="timeRequest.toBeApproved ? 'alert-circle' : timeRequest.approved ? 'checkmark' : 'close'" [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'"></ion-icon>
+                        <ion-label [color]="timeRequest.toBeApproved ? 'gray' : timeRequest.approved ? 'success' : 'danger'" translate>{{timeRequest.toBeApproved ? 'to-approve' : timeRequest.approved ? 'approved' : 'denied'}}</ion-label>
+                      </div>
+                    </ion-item>
+                  </mat-card>
+                </ion-col>
+              </ng-container>
+            </ion-row>
+          </ng-container>
+        </ng-container>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid class="pane-container app-content ion-no-padding" *ngIf="profile" [@enterAnimation]>
+    <ion-row class="ion-justify-content-center ion-align-items-center" style="flex-direction: column" *ngIf="employeeProfileService.employee$ | async as employee">
+      <ion-col class="ion-no-padding">
+        <form [formGroup]="editProfileForm" (ngSubmit)="onSubmitForm()">
+          <button style="display: none" #submitBtn></button>
+          <mat-card style="margin: 0 0 32px 0!important; width: 100%">
+            <ion-item>
+              <ion-icon name="person" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>reg-name</span>
+                <p>{{employee.name}}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-icon name="briefcase" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>employee-from</span>
+                <p><span>{{timeUtil.showDob(employee.registerDate, translate.getLocale())}}</span>
+                </p>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="!editPhone">
+              <ion-icon name="call" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>phone</span>
+                <ion-icon class="hover" color="secondary" name="create" (click)="editField('phone')"></ion-icon>
+                <p *ngFor="let phone of employee.phones" style="display: flex">
+                  <ion-icon name="trash-outline" color="danger" class="hover" [title]="'delete' | translate" (click)="deletePhone(phone.id, phone.number)"></ion-icon>
+                  <ion-icon color="primary" name="phone-portrait" *ngIf="phone.phoneType==='CELL'"></ion-icon>
+                  <ion-icon color="primary" name="call" *ngIf="phone.phoneType!=='CELL'"></ion-icon>
+                  <span >+{{phone.code}} {{phone.number}}</span>
+                </p>
+              </ion-label>
+            </ion-item>
+            <ion-item [hidden]="!editPhone" lines="none">
+              <ion-icon name="call" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <div formGroupName="phones" style="display: flex; align-items: center">
+                  <ion-row class="border-bottom" style="width: 100%">
+                    <ion-row *ngFor="let phone of phoneControls; index as i">
+                      <ion-col [formGroupName]="i" style="margin-top: 16px;">
+                        <ion-row>
+                          <ion-col size="2" size-md="1" class="ion-text-end align-content">
+                            <ion-button fill="clear" color="danger" class="ion-no-margin" (click)="removePhone(i)">
+                              <ion-icon size="small" name="trash" slot="icon-only"></ion-icon>
+                            </ion-button>
+                          </ion-col>
+                          <ion-col size="10" size-md="4">
+                            <mat-form-field class="no-padding phone-label" *ngIf="!mobile">
+                              <mat-select [placeholder]="'pay-type' | translate" formControlName="type">
+                                <mat-option value="CELL">
+                                  {{'prof-cell' | translate}}
+                                </mat-option>
+                                <mat-option value="LANDLINE">
+                                  {{'prof-landline' | translate}}
+                                </mat-option>
+                                <mat-option value="MISC">
+                                  {{'phone-misc' | translate}}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                            <div class="select-holder" *ngIf="mobile" style="width: auto; margin-right: 16px">
+                              <select formControlName="type" style="margin-bottom: 6px; margin-right: 16px">
+                                <option value="CELL">
+                                  {{'prof-cell' | translate}}
+                                </option>
+                                <option value="LANDLINE">
+                                  {{'prof-landline' | translate}}
+                                </option>
+                                <option value="MISC">
+                                  {{'phone-misc' | translate}}
+                                </option>
+                              </select>
+                              <ion-icon style="margin-left: -36px; margin-bottom: 3px" class="select-dropdown-icon" name="chevron-down-outline"></ion-icon>
+                            </div>
+                          </ion-col>
+                          <ion-col size="12" size-md="6" class="align-content">
+                            <ngx-intl-tel-input
+                                    [cssClass]="'intl-code-input'"
+                                    [enableAutoCountrySelect]="true"
+                                    [enablePlaceholder]="true"
+                                    [searchCountryFlag]="true"
+                                    [selectFirstCountry]="true"
+                                    [preferredCountries]="userService.preferredCountries"
+                                    [maxLength]="15"
+                                    [separateDialCode]="true"
+                                    [phoneValidation]="true"
+                                    [searchCountryPlaceholder]="translate.getFromKey('search')"
+                                    formControlName="phone"></ngx-intl-tel-input>
+                          </ion-col>
+                        </ion-row>
+                      </ion-col>
+                      <ion-col size="12" class="ion-text-center" *ngIf="phone.controls.type.hasError('required')">
+                        <ion-label color="danger" translate>phone-type-error</ion-label>
+                      </ion-col>
+                      <ion-col size="12" class="ion-text-center" *ngIf="!phone.controls.phone.valid">
+                        <ion-label color="danger" translate>phone-error</ion-label>
+                      </ion-col>
+                    </ion-row>
+                    <div class="button-holder">
+                      <ion-chip outline color="warning" (click)="userService.addPhoneField(editProfileForm, formChanged)">
+                        <ion-icon name="add"></ion-icon>
+                        <ion-label translate>phone</ion-label>
+                      </ion-chip>
+                    </div>
+                  </ion-row>
+                </div>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="!editPersonalEmail">
+              <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+              <ion-label>
+                <span translate>personal-email</span>
+                <ion-icon class="hover" color="secondary" name="create" (click)="editField('personalEmail')"></ion-icon>
+                <p *ngIf="employee.personalEmail">{{employee.personalEmail}}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item lines="none" *ngIf="editPersonalEmail">
+              <ion-icon color="secondary" slot="start" name="mail"></ion-icon>
+              <ion-label position="floating" translate>personal-email</ion-label>
+              <ion-input style="margin: 10px 0;
+"
+                         formControlName="personalEmail"
+                         email
+                         [placeholder]="'personal-email' | translate"
+              ></ion-input>
+            </ion-item>
+            <ion-label class="alert-margin" *ngIf="formSubmitted && (editProfileForm.get('personalEmail').hasError('pattern'))" color="danger" translate>login-email-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="!formSubmitted && editProfileForm.get('personalEmail').hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+            <ion-label class="alert-margin" *ngIf="!formSubmitted && editProfileForm.get('personalEmail').hasError('maxlength')" color="danger" translate>sched-name-error</ion-label>
+            <ion-item *ngIf="!editAddress">
+              <ion-icon name="home" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>employee-address</span>
+                <ion-icon class="hover" color="secondary" name="create" (click)="editField('address')"></ion-icon>
+                <ng-container *ngIf="employee.homeAddress">
+                  <p *ngIf="employee.homeAddress.street"><span>{{employee.homeAddress.street}}</span><span *ngIf="employee.homeAddress.number">{{', ' + employee.homeAddress.number}}</span></p>
+                  <p *ngIf="employee.homeAddress.postalCode"><span>{{employee.homeAddress.postalCode + ' ' +employee.homeAddress.city}}</span></p>
+                  <p *ngIf="employee.homeAddress.country"><span>{{employee.homeAddress.country}}</span></p>
+                </ng-container>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="editAddress">
+              <ion-icon name="home" slot="start" color="primary"></ion-icon>
+              <ion-grid class="ion-no-padding" style="margin-bottom: 16px; min-width: 50%" formGroupName="address">
+                <ion-row class="ion-no-padding">
+                  <ion-col class="ion-no-padding" size="12">
+                    <ion-item [lines]="mobile ? 'none' : undefined">
+                      <ion-label position="floating"><span translate>reg-street</span>*</ion-label>
+                      <ion-input style="max-width: 100%"
+                                 [placeholder]="('reg-street' | translate) + '*'"
+                                 formControlName="street"
+                      ></ion-input>
+                    </ion-item>
+                    <ion-label color="danger" translate *ngIf="formSubmitted && (editProfileForm.get('address.street').hasError('required') || editProfileForm.get('address.street').hasError('minlength')) ">reg-address-error</ion-label>
+                  </ion-col>
+                </ion-row>
+                <ion-row class="ion-no-padding">
+                  <ion-col size="12" size-md="5" class="ion-no-padding">
+                    <ion-item [lines]="mobile ? 'none' : undefined">
+                      <ion-label position="floating"><span translate>reg-zip</span>*</ion-label>
+                      <ion-input formControlName="postalCode" [placeholder]="('reg-zip' | translate) + '*'"></ion-input>
+                    </ion-item>
+                    <ion-label color="danger" translate *ngIf="formSubmitted && (editProfileForm.get('address.postalCode').hasError('required') || editProfileForm.get('address.postalCode').hasError('minlength'))">navbar-CP4BindError</ion-label>
+                  </ion-col>
+                  <ion-col size="12" offset-md="1" size-md="6" class="ion-no-padding">
+                    <ion-item [lines]="mobile ? 'none' : undefined">
+                      <ion-label position="floating"><span translate>reg-place</span>*</ion-label>
+                      <ion-input formControlName="city" [placeholder]="('reg-place' | translate) + '*'"></ion-input>
+                    </ion-item>
+                    <ion-label color="danger" translate *ngIf="formSubmitted && (editProfileForm.get('address.city').hasError('required') || editProfileForm.get('address.city').hasError('minlength'))">reg-place-error</ion-label>
+                  </ion-col>
+                </ion-row>
+                <ion-row class="ion-no-padding">
+                  <ion-col size="12" size-md="5" class="ion-no-padding" style="display: flex; align-items: center">
+                    <ion-item style="width: 100%" [lines]="mobile ? 'none' : undefined">
+                      <ion-label position="floating"><span translate>reg-province</span></ion-label>
+                      <ion-input formControlName="province" [placeholder]="'reg-province' | translate"></ion-input>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" size-md="5" offset-md="1" class="ion-no-padding ion-text-left ion-align-items-center">
+                    <mat-form-field style="width: 100%; margin-top: 32px" *ngIf="!mobile">
+                      <mat-select placeholder="{{ 'reg-country' | translate }}*" formControlName="country">
+                        <mat-option *ngFor="let country of countryCodesService.getCodes()" [value]="country.name">
+                          {{country.name}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <div class="select-holder" *ngIf="mobile" [style.margin-top]="tablet ? '20px' : '0'">
+                      <select formControlName="country" style="width: 100%; margin-top: 16px">
+                        <option [ngValue]="null">{{ 'reg-country' | translate }}*</option>
+                        <option *ngFor="let country of countryCodesService.getCodes()" [value]="country.name">{{country.name}}</option>
+                      </select>
+                      <ion-icon style="margin-top: 16px" class="select-dropdown-icon" color="dark" name="chevron-down-outline"></ion-icon>
+                    </div>
+                    <ion-label color="danger" translate *ngIf="formSubmitted && (editProfileForm.get('address.country').hasError('required') || editProfileForm.get('address.country').hasError('minlength'))">reg-country-error</ion-label>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-item>
+            <ion-item>
+              <ion-icon name="cash" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>tax-payer-id</span>
+                <p *ngIf="employee.taxPayerId">{{employee.taxPayerId}}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="!editBankAccount">
+              <ion-icon name="card" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>bank-account</span>
+                <ion-icon class="hover" color="secondary" name="create" (click)="editField('bank')"></ion-icon>
+                <p *ngIf="employee.bankAccount">{{employee.bankAccount}}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="editBankAccount"  [lines]="mobile ? 'none' : undefined">
+              <ion-icon name="card" slot="start" color="primary"></ion-icon>
+              <ion-label translate position="floating">bank-account</ion-label>
+              <ion-input style="max-width: 100%"
+                         [placeholder]="'bank-account' | translate"
+                         formControlName="bankAccount"
+              ></ion-input>
+            </ion-item>
+            <ion-item *ngIf="!editFamily" lines="none">
+              <ion-icon name="people" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <span translate>family</span>
+                <ion-icon class="hover" color="secondary" name="create" (click)="editField('family')"></ion-icon>
+                <p class="align-content" style="justify-content: flex-start" *ngFor="let member of employee.family">
+                  <ion-icon name="trash-outline" color="danger" class="hover" [title]="'delete' | translate" (click)="deleteFamily(member.id, member.name)"></ion-icon> <span >{{member.name}} ({{translateKinship(member.kinship) | lowercase}})</span>
+                </p>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="editFamily" lines="none" style="width: 100%">
+              <ion-icon name="people" slot="start" color="primary"></ion-icon>
+              <div formGroupName="family" style="display: flex; align-items: center; width: 100%">
+                <div style="width: 100%; margin-top: 16px">
+                  <ng-container *ngFor="let member of familyControls; index as i">
+                    <ion-row [formGroupName]="i">
+                      <ion-col size="2" size-md="1" class="align-content">
+                        <ion-button fill="clear" color="danger" class="ion-no-margin" (click)="removeFamilyMember(i)">
+                          <ion-icon size="small" name="trash" slot="icon-only"></ion-icon>
+                        </ion-button>
+                      </ion-col>
+                      <ion-col size="10" size-md="4" class="align-content">
+                        <mat-form-field style="margin-top: 35px" class="no-padding phone-label" *ngIf="!mobile">
+                          <mat-select [placeholder]="'kinship' | translate" formControlName="kinship">
+                            <mat-option value="0">
+                              {{'spouse' | translate}}
+                            </mat-option>
+                            <mat-option value="1">
+                              {{'partner' | translate}}
+                            </mat-option>
+                            <mat-option value="2">
+                              {{'child' | translate}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                        <div class="select-holder" *ngIf="mobile">
+                          <select formControlName="kinship">
+                            <option value="0">
+                              {{'spouse' | translate}}
+                            </option>
+                            <option value="1">
+                              {{'partner' | translate}}
+                            </option>
+                            <option value="3">
+                              {{'child' | translate}}
+                            </option>
+                          </select>
+                          <ion-icon style="margin-left: -36px; margin-bottom: 3px" class="select-dropdown-icon" name="chevron-down-outline"></ion-icon>
+                        </div>
+                      </ion-col>
+                      <ion-col size="12" size-md="7" class="align-content">
+                        <ion-item lines="none" style="width: 100%">
+                          <ion-label translate position="floating" *ngIf="!mobile">reg-name</ion-label>
+                          <ion-input style="max-width: 100%"  [placeholder]="'reg-name' | translate" formControlName="name"></ion-input>
+                        </ion-item>
+                        <p *ngIf="formSubmitted && member.controls.name.hasError('required')" style="position: absolute">
+                          <ion-label color="danger" translate>navbar-nameBindError</ion-label>
+                        </p>
+                      </ion-col>
+                      <ion-col size="12" class="ion-text-center" *ngIf="member.controls.kinship.hasError('required')">
+                        <ion-label color="danger" translate>phone-type-error</ion-label>
+                      </ion-col>
+                    </ion-row>
+                  </ng-container>
+                  <div class="button-holder">
+                    <ion-chip outline color="warning" (click)="addFamilyMember()">
+                      <ion-icon name="add"></ion-icon>
+                      <ion-label translate>family-member</ion-label>
+                    </ion-chip>
+                  </div>
+                </div>
+              </div>
+            </ion-item>
+            <div *ngIf="formChanged" style="margin: 16px 0; display: flex; justify-content: flex-end" class="ion-text-end">
+              <ion-button (click)="cancel()" fill="clear" color="dark" translate="">cancel</ion-button>
+              <ion-spinner color="primary" *ngIf="formChanged && isSubmitting" class="ion-align-self-center"></ion-spinner>
+              <ion-button *ngIf="formChanged && !isSubmitting" translate (click)="submitForm()">submit</ion-button>
+            </div>
+          </mat-card>
+        </form>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

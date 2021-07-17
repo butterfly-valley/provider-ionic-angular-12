@@ -1,0 +1,15 @@
+a{
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  align-items: center;
+}
+
+ion-label{
+  font-size: 0.7em;
+  font-family: 'Cabin-bold', 'Roboto',"Segoe UI",Roboto,"Helvetica Neue",Arial,
+  "Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"!important;
+}

@@ -1,0 +1,119 @@
+<ion-header *ngIf="mobile">
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons>
+      <ion-button *ngIf="!tablet" (click)="dismiss()" fill="clear">
+        <ion-icon *ngIf="swipe || close" name="close" slot="icon-only" mode="md"></ion-icon>
+        <ion-icon *ngIf="!swipe && !close" md="arrow-back" ios="chevron-back"></ion-icon>
+        <ion-label *ngIf="!swipe && !close" translate>navbar-messages</ion-label>
+       </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <ion-label color="dark"  *ngIf="userName">{{ userName }}</ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button  (click)="dismiss()" fill="clear">
+        <ion-button *ngIf="threadId || appointmentId" (click)="deleteThread()" color="danger" fill="clear" size="large"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+     </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-header *ngIf="!mobile">
+  <ion-toolbar>
+    <div slot="start">
+      <ion-button class="bold-600" (click)="dismiss()" fill="clear" translate>close</ion-button>
+    </div>
+    <ion-title class="ion-text-center" *ngIf="userName">
+      <ion-label class="ion-text-center">
+        {{ userName }}
+      </ion-label>
+    </ion-title>
+    <div slot="end">
+      <ion-button *ngIf="appointmentId || threadId" (click)="deleteThread()" color="danger" translate>delete</ion-button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+<ion-content #container (ionScroll)="scrollPosition($event)" [scrollEvents]="true">
+  <ion-grid class="ion-no-padding ion-no-margin" *ngIf="isLoading">
+    <ion-row class="iconContainer ion-justify-content-center ion-align-items-center" style=" flex-direction: column">
+      <ion-col size="12" class="ion-text-center">
+        <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button *ngIf="!scrollToEnd" size="small" color="toolbar" (click)="scrollToBottom()">
+        <ion-icon name="arrow-down"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  <ng-container *ngIf="messageList$ | async as messages; else loading">
+    <ion-grid *ngIf="messages.length>0 && !isLoading" #messageGrid>
+      <ion-row *ngFor="let message of messages" [id]="message.messageId">
+        <ion-col size="9" *ngIf="!message.fromProvider">
+          <div class="message other-message">
+            <b>{{ message.from }}</b><br>
+            <span *ngIf="!message.attachment">{{ message.messageText }}</span>
+            <a *ngIf="message.attachment && message.attachmentName" [href]="message.attachment" [innerHTML]="previewAttachment(message)"></a>
+            <div style="width: 100%">
+              <small><i>{{ timestamp(message.sent) }}</i></small>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col class="user-message" size="9" offset="3" *ngIf="message.fromProvider">
+          <div class="message my-message">
+            <span *ngIf="!message.attachment">{{ message.messageText }}</span>
+            <a *ngIf="message.attachment && message.attachmentName" [href]="message.attachment" [innerHTML]="previewAttachment(message)"></a>
+            <div style="width: 100%; text-align: right"><small><i>{{ timestamp(message.sent) }}</i></small></div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid *ngIf="messages.length<1 && !isLoading" class="ion-no-padding ion-no-margin">
+      <ion-row *ngIf="mobile" class="iconContainer ion-justify-content-center ion-align-items-center" style="flex-direction: column">
+        <ion-col size="12" class="ion-text-center">
+          <fa-icon [icon]="messageIcon" style="opacity: 0.5; font-size: 200px; color: #3880ff"></fa-icon>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngIf="!mobile" style="height: 470px">
+        <ion-col size="12" class="ion-no-padding ion-justify-content-center ion-align-items-center ion-no-margin"style="display: flex">
+          <fa-icon [icon]="messageIcon" style="opacity: 0.5; font-size: 200px; color: #3880ff"></fa-icon>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-container>
+  <ng-template #loading>
+    <ion-grid class="ion-no-padding ion-no-margin">
+      <ion-row class="iconContainer ion-justify-content-center ion-align-items-center" style=" flex-direction: column">
+        <ion-col size="12" class="ion-text-center">
+          <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-template>
+</ion-content>
+<ion-footer>
+  <input type="file" accept="image/x-png,image/jpeg,application/pdf" style="display: none" #filePicker (change)="onFilePicked($event)">
+  <form [formGroup]="messageForm" (ngSubmit)="onSendMessage()">
+    <ion-toolbar color="light">
+      <ion-row>
+        <ion-col size="9" class="ion-align-items-center" style="display: flex">
+          <ion-textarea auto-grow="true" rows="1" formControlName="message" *ngIf="mobile"></ion-textarea>
+          <mat-form-field *ngIf="!mobile">
+            <mat-label translate>contact-message</mat-label>
+            <input matInput formControlName="message">
+          </mat-form-field>
+        </ion-col>
+        <ion-col class="ion-no-padding ion-align-items-center" style="display: flex" size="3">
+          <ion-button class="ion-no-padding" (click)="openFilePicker()" fill="clear" color="secondary" size="large"><ion-icon name="attach"></ion-icon></ion-button>
+          <ion-button [disabled]="!messageForm.valid" expand="block" fill="clear" color="warning" (click)="submit()" class="msg-btn">
+            <ion-icon name="send" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-toolbar>
+    <button style="display: none" #submitBtn></button>
+  </form>
+</ion-footer>
+

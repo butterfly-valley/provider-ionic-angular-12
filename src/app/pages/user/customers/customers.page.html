@@ -1,0 +1,325 @@
+<ion-header *ngIf="mobile" mode="ios">
+    <ion-toolbar color="toolbar">
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false"></ion-menu-button>
+        </ion-buttons>
+        <ion-buttons slot="start">
+            <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt=""></a>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-grid class="ion-no-padding ion-no-margin full-height" *ngIf="isDownloading">
+    <ion-row class="full-height">
+        <ion-col size="12" class="ion-text-center full-height ion-align-items-center">
+            <ion-spinner style="width: 50px;height: 50px;" color="primary"></ion-spinner>
+        </ion-col>
+    </ion-row>
+</ion-grid>
+<ion-content #container [ngClass]="{'white': mobile}" [hidden]="isDownloading">
+    <div class="loading-cover-desktop-modal" *ngIf="isPaginatorLoading">
+        <div class="spinner-holder-75"><ion-spinner color="secondary" class="spinner-75"></ion-spinner></div>
+    </div>
+    <div class="loading-cover-desktop-modal" style="display: flex; justify-content: center; align-items: center; flex-direction: column" *ngIf="!authorized">
+        <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; height: 200px; width: 200px"></ion-icon>
+        <ion-label class="ion-text-uppercase ion-text-center" color="danger" style="opacity: 0.5; font-size: 1.5em">
+            <span translate>plan-upgrade-pro</span>
+            <a routerLink="/user/profile/payments"><ion-icon name="open" color="primary"></ion-icon></a>
+        </ion-label>
+    </div>
+    <ng-container *ngIf="authorized">
+        <ion-fab *ngIf="mobile && !tablet && customersIds.length>0" [hidden]="!own"  vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" (click)="smsCampaignAll()">
+                <fa-icon [icon]="smsIcon" style="color: var(--ion-color-white)"></fa-icon>
+            </ion-fab-button>
+            <ion-fab-button size="small" color="danger" (click)="deleteCustomers()">
+                <ion-icon name="trash"></ion-icon>
+            </ion-fab-button>
+        </ion-fab>
+        <ion-fab *ngIf="mobile && !tablet && bookanappCustomersIds.length>0" [hidden]="!bookanapp"  vertical="bottom" horizontal="end" slot="fixed">
+            <ion-fab-button size="small" (click)="promoCampaignAll()">
+                <fa-icon [icon]="adsIcon" style="color: var(--ion-color-white)"></fa-icon>
+            </ion-fab-button>
+        </ion-fab>
+        <ion-refresher *ngIf="mobile" class="app-content-margin" slot="fixed" (ionRefresh)="doRefresh($event)">
+            <ion-refresher-content>
+            </ion-refresher-content>
+        </ion-refresher>
+        <ion-grid class="pane-container ion-no-padding">
+            <ion-row>
+                <ion-col class="ion-no-padding" offset-lg="3" size-lg="6">
+                    <ion-segment #segment *ngIf="!mobile" style="margin-bottom: 16px" mode="ios" (ionChange)="segmentChanged($event)" value="own">
+                        <ion-segment-button value="own">
+                            <ion-label style="padding: 0 10px"><span translate>customer-h3</span>
+                            </ion-label>
+                        </ion-segment-button>
+                        <ion-segment-button value="bookanapp">
+                            <ion-label style="padding: 0 10px"><span translate>customer-bookanapp-h3</span>
+                            </ion-label>
+                        </ion-segment-button>
+                    </ion-segment>
+                    <ion-segment #segment *ngIf="mobile" style="margin-bottom: 16px" (ionChange)="segmentChanged($event)" value="own">
+                        <ion-segment-button value="own">
+                            <ion-label style="padding: 0 10px"><span translate>customer-h3</span>
+                            </ion-label>
+                        </ion-segment-button>
+                        <ion-segment-button value="bookanapp">
+                            <ion-label style="padding: 0 10px"><span translate>customer-bookanapp-h3</span>
+                            </ion-label>
+                        </ion-segment-button>
+                    </ion-segment>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ion-grid class="pane-container ion-no-padding" [hidden]="!own" *ngIf="ownCustomer$ | async as ownCustomers">
+            <ion-row>
+                <ion-col class="ion-align-items-center ion-no-padding ion-no-margin" *ngIf="ownCustomer$ | async as ownCustomers" size="2" size-md="3" size-xl="2" style="display: flex; align-items: center; padding-left: 16px">
+                    <ion-checkbox *ngIf="ownCustomers.length>0" (ionChange)="selectAllCheckboxes(ownCustomers, $event)"></ion-checkbox>
+                    <ion-button color="danger" fill="clear" *ngIf="ownCustomers.length>0 && customersIds.length>0 && (!mobile || tablet)" (click)="deleteCustomers()">
+                        <ion-icon name="trash" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" *ngIf="customersIds.length>0 && (!mobile || tablet)" (click)="smsCampaignAll()">
+                        <fa-icon [icon]="smsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                    </ion-button>
+                </ion-col>
+                <ion-col size="10" size-md="8" size-xl="9" style="display: flex" class="ion-align-items-center ion-no-padding ion-no-margin">
+                    <ion-searchbar style="padding-left: 0; padding-right: 0" type="text" debounce="500" [placeholder]="'search' | translate" (ionInput)="searchCustomers($event)" animated></ion-searchbar>
+                    <ion-button *ngIf="mobile && !tablet" color="warning" style="border-radius: 25px!important;" fill="clear" (click)="addNew()">
+                        <ion-icon style="height: 30px; width: 30px" name="add" mode="ios"></ion-icon>
+                    </ion-button>
+                    <ion-chip *ngIf="!mobile || tablet" color="warning" (click)="addNew()" style="margin-left: 32px">
+                        <ion-icon style="height: 45px; width: 45px" name="add" mode="ios"></ion-icon>
+                        <ion-label translate>client</ion-label>
+                    </ion-chip>
+                </ion-col>
+                <ion-col size="12" style="display: flex" class="ion-no-padding ion-no-margin ion-justify-content-end" *ngIf="totalOwnCustomers$ | async as totalOwnCustomers">
+                    <mat-paginator style="background: var(--ion-color-background)" [ngClass]="{'white-background' : mobile}" [length]="totalOwnCustomers" *ngIf="totalOwnCustomers>10  && (!mobile || tablet)" (page)="paginator($event)"
+                                   [pageSize]="10"
+                                   [pageSizeOptions]="[10, 25, 50]"
+                                   showFirstLastButtons="true">
+                    </mat-paginator>
+                </ion-col>
+            </ion-row>
+            <ion-row class="app-icon-container" style="flex-direction: column; height: 80vh" *ngIf="ownCustomers.length===0">
+                <ion-col size="12" style="display: flex" class="ion-justify-content-center ion-align-items-center">
+                    <fa-icon [icon]="customersIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-secondary)"></fa-icon>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ion-grid style="padding-right: 6px" class="app-content pane-container ion-no-padding" [hidden]="!own">
+            <ng-container *ngIf="ownCustomer$ | async as ownCustomers; else loadingOrError">
+                <ion-row *ngIf="ownCustomers.length>0" [@listAnimation]="ownCustomers.length">
+                    <ion-col class="ion-no-padding ion-no-margin" *ngFor="let customer of ownCustomers" size="12" sizeLg="6">
+                        <mat-card class="appointment-card" style="padding: 0; margin: 3px">
+                            <ion-grid class="ion-no-padding ion-no-margin" *ngIf="!mobile">
+                                <ion-row class="ion-no-padding ion-no-margin">
+                                    <ion-col size="9" class="ion-no-padding ion-no-margin">
+                                        <ion-item class="desktop-item ion-activatable" lines="none">
+                                            <ion-ripple-effect></ion-ripple-effect>
+                                            <span slot="start" class="checkbox-container">
+                                            <ion-checkbox [(ngModel)]="customer.checked" (ionChange)="addToDeleteCustomer(customer.id, $event)"></ion-checkbox>
+                                        </span>
+                                            <ion-avatar slot="start">
+                                                <img *ngIf="customer.avatar" class="avatar" [img-preloader]="customer.avatar" (click)="showAvatar(customer.avatar)">
+                                                <img *ngIf="!customer.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                            </ion-avatar>
+                                            <ion-label class="customer-label" (click)="showCustomer(customer.id, false)">
+                                                <h3>{{customer.name}}</h3>
+                                            </ion-label>
+                                        </ion-item>
+                                    </ion-col>
+                                    <ion-col class="appointment-col ion-justify-content-center ion-align-items-center" size="3" *ngIf="!mobile">
+                                        <ion-button [title]="'customer-sms-campaign' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="smsCampaign(customer.id)">
+                                            <fa-icon [icon]="smsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                        </ion-button>
+                                        <ion-button [title]="'customer-gdpr' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="downloadGDPR(customer.id, false)">
+                                            <ion-icon slot="icon-only" name="document"></ion-icon>
+                                        </ion-button>
+                                        <ion-button [title]="'customer-gdprAd' | translate" style="margin-left: 5px" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="downloadGDPR(customer.id, true)">
+                                            <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                        </ion-button>
+                                        <ion-button [title]="'delete' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" color="danger" fill="clear" (click)="deleteCustomer(customer.id)">
+                                            <ion-icon slot="icon-only" name="trash" ></ion-icon>
+                                        </ion-button>
+                                    </ion-col>
+                                </ion-row>
+                            </ion-grid>
+                            <ion-item class="desktop-item ion-activatable" *ngIf="mobile && tablet">
+                                <ion-ripple-effect></ion-ripple-effect>
+                                <span slot="start" class="checkbox-container">
+                                            <ion-checkbox [(ngModel)]="customer.checked" (ionChange)="addToDeleteCustomer(customer.id, $event)"></ion-checkbox>
+                                        </span>
+                                <ion-avatar slot="start">
+                                    <img *ngIf="customer.avatar" class="avatar" [img-preloader]="customer.avatar" (click)="showAvatar(customer.avatar)">
+                                    <img *ngIf="!customer.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                </ion-avatar>
+                                <ion-label class="customer-label" (click)="showCustomer(customer.id, false)">
+                                    <h3>{{customer.name}}</h3>
+                                </ion-label>
+                                <ion-button [title]="'customer-sms-campaign' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="smsCampaign(customer.id)">
+                                    <fa-icon [icon]="smsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                </ion-button>
+                                <ion-button [title]="'customer-gdpr' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="downloadGDPR(customer.id, false)">
+                                    <ion-icon slot="icon-only" name="document"></ion-icon>
+                                </ion-button>
+                                <ion-button [title]="'customer-gdprAd' | translate" style="margin-left: 5px" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="downloadGDPR(customer.id, true)">
+                                    <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                </ion-button>
+                                <ion-button [title]="'delete' | translate" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" color="danger" fill="clear" (click)="deleteCustomer(customer.id)">
+                                    <ion-icon slot="icon-only" name="trash" ></ion-icon>
+                                </ion-button>
+                            </ion-item>
+                            <ion-item-sliding *ngIf="mobile && !tablet">
+                                <ion-item detail>
+                            <span slot="start" class="checkbox-container">
+                                <ion-checkbox [(ngModel)]="customer.checked" (ionChange)="addToDeleteCustomer(customer.id, $event)"></ion-checkbox>
+                            </span>
+                                    <ion-avatar style="margin-right: 16px">
+                                        <img *ngIf="customer.avatar" class="avatar" [img-preloader]="customer.avatar" (click)="showAvatar(customer.avatar)">
+                                        <img *ngIf="!customer.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                    </ion-avatar>
+                                    <ion-label class="customer-label" (click)="showCustomer(customer.id, false)">
+                                        {{customer.name}}
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item-options side="end">
+                                    <ion-item-option>
+                                        <ion-button class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="smsCampaign(customer.id)">
+                                            <fa-icon [icon]="smsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                        </ion-button>
+                                    </ion-item-option>
+                                    <ion-item-option>
+                                        <ion-button  class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="downloadGDPR(customer.id, false)">
+                                            <ion-icon slot="icon-only" name="document"></ion-icon>
+                                        </ion-button>
+                                    </ion-item-option>
+                                    <ion-item-option>
+                                        <ion-button  style="margin-left: 5px" class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" fill="clear" (click)="downloadGDPR(customer.id, true)">
+                                            <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                        </ion-button>
+                                    </ion-item-option>
+                                    <ion-item-option>
+                                        <ion-button class="ion-no-padding" [ngClass]="{'button-margin' : !tablet, 'button-margin-mobile' : tablet}" size="small" color="danger" fill="clear" (click)="deleteCustomer(customer.id)">
+                                            <ion-icon slot="icon-only" name="trash"></ion-icon>
+                                        </ion-button>
+                                    </ion-item-option>
+                                </ion-item-options>
+                            </ion-item-sliding>
+                        </mat-card>
+                    </ion-col>
+                    <ng-container *ngIf="totalOwnCustomers$ | async as totalOwnCustomers">
+                        <div class="button-holder" *ngIf="totalOwnCustomers>10 && (mobile && !tablet)">
+                            <ion-fab-button mode="ios" (click)="loadMore(totalOwnCustomers, false)" size="small" color="warning"><ion-icon name="add"></ion-icon></ion-fab-button>
+                        </div>
+                    </ng-container>
+                </ion-row>
+            </ng-container>
+        </ion-grid>
+        <ion-grid class="pane-container ion-no-padding" [hidden]="!bookanapp">
+            <ion-row>
+                <ion-col *ngIf="bookanappCustomers$ | async as bookanappCustomers" size="2" size-lg="3" style="display: flex; align-items: center; padding-left: 16px">
+                    <ion-checkbox *ngIf="bookanappCustomers.length>0" (ionChange)="selectAllCheckboxesBookanapp(bookanappCustomers, $event)"></ion-checkbox>
+                    <ion-button fill="clear" *ngIf="bookanappCustomers.length>0 && bookanappCustomersIds.length>0  && (!mobile || tablet)" (click)="promoCampaignAll()">
+                        <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                    </ion-button>
+                </ion-col>
+                <ion-col size="8" size-md="8" size-lg="6" style="display: flex" class="ion-align-items-center">
+                    <ion-searchbar style="padding-left: 0; padding-right: 0" type="text" debounce="500" [placeholder]="'search' | translate" (ionInput)="searchBookanappCustomers($event)" animated></ion-searchbar>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ion-grid style="padding-right: 6px" class="app-content pane-container ion-no-padding" [hidden]="!bookanapp">
+            <ng-container *ngIf="bookanappCustomers$ | async as bookanappCustomers; else loadingOrError">
+                <ion-row *ngIf="bookanappCustomers.length>10">
+                    <ion-col size="12" size-md="8" size-lg="9" size-xl="10" class="ion-text-end ion-no-padding" *ngIf="totalBookanappCustomers$ | async as totalBookanappCustomers">
+                        <mat-paginator style="background: var(--ion-color-background)" [ngClass]="{'white-background' : mobile && !tablet}" [length]="totalBookanappCustomers" *ngIf="totalBookanappCustomers>10" (page)="paginatorBookanapp($event)"
+                                       [pageSize]="10"
+                                       [pageSizeOptions]="[10, 25, 50]"
+                                       showFirstLastButtons="true">
+                        </mat-paginator>
+                    </ion-col>
+                </ion-row>
+                <ion-row *ngIf="bookanappCustomers.length>0" [@listAnimation]="bookanappCustomers.length">
+                    <ion-col class="ion-no-padding ion-no-margin" *ngFor="let customer of bookanappCustomers" size="12" sizeLg="6">
+                        <mat-card class="appointment-card desktop-card">
+                            <ion-item *ngIf="!mobile" lines="none" class="desktop-item ion-activatable">
+                                <ion-ripple-effect></ion-ripple-effect>
+                                <span slot="start" class="checkbox-container">
+                                <ion-checkbox [(ngModel)]="customer.checked" (ionChange)="addBookanappCustomer(customer.id, $event)"></ion-checkbox>
+                                </span>
+                                <ion-avatar slot="start">
+                                    <img *ngIf="customer.avatar" class="avatar" [img-preloader]="customer.avatar" (click)="showAvatar(customer.avatar)">
+                                    <img *ngIf="!customer.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                </ion-avatar>
+                                <ion-label class="customer-label" (click)="showCustomer(customer.id, true)">
+                                    <h3>{{customer.name}}</h3>
+                                </ion-label>
+                            </ion-item>
+                            <ion-button size="small" fill="clear" *ngIf="!mobile && customer.pushNotifications" (click)="promoCampaign(customer.id)">
+                                <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                            </ion-button>
+                            <ion-item *ngIf="mobile && tablet" class="desktop-item ion-activatable">
+                                <ion-ripple-effect></ion-ripple-effect>
+                                <span slot="start" class="checkbox-container">
+                                <ion-checkbox [(ngModel)]="customer.checked" (ionChange)="addBookanappCustomer(customer.id, $event)"></ion-checkbox>
+                                </span>
+                                <ion-avatar slot="start">
+                                    <img *ngIf="customer.avatar" class="avatar" [img-preloader]="customer.avatar" (click)="showAvatar(customer.avatar)">
+                                    <img *ngIf="!customer.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                </ion-avatar>
+                                <ion-label class="customer-label" (click)="showCustomer(customer.id, true)">
+                                    <h3>{{customer.name}}</h3>
+                                </ion-label>
+                                <ion-button slot="end" fill="clear" *ngIf="customer.pushNotifications" (click)="promoCampaign(customer.id)">
+                                    <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                </ion-button>
+                            </ion-item>
+                            <ion-item-sliding *ngIf="mobile && !tablet">
+                                <ion-item detail>
+                                <span slot="start" class="checkbox-container">
+                                    <ion-checkbox [(ngModel)]="customer.checked" (ionChange)="addBookanappCustomer(customer.id, $event)"></ion-checkbox>
+                                </span>
+                                    <ion-avatar style="margin-right: 16px">
+                                        <img *ngIf="customer.avatar" class="avatar" [img-preloader]="customer.avatar" (click)="showAvatar(customer.avatar)">
+                                        <img *ngIf="!customer.avatar" class="avatar" src="/assets/img/avatar.svg">
+                                    </ion-avatar>
+                                    <ion-label class="customer-label" (click)="showCustomer(customer.id, true)">
+                                        {{customer.name}}
+                                    </ion-label>
+                                </ion-item>
+                                <ion-item-options side="end" *ngIf="customer.pushNotifications">
+                                    <ion-item-option>
+                                        <ion-button size="small" fill="clear" (click)="promoCampaign(customer.id)">
+                                            <fa-icon [icon]="adsIcon" style="color: var(--ion-color-secondary)" slot="icon-only"></fa-icon>
+                                        </ion-button>
+                                    </ion-item-option>
+                                </ion-item-options>
+                            </ion-item-sliding>
+                        </mat-card>
+                    </ion-col>
+                    <ng-container *ngIf="totalBookanappCustomers$ | async as totalBookanappCustomers">
+                        <div class="button-holder" *ngIf="totalBookanappCustomers>10 && (mobile && !tablet)">
+                            <ion-fab-button mode="ios" (click)="loadMore(totalBookanappCustomers, true)" size="small" color="warning"><ion-icon name="add"></ion-icon></ion-fab-button>
+                        </div>
+                    </ng-container>
+                </ion-row>
+                <ion-row style="min-height: 80vh; display: flex; align-items: center" *ngIf="bookanappCustomers.length===0">
+                    <ion-col size="12" class="ion-text-center">
+                        <fa-icon [icon]="customersIcon" style="opacity: 0.5; font-size: 200px; color: var(--ion-color-secondary)"></fa-icon>
+                    </ion-col>
+                </ion-row>
+            </ng-container>
+        </ion-grid>
+    </ng-container>
+    <ng-template #loadingOrError>
+        <ion-grid class="ion-no-padding ion-no-margin">
+            <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: calc(100vh - 106px); flex-direction: column">
+                <ion-col size="12" class="ion-text-center">
+                    <ng-container *ngIf="loadingError">
+                        <ion-icon name="alert-circle-outline" color="danger" style="opacity: 0.5; font-size: 200px"></ion-icon>
+                    </ng-container>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ng-template>
+</ion-content>
+

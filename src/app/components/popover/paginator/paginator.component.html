@@ -1,0 +1,6 @@
+<mat-paginator [length]="total" (page)="paginator($event)" style="background: var(--ion-color-background)"
+               [pageSize]="customersPerPage"
+               [pageSizeOptions]="[10, 25, 50]"
+               [pageIndex]="pageIndex"
+               showFirstLastButtons="true">
+</mat-paginator>

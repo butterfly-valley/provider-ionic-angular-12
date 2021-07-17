@@ -1,0 +1,326 @@
+<ion-header mode="ios" class="desktop-modal-header">
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!tablet && mobile" (click)="dismiss()" fill="clear">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="mobile && tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+      <ion-button *ngIf="!mobile" fill="clear" (click)="dismiss()">
+        <ion-icon name="arrow-back"></ion-icon>
+        <span class="ion-text-capitalize" translate>back</span>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-label color="dark" translate>sched-new-specialist-label</ion-label>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white">
+  <div class="loading-cover-desktop-modal" *ngIf="isLoading">
+    <div style="position: absolute; top: 50%; left: calc(50% - 37px);z-index: 10000;"><ion-spinner color="secondary" style="height: 75px; width: 75px"></ion-spinner></div>
+  </div>
+  <div style="display: flex" class="ion-justify-content-center ion-align-items-center ion-margin">
+    <div class="avatar-holder">
+      <ion-avatar>
+        <input type="file" accept="image/x-png,image/jpeg" style="display: none" #imagePicker (change)="onImagePicked($event)">
+        <img (click)="showAvatar(scheduleService.imageSrc)" [src]="scheduleService.imageSrc || '/assets/img/avatar.svg'" class="avatar">
+      </ion-avatar>
+      <ion-fab class="delete-button">
+        <ion-fab-button (click)="editPickedPic()" class="ion-no-margin small-fab" color="warning"><ion-icon name="camera" mode="ios"></ion-icon></ion-fab-button>
+      </ion-fab>
+    </div>
+  </div>
+  <form [formGroup]="scheduleForm" *ngIf="scheduleForm" (ngSubmit)="onSubmitForm()">
+    <mat-vertical-stepper #stepper class="modal-container">
+      <!-- Define the edit icon, by default is 'create' -->
+      <ng-template matStepperIcon="edit">
+        <ion-icon style="margin-top: 3px" name="checkmark"></ion-icon>
+      </ng-template>
+      <!--       <mat-step [label]="'sched-choose-option' | translate" [completed]="false">
+                    <ion-list>
+                      <ion-radio-group formControlName="type" (ionChange)="scheduleType($event)">
+                        <ion-item>
+                          <ion-label translate>sched-normal</ion-label>
+                          <ion-radio slot="start" color="secondary" value="1"></ion-radio>
+                        </ion-item>
+                        <ion-item>
+                          <ion-label translate>sched-free</ion-label>
+                          <ion-radio slot="start" color="secondary" value="2"></ion-radio>
+                        </ion-item>
+                      </ion-radio-group>
+                    </ion-list>
+                    <div text-end margin-top="16px">
+                      <ion-button fill="clear" expand="outline" translate (click)="nextStep()">sched-next-step</ion-button>
+                    </div>
+                  </mat-step>-->
+      <mat-step  [label]="'sched-choose-option' | translate" [completed]="false">
+        <ion-list class="type">
+          <ion-radio-group formControlName="scheduleType" (ionChange)="pickScheduleType($event)">
+            <ion-item>
+              <ion-label>
+                <span style="align-self: center" translate>sched-normal</span>
+                <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-normal-sched', $event, 'sched-type-1')"></ion-icon>
+              </ion-label>
+              <ion-radio slot="start" color="secondary" value="1"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>
+                <span style="align-self: center" translate>sched-free</span>
+                <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-free-sched', $event, 'sched-type-2')"></ion-icon>
+              </ion-label>
+              <ion-radio slot="start" color="secondary" value="0"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>
+                <span style="align-self: center" translate>sched-service-btn</span>
+                <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-service-sched', $event, 'sched-type-3')"></ion-icon>
+              </ion-label>
+              <ion-radio slot="start" color="secondary" value="2"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+          <div class="ion-text-end" style="margin-top: 16px">
+            <ion-button translate (click)="nextStep()">sched-next-step</ion-button>
+          </div>
+        </ion-list>
+      </mat-step>
+      <mat-step [label]="'sched-name' | translate" formGroupName="name" [completed]="false">
+        <ion-list class="name">
+          <ion-item lines="none" style="margin-bottom: 10px">
+            <ion-input formControlName="name" required [placeholder]="translate.getFromKey('sched-name') + '*'"></ion-input>
+          </ion-item>
+          <ion-label *ngIf="!formSubmitted && scheduleForm.controls.name['controls'].name.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label *ngIf="!formSubmitted && scheduleForm.controls.name['controls'].name.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label *ngIf="formSubmitted && scheduleForm.controls.name['controls'].name.hasError('required')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label *ngIf="formSubmitted && scheduleForm.controls.name['controls'].name.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label *ngIf="formSubmitted && scheduleForm.controls.name['controls'].name.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-item lines="none" *ngIf="!serviceSchedule">
+            <ion-input  formControlName="category" [placeholder]="translate.getFromKey('search-category')"></ion-input>
+          </ion-item>
+          <ion-label *ngIf="formSubmitted && scheduleForm.controls.name['controls'].category.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label *ngIf="formSubmitted && scheduleForm.controls.name['controls'].category.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label *ngIf="!formSubmitted && scheduleForm.controls.name['controls'].category.hasError('minlength')"  color="danger" translate>sched-name-error</ion-label>
+          <ion-label *ngIf="!formSubmitted && scheduleForm.controls.name['controls'].category.hasError('maxlength')"  color="danger" translate>sched-name-error</ion-label>
+        </ion-list>
+        <div class="ion-text-end" style="margin-top: 16px">
+          <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+          <ion-button *ngIf="!freeSchedule"translate (click)="nextStep()">sched-next-step</ion-button>
+          <ion-button *ngIf="freeSchedule" translate (click)="submit()">submit</ion-button>
+        </div>
+      </mat-step>
+      <mat-step *ngIf="!freeSchedule" [label]="'sched-vacancy-choose-option' | translate" [completed]="false" formGroupName="vacancyType">
+        <ion-list class="slot-type">
+          <ion-radio-group formControlName="type" (ionChange)="pickVacancyType($event)">
+            <ion-item>
+              <ion-label>
+                <span style="align-self: center" translate>sched-vacancy-choose-option-1</span>
+                <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-slot-1', $event, 'sched-type-1')"></ion-icon>
+              </ion-label>
+              <ion-radio slot="start" color="secondary" value="1"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>
+                <span style="align-self: center" translate>sched-vacancy-choose-option-2</span>
+                <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-slot-2', $event, 'slot-type-2')"></ion-icon>
+              </ion-label>
+              <ion-radio slot="start" color="secondary" value="2"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>
+                <span style="align-self: center" translate>sched-option3</span>
+                <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-slot-3', $event, 'slot-type-3')"></ion-icon>
+              </ion-label>
+              <ion-radio slot="start" color="secondary" value="3"></ion-radio>
+            </ion-item>
+            <ion-item *ngIf="existingScheduleList && existingScheduleList.length>0">
+              <ion-label translate>copy-schedule</ion-label>
+              <ion-radio slot="start" color="secondary" value="4"></ion-radio>
+            </ion-item>
+            <ion-item *ngIf="serviceScheduleList && serviceScheduleList.length>0 && !serviceSchedule">
+              <ion-label translate>sched-service-link</ion-label>
+              <ion-radio slot="start" color="secondary" value="5"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+        <mat-card *ngIf="multipleServices" style="width: 100%">
+          <div formGroupName="services">
+            <h4 translate class="ion-text-center" style="margin-top: 0; color: var(--ion-color-dark)">sched-service</h4>
+            <div *ngFor="let service of serviceControls; index as i">
+              <div [formGroupName]="i">
+                <ion-grid>
+                  <ion-row>
+                    <ion-col size="12" size-md="8" class="ion-no-padding">
+                      <ion-label position="floating" style="margin-bottom: 5px; margin-left: 46px"><span translate>service-desc-duration</span></ion-label>
+                      <div class="align-items-center" style="width: 100%">
+                        <ion-button fill="clear" class="ion-no-padding" (click)="deleteService(i, services)" color="danger">
+                          <ion-icon slot="icon-only" name="trash"></ion-icon>
+                        </ion-button>
+                        <ion-input style="margin-right: 16px" formControlName="service" [placeholder]="translate.getFromKey('man-desc')"></ion-input>
+                      </div>
+                    </ion-col>
+                    <ion-col offset="2" size="6" size-md="4" offset-md="0" class="ion-no-padding align-items-center">
+                      <ng-number-picker min="15" max="1440" step="5" style="margin-top: 26px" [value]="30" (valueChange)="updateServiceDuration(service, $event)"></ng-number-picker>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <div class="margin-left-service-error" *ngIf="formSubmitted && service.controls.service.hasError('required')"><ion-label color="danger" translate>reg-name-error</ion-label></div>
+              <div class="margin-left-service-error" *ngIf="service.controls.service.hasError('minlength')"><ion-label color="danger" translate>reg-name-error</ion-label></div>
+              <div class="margin-left-service-error" *ngIf="service.controls.service.hasError('maxlength')"><ion-label color="danger" translate>reg-name-error</ion-label></div>
+              <div class="margin-left-service-error" *ngIf="formSubmitted && service.controls.duration.hasError('required')"><ion-label color="danger" translate>sched-invalid-duration</ion-label></div>
+              <div class="margin-left-service-error" *ngIf="service.controls.duration.hasError('pattern')"><ion-label color="danger" translate>sched-invalid-duration</ion-label></div>
+            </div>
+            <div class="button-holder" style="margin-top: 12px">
+              <ion-fab-button mode="ios" (click)="addService(services)" color="warning"><ion-icon name="add"></ion-icon></ion-fab-button>
+            </div>
+          </div>
+        </mat-card>
+        <ion-item lines="none" *ngIf="!multipleServices && !copyFromSchedule && !linkServiceSchedule">
+          <ion-label class="ion-no-margin">
+            <span translate >sched-duration-desc</span>
+            <div style="max-width: 45%">
+              <ng-number-picker min="15" max="1440" step="5" [value]="30" (valueChange)="updateNumberInput(scheduleForm.get('vacancyType.duration'), $event)"></ng-number-picker>
+            </div>
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none" *ngIf="copyFromSchedule && existingScheduleList">
+          <ion-label>
+            <mat-form-field style="width: 100%" *ngIf="!mobile">
+              <mat-select placeholder="{{ 'specialist' | translate }}" formControlName="copySchedule">
+                <mat-option *ngFor="let schedule of existingScheduleList" [value]="schedule.id">
+                  {{schedule.name}} <span *ngIf="schedule.categoryName !== 'default' && schedule.categoryName !== '###'">({{schedule.categoryName }})</span>
+                  <span *ngIf="schedule.categoryName === 'default'">(<span translate>provider-null-reference</span>)</span>
+                  <span *ngIf="schedule.categoryName === '###'">(<span translate>sched-service-btn</span>)</span>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <div class="select-holder" *ngIf="mobile">
+              <select formControlName="copySchedule" style="width: 100%; margin-top: 16px">
+                <option [ngValue]="null">{{ 'specialist' | translate }}*</option>
+                <option *ngFor="let schedule of existingScheduleList" [value]="schedule.id">
+                  {{schedule.name}} <span *ngIf="schedule.categoryName !== 'default'  && schedule.categoryName !== '###'">({{schedule.categoryName }})</span>
+                  <span *ngIf="schedule.categoryName === 'default'">(<span translate>provider-null-reference</span>)</span>
+                  <span *ngIf="schedule.categoryName === '###'">(<span translate>sched-service-btn</span>)</span>
+                </option>
+              </select>
+              <ion-icon style="margin-top: 16px" class="select-dropdown-icon" color="dark" name="chevron-down-outline"></ion-icon>
+            </div>
+            <ion-label color="danger" translate *ngIf="copyForm && !copyForm.scheduleId">sched-choose-specialist-error</ion-label>
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none" *ngIf="serviceScheduleList && serviceScheduleList.length>0 && linkServiceSchedule">
+          <ion-label>
+            <mat-form-field style="width: 100%" *ngIf="!mobile">
+              <mat-select placeholder="{{ 'specialist' | translate }}*" formControlName="serviceSchedule">
+                <mat-option *ngFor="let schedule of serviceScheduleList" [value]="schedule.id">
+                  {{schedule.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <div class="select-holder" *ngIf="mobile">
+              <select formControlName="serviceSchedule" style="width: 100%; margin-top: 16px">
+                <option [ngValue]="null">{{ 'specialist' | translate }}</option>
+                <option *ngFor="let schedule of serviceScheduleList" [value]="schedule.id">
+                  {{schedule.name}}
+                </option>
+              </select>
+              <ion-icon style="margin-top: 16px" class="select-dropdown-icon" color="dark" name="chevron-down-outline"></ion-icon>
+            </div>
+            <ion-label color="danger" translate *ngIf="copyForm && !copyForm.scheduleId">sched-choose-specialist-error</ion-label>
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none" *ngIf="multipleSpots">
+          <ion-label class="ion-no-margin">
+            <span translate >sched-number-spots</span>
+            <div style="max-width: 45%">
+              <ng-number-picker min="2" max="100" step="1" style="margin-top: 23px; max-width: 50%" [value]="5" (valueChange)="updateNumberInput(scheduleForm.get('vacancyType.numberOfSpots'), $event)"></ng-number-picker>
+            </div>
+          </ion-label>
+        </ion-item>
+        <div class="ion-text-end" style="margin-top: 16px">
+          <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+          <ion-button *ngIf="!multipleServices || (multipleServices && servicesSize())" translate (click)="nextStep()">sched-next-step</ion-button>
+        </div>
+      </mat-step>
+      <mat-step [label]="'sched-choose-days-hours' | translate" formGroupName="schedule" [completed]="false" *ngIf="!copyFromSchedule && !linkServiceSchedule &&!freeSchedule">
+        <ion-label *ngIf="formSubmitted && scheduleForm.get('schedule.days.day').hasError('required')"  color="danger" translate>sched-choose-day-error</ion-label>
+        <ng-container *ngIf="opsHours$ | async as opsHours">
+          <app-weekday-picker [scheduleForm]="scheduleForm" [days]="true" [formSubmitted]="formSubmitted" [opsHours]="opsHours"></app-weekday-picker>
+        </ng-container>
+        <div class="ion-text-end" style="margin-top: 16px">
+          <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+          <ion-button *ngIf="!serviceSchedule" translate (click)="nextStep()">sched-next-step</ion-button>
+          <ion-button *ngIf="serviceSchedule" translate (click)="submit()">submit</ion-button>
+        </div>
+      </mat-step>
+      <mat-step  *ngIf="!serviceSchedule && !freeSchedule" [label]="'reg-finishing-touches' | translate" formGroupName="misc">
+        <ion-list class="misc">
+          <ion-item>
+            <ion-label>
+              <span style="align-self: center" translate>sched-live</span>
+              <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-sched-live', $event)"></ion-icon>
+            </ion-label>
+            <div class="toggle-holder">
+              <ion-toggle formControlName="visible" color="warning"></ion-toggle>
+            </div>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <span style="align-self: center" translate>sched-mandatory-phone</span>
+              <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('tut-sched-phone', $event)"></ion-icon>
+            </ion-label>
+            <div class="toggle-holder">
+              <ion-toggle formControlName="mandatoryPhone" color="warning"></ion-toggle>
+            </div>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h2 style="align-self: center" translate>pricing-sms</h2>
+            </ion-label>
+            <div class="toggle-holder">
+              <ion-toggle formControlName="smsReminder" color="warning"></ion-toggle>
+            </div>
+          </ion-item>
+          <ion-item style="margin-top: 10px">
+            <ion-label class="normal-white-space ion-no-margin">
+              <span translate >sched-minimum-notice</span>
+              <div style="max-width: 45%">
+                <ng-number-picker min="1" max="24" step="1" [value]="2" (valueChange)="updateNumberInput(scheduleForm.get('misc.minimumNotice'), $event)"></ng-number-picker>
+              </div>
+            </ion-label>
+          </ion-item>
+          <ion-item lines="none" style="margin: 10px 0">
+            <ion-textarea auto-grow="true"  formControlName="note" [placeholder]="translate.getFromKey('sched-rest-label')"></ion-textarea>
+          </ion-item>
+          <ion-label *ngIf="scheduleForm.get('misc.note').hasError('minlength') || scheduleForm.get('misc.note').hasError('maxlength')"  color="danger" translate>app-remark-length-error</ion-label>
+          <ion-item>
+            <ion-label>
+              <span style="align-self: center" translate>sched-notif</span>
+              <ion-icon class="info" name="information-circle" color="secondary" (click)="infoPopover('sched-notif-help', $event)"></ion-icon>
+            </ion-label>
+            <div class="toggle-holder">
+              <ion-toggle formControlName="notif" color="warning" (ionChange)="notifEmailToggle($event)"></ion-toggle>
+            </div>
+          </ion-item>
+          <ion-item *ngIf="notifEmail" lines="none" style="margin-top: 10px">
+            <ion-input type="email"
+                       formControlName="notifEmail"
+                       email
+                       autocomplete="username"
+                       [placeholder]="'sched-notif-email' | translate"
+            ></ion-input>
+          </ion-item>
+          <ion-label *ngIf="scheduleForm.get('misc.notifEmail').hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+          <div class="ion-text-end" style="margin-top: 16px">
+            <ion-button fill="clear" color="dark" translate  (click)="prevStep()">sched-previous</ion-button>
+            <ion-button translate (click)="submit()">submit</ion-button>
+          </div>
+        </ion-list>
+      </mat-step>
+    </mat-vertical-stepper>
+    <button style="display: none" #submitBtn></button>
+  </form>
+</ion-content>
+
+

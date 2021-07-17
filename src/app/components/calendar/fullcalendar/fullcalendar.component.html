@@ -1,0 +1,22 @@
+<ion-card>
+    <div class="loading-cover-desktop-modal" *ngIf="fullcalendarService.slotsLoading">
+        <div style="position: absolute; top: 50%; left: calc(50% - 12px);z-index: 10000;"><ion-spinner color="secondary" style="height: 25px; width: 25px"></ion-spinner></div>
+    </div>
+    <ion-item lines="none" style="padding: 6px">
+        <ion-avatar class="schedule-avatar" slot="start">
+            <img *ngIf="avatar" [src]="avatar" alt="">
+            <img *ngIf="!avatar" src="/assets/img/avatar.svg">
+        </ion-avatar>
+        <ion-label>
+            <span style="font-weight: 600">
+                {{ scheduleName }} (<span *ngIf="scheduleCategory !== 'default' && scheduleCategory !== '###'">{{scheduleCategory}}</span>
+                <span *ngIf="scheduleCategory === 'default'" translate>provider-null-reference</span>
+                 <span *ngIf="scheduleCategory === '###'" translate>sched-service-btn</span>)
+            </span>
+        </ion-label>
+    </ion-item>
+    <ion-card-content class="ion-no-padding">
+        <full-calendar #fullCalendar *ngIf="options" id="fullcalendar" [options]="options"></full-calendar>
+    </ion-card-content>
+</ion-card>
+

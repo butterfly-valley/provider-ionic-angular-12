@@ -1,0 +1,66 @@
+.message-input{
+  width: 100%;
+  border: 1px solid #ddd;
+  background: var(--ion-color-background);
+  resize: none;
+  border-radius: 25px!important;
+  padding: 0 16px!important;
+  color: inherit;
+}
+.message {
+  padding: 10px;
+  border-radius: 20px!important;
+  margin-bottom: 4px;
+  white-space: pre-wrap;
+  display: inline-block;
+  word-break: break-all;
+}
+
+.my-message{
+  background: var(--ion-color-secondary);
+  color: white;
+}
+
+.other-message{
+  background: var(--ion-color-tertiary);
+  color: white;
+}
+
+.user-message{
+  display: flex;
+  justify-content: flex-end
+}
+
+::ng-deep img {
+  display: block;
+  object-fit: cover;
+}
+
+a{
+  color: white;
+}
+
+ion-textarea {
+  border: 1px solid #ddd;
+  border-radius: 50px !important;
+  background: var(--ion-color-background) !important;
+  padding-left: 10px;
+  margin: 0;
+}
+@media (max-width: 800px) {
+  ion-textarea {
+    padding: 10px 16px !important;
+  }
+}
+
+::ng-deep textarea{
+  padding: 0!important;
+}
+
+::ng-deep .mat-form-field-infix {
+  border-bottom: 1px solid var(--ion-color-gray);
+}
+
+mat-form-field {
+  width: 100%;
+}

@@ -1,0 +1,81 @@
+<ion-header *ngIf="mobile">
+  <ion-toolbar color="toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()" fill="clear" *ngIf="!tablet">
+        <ion-icon name="close" slot="icon-only" mode="md"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="tablet" (click)="dismiss()" fill="clear">
+        <ion-label translate>close</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <ion-label color="dark" translate>{{sales ? 'contact-contact' : 'feedback'}}</ion-label>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="warning" style="font-weight: 600" translate (click)="submitForm()" fill="clear">submit</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="white" >
+  <h3 *ngIf="!mobile" class="ion-text-center">
+    <ion-label translate class="ion-text-center">{{sales ? 'contact-contact' : 'feedback'}}</ion-label>
+  </h3>
+  <ion-grid class="ion-no-margin ion-no-padding" style="height: 85%">
+    <ion-row class="ion-no-margin ion-no-padding" style="height: 100%; flex-direction: column">
+      <ion-col size="12" class="ion-no-margin ion-no-padding ion-justify-content-center" style="flex-direction: column; display: flex">
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="ion-padding" #form>
+          <div>
+            <ng-container *ngIf="anonymousUser$ | async as anonymousUser">
+              <ion-item lines="none" *ngIf="!provider">
+                <ion-input type="text"
+                           formControlName="name"
+                           maxlength="30"
+                           minlength="3"
+                           [placeholder]="'reg-name' | translate"
+                ></ion-input>
+              </ion-item>
+              <ion-label *ngIf="submitted && (contactForm.controls.name.hasError('required') || contactForm.controls.name.hasError('minlength') || contactForm.controls.name.hasError('maxlength'))" color="danger" translate>reg-name-error</ion-label>
+              <ion-label *ngIf="!submitted && (contactForm.controls.name.hasError('minlength') || contactForm.controls.name.hasError('maxlength'))" color="danger" translate>reg-name-error</ion-label>
+              <ion-item lines="none" style="margin-top: 16px" *ngIf="!provider">
+                <ion-input type="email"
+                           formControlName="email"
+                           email
+                           autocomplete="username"
+                           placeholder="example@example.com"
+                ></ion-input>
+              </ion-item>
+              <ion-label *ngIf="submitted && (contactForm.controls.email.hasError('pattern') || contactForm.controls.email.hasError('required'))" color="danger" translate>login-email-error</ion-label>
+              <ion-label *ngIf="!submitted && contactForm.controls.email.hasError('pattern')" color="danger" translate>login-email-error</ion-label>
+            </ng-container>
+            <ion-item lines="none" style="margin-top: 16px" *ngIf="!sales">
+              <ion-input formControlName="subject"   [placeholder]="'contact-subject' | translate"></ion-input>
+            </ion-item>
+            <ion-label *ngIf="submitted && (contactForm.controls.subject.hasError('required') || contactForm.controls.subject.hasError('minlength') || contactForm.controls.subject.hasError('maxlength'))" color="danger" translate>reg-name-error</ion-label>
+            <ion-label *ngIf="!submitted && (contactForm.controls.subject.hasError('minlength') || contactForm.controls.subject.hasError('maxlength'))" color="danger" translate>reg-name-error</ion-label>
+            <ion-item lines="none" style="margin-top: 16px">
+              <ion-textarea auto-grow="true" rows="1" formControlName="message"  [placeholder]="'contact-message' | translate"></ion-textarea>
+            </ion-item>
+            <ion-label *ngIf="submitted && (contactForm.controls.message.hasError('required') || contactForm.controls.message.hasError('minlength') || contactForm.controls.message.hasError('maxlength'))" color="danger" translate>contact-message-error</ion-label>
+            <ion-label *ngIf="!submitted && (contactForm.controls.message.hasError('minlength') || contactForm.controls.message.hasError('maxlength'))" color="danger" translate>contact-message-error</ion-label>
+            <div style="margin-top: 16px">
+              <ngx-recaptcha2 #captchaElem
+                              [siteKey]="siteKey()"
+                              [useGlobalDomain]="false"
+                              [size]="'normal'"
+                              [hl]="locale()"
+                              formControlName="recaptcha">
+              </ngx-recaptcha2>
+            </div>
+            <ion-label *ngIf="submitted && contactForm.controls.recaptcha.hasError('required')" color="danger" translate>contact-captcha-error</ion-label>
+          </div>
+          <button type="submit" style="display: none" #submitBtn></button>
+        </form>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+<ion-footer *ngIf="!mobile" style="display: flex; justify-content: flex-end;" class="ion-padding">
+  <ion-button (click)="dismiss()" fill="clear" color="dark" translate="">close</ion-button>
+  <ion-button *ngIf="!isLoading" type="submit" (click)="submitForm()" translate><ion-label translate="">submit</ion-label></ion-button>
+  <ion-spinner color="primary" *ngIf="isLoading" class="ion-align-self-center"></ion-spinner>
+</ion-footer>

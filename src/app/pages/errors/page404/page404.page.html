@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar color="toolbar">
+    <ion-buttons slot="end">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <a routerLink="/" class="logo"><img height="23px" src="/assets/logo/BOOKanAPP_30.png" alt="BOOKanAPP"></a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<app-mainmenu [menuId]="'404'"></app-mainmenu>
+<ion-content>
+  <ion-grid class="app-content ion-no-padding">
+    <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: 90vh; flex-direction: column">
+      <ion-col size="12" class="ion-text-center">
+        <ion-icon name="remove-circle" color="danger" [ngClass]="{'error-desktop' : !mobile}" style="font-size: 200px; opacity: 0.5"></ion-icon>
+        <ion-label><h1 translate [ngClass]="{'error-desktop-h1' : !mobile}">page404</h1></ion-label>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,18 @@
+.bookanapp-image {
+  height: 20px;
+  width: 20px;
+  object-fit: cover;
+}
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50%!important;
+}
+
+.p-flex{
+  display: flex;
+}
+
+fa-icon{
+  color: var(--ion-color-primary);
+}

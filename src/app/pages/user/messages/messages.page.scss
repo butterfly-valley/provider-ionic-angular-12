@@ -1,0 +1,78 @@
+p{margin: 0}
+
+.sc-ion-card-ios-h, .sc-ion-card-md-h{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.item-options-ios {
+  border: none;
+}
+
+.text-bold{
+  font-weight: bold;
+}
+
+.ion-activatable:hover{
+  cursor: pointer;
+}
+
+.avatar {
+  vertical-align: middle;
+  border-radius: 50%!important;
+}
+
+.tick-holder {
+  display: inline-block;
+  margin-left: 2px;
+  top: 3px;
+  width: 16px;
+}
+
+.badge {
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  border-radius: 50%!important;
+  background: #ff5406;
+  color: white;
+  position: absolute;
+  top: 0;
+  left: 4%;
+}
+
+@media (max-width: 1025px) {
+  .badge.mobile {
+    left: 5%;
+  }
+
+  .badge.mobile {
+    left: 4%;
+    top: 12%
+
+  }
+}
+
+@media (max-width: 799px) {
+  .badge {
+    left: 6%;
+  }
+  .badge.mobile {
+    left: 5%;
+    top: 15%
+  }
+}
+
+@media (max-width: 450px) {
+  .badge.mobile {
+    left: 11%;
+    top: 15%
+  }
+}
+
+.appointment-col {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 16px;
+}
